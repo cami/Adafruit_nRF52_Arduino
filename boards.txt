@@ -19,49 +19,6 @@
 menu.softdevice=Bootloader Version
 menu.debug=Debug Mode
 
-#**********************************************
-# Bluefruit Feather nRF52832 Board
-#**********************************************
-feather52832.name=Adafruit Bluefruit nRF52832 Feather
-feather52832.bootloader.tool=bootburn
-
-# Upload
-feather52832.upload.tool=nrfutil
-feather52832.upload.protocol=nrfutil
-feather52832.upload.use_1200bps_touch=false
-feather52832.upload.wait_for_upload_port=false
-feather52832.upload.native_usb=false
-
-# Build
-feather52832.build.mcu=cortex-m4
-feather52832.build.f_cpu=64000000
-feather52832.build.board=NRF52_FEATHER
-feather52832.build.core=nRF5
-feather52832.build.variant=feather_nrf52832
-feather52832.build.extra_flags=-DNRF52832_XXAA -DNRF52
-
-# SofDevice Menu
-# Ram & ROM size varies depending on SoftDevice (check linker script)
-
-feather52832.menu.softdevice.s132v6=0.2.7 (s132 6.1.1)
-feather52832.menu.softdevice.s132v6.build.sd_flags=-DS132
-feather52832.menu.softdevice.s132v6.build.sd_name=s132
-feather52832.menu.softdevice.s132v6.build.sd_version=6.1.1
-feather52832.menu.softdevice.s132v6.build.sd_fwid=0x00B7
-feather52832.menu.softdevice.s132v6.build.ldscript=nrf52832_s132_v6.ld
-feather52832.menu.softdevice.s132v6.upload.maximum_size=290816
-feather52832.menu.softdevice.s132v6.upload.maximum_data_size=51072
-
-# Debug Menu
-feather52832.menu.debug.l0=Level 0 (Release)
-feather52832.menu.debug.l0.build.debug_flags=-DCFG_DEBUG=0 -Os
-feather52832.menu.debug.l1=Level 1 (Error Message)
-feather52832.menu.debug.l1.build.debug_flags=-DCFG_DEBUG=1 -Os
-feather52832.menu.debug.l2=Level 2 (Full Debug)
-feather52832.menu.debug.l2.build.debug_flags=-DCFG_DEBUG=2 -Os
-feather52832.menu.debug.l3=Level 3 (Segger SystemView)
-feather52832.menu.debug.l3.build.debug_flags=-DCFG_DEBUG=3 -Os
-
 
 #**********************************************
 # Bluefruit Feather nRF52840 Express Board
@@ -205,3 +162,45 @@ pca10056.menu.debug.l2=Level 2 (Full Debug)
 pca10056.menu.debug.l2.build.debug_flags=-DCFG_DEBUG=2 -Os
 pca10056.menu.debug.l3=Level 3 (Segger SystemView)
 pca10056.menu.debug.l3.build.debug_flags=-DCFG_DEBUG=3 -Os
+
+#**********************************************
+# CAMI qibanca nectis series on nRF52840
+#**********************************************
+nectis.name=CAMI qibanca nectis series on nRF52840
+nectis.bootloader.tool=bootburn
+
+# Upload
+nectis.upload.tool=nrfutil
+nectis.upload.protocol=nrfutil
+nectis.upload.use_1200bps_touch=true
+nectis.upload.wait_for_upload_port=true
+
+# Build
+nectis.build.mcu=cortex-m4
+nectis.build.f_cpu=64000000
+nectis.build.board=nRF52840_PCA10056
+nectis.build.core=nRF5
+nectis.build.variant=nectis
+nectis.build.extra_flags=-DNRF52840_XXAA
+
+# SofDevice Menu
+# Ram & ROM size varies depending on SoftDevice (check linker script)
+
+nectis.menu.softdevice.s140v6=0.2.7 (s140 6.1.1)
+nectis.menu.softdevice.s140v6.build.sd_flags=-DS140
+nectis.menu.softdevice.s140v6.build.sd_name=s140
+nectis.menu.softdevice.s140v6.build.sd_version=6.1.1
+nectis.menu.softdevice.s140v6.build.sd_fwid=0x00B6
+nectis.menu.softdevice.s140v6.build.ldscript=nrf52840_s140_v6.ld
+nectis.menu.softdevice.s140v6.upload.maximum_size=815104
+nectis.menu.softdevice.s140v6.upload.maximum_data_size=248832
+
+# Debug Menu
+nectis.menu.debug.l0=Level 0 (Release)
+nectis.menu.debug.l0.build.debug_flags=-DCFG_DEBUG=0 -Os
+nectis.menu.debug.l1=Level 1 (Error Message)
+nectis.menu.debug.l1.build.debug_flags=-DCFG_DEBUG=1 -Os
+nectis.menu.debug.l2=Level 2 (Full Debug)
+nectis.menu.debug.l2.build.debug_flags=-DCFG_DEBUG=2 -Os
+nectis.menu.debug.l3=Level 3 (Segger SystemView)
+nectis.menu.debug.l3.build.debug_flags=-DCFG_DEBUG=3 -Os
