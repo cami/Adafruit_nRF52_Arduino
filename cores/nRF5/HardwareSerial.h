@@ -20,6 +20,7 @@
 #define HardwareSerial_h
 
 #include <inttypes.h>
+#include <queue>  //std::queue
 
 #include "Stream.h"
 
