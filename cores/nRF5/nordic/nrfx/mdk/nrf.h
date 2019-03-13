@@ -35,7 +35,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* MDK version */
 #define MDK_MAJOR_VERSION   8
-#define MDK_MINOR_VERSION   17
+//#define MDK_MINOR_VERSION   17
+#define MDK_MINOR_VERSION   5
 #define MDK_MICRO_VERSION   0
 
 /* Redefine "old" too-generic name NRF52 to NRF52832_XXAA to keep backwards compatibility. */
@@ -82,7 +83,7 @@ POSSIBILITY OF SUCH DAMAGE.
         #include "nrf52840_bitfields.h"
         #include "nrf51_to_nrf52840.h"
         #include "nrf52_to_nrf52840.h"
-    
+
     #else
         #error "Device must be defined. See nrf.h."
     #endif /* NRF51, NRF52810_XXAA, NRF52832_XXAA, NRF52832_XXAB, NRF52840_XXAA */
