@@ -178,7 +178,7 @@ nectis.upload.wait_for_upload_port=true
 # Build
 nectis.build.mcu=cortex-m4
 nectis.build.f_cpu=64000000
-nectis.build.board=nRF52840_PCA10056
+nectis.build.board=NRF52840_NECTIS
 nectis.build.core=nRF5
 nectis.build.variant=nectis
 nectis.build.extra_flags=-DNRF52840_XXAA
