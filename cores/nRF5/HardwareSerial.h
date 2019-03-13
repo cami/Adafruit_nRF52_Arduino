@@ -19,6 +19,8 @@
 #ifndef HardwareSerial_h
 #define HardwareSerial_h
 
+#include "Arduino.h"
+
 #include <inttypes.h>
 #include <queue>  //std::queue
 
@@ -65,19 +67,71 @@
 #define SERIAL_7O2	(HARDSER_STOP_BIT_2 | HARDSER_PARITY_ODD  | HARDSER_DATA_7)
 #define SERIAL_8O2	(HARDSER_STOP_BIT_2 | HARDSER_PARITY_ODD  | HARDSER_DATA_8)
 
+#define HAL_MAX_DELAY      0xFFFFFFFFU
+
+
 class HardwareSerial : public Stream
 {
   public:
-    virtual void begin(unsigned long);
-    virtual void begin(unsigned long baudrate, uint16_t config);
-    virtual void end();
-    virtual int available(void);
-    virtual int peek(void);
-    virtual int read(void);
-    virtual void flush(void);
-    virtual size_t write(uint8_t);
+//    HardwareSerial(uint8_t _pinRX, uint8_t _pinTX);
+//    HardwareSerial(int port, int txPin, int rxPin, int ctsPin = -1, int rtsPin = -1);
+//    HardwareSerial(int, int, int);
+//    HardwareSerial(int, uint8_t, uint8_t, int ctsPin = -1, int rtsPin = -1);
+//    HardwareSerial(NRF_UART_Type, IRQn_Type, uint8_t, uint8_t, uint8_t, uint8_t);
+//    HardwareSerial(int port, uint8_t txPin, uint8_t rxPin, int ctsPin = -1, int rtsPin = -1) {};
+//    HardwareSerial(NRF_UART_Type *_nrfUart, IRQn_Type _IRQn, uint8_t _pinRX, uint8_t _pinTX, uint8_t _pinCTS, uint8_t _pinRTS) {};
+//    HardwareSerial() {};
+//    virtual ~HardwareSerial() {};
+    HardwareSerial(int port, uint8_t txPin, uint8_t rxPin, int ctsPin = -1, int rtsPin = -1);
+    HardwareSerial(NRF_UART_Type *_nrfUart, IRQn_Type _IRQn, uint8_t _pinRX, uint8_t _pinTX, uint8_t _pinCTS, uint8_t _pinRTS);
+    HardwareSerial();
+    virtual ~HardwareSerial();
+
+//    HardwareSerial(uint8_t, uint8_t);
+//    HardwareSerial(int, int, int, int, int);
+//    HardwareSerial(int, uint8_t, uint8_t);
+//    HardwareSerial(int port, uint8_t txPin, uint8_t rxPin, int ctsPin = -1, int rtsPin = -1);
+//    HardwareSerial(NRF_UART_Type, IRQn_Type, uint8_t, uint8_t);
+//    HardwareSerial(NRF_UART_Type, IRQn_Type, uint8_t, uint8_t, uint8_t, uint8_t);
+//    HardwareSerial();
+
+//    virtual ~HardwareSerial();
+
+    virtual void begin(unsigned long) {};
+    virtual void begin(unsigned long baudrate, uint16_t config) {};
+    virtual void end() {};
+    virtual int available(void) {};
+    virtual int peek(void) {};
+    virtual int read(void) {};
+    virtual void flush(void) {};
+    virtual size_t write(uint8_t) {};
+//    virtual int available(void);
+//    virtual int peek(void);
+//    virtual int read(void);
+//    virtual void flush(void);
+//    virtual size_t write(uint8_t);
+
+//    int _Port;
+//    int _TxPin;		// out
+//    int _RxPin;		// in
+//    int _CtsPin;	// in
+//    int _RtsPin;	// out
+//
+    unsigned long _TxTimeout;
+
+
     using Print::write; // pull in write(str) and write(buf, size) from Print
-    virtual operator bool();
+    virtual operator bool() {};
+//    virtual operator bool();
+
+    void setReadBufferSize(int size);
+    unsigned long getWriteTimeout() const;
+    void setWriteTimeout(unsigned long timeout);
+
+  private:
+    int _RxBufferCapacity;
+//    unsigned long _TxTimeout;
+
 };
 
 extern void serialEventRun(void) __attribute__((weak));
