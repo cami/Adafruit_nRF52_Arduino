@@ -192,9 +192,11 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 #define GROVE_GPIO_6_1            15    //GPIO, GROVE_GPIO_6_1
 #define GROVE_GPIO_6_2            16    //GPIO, GROVE_GPIO_6_2
 
-#define DEBUG_UART_CORE           (2)   // USART3, //TODO: UARTのチャンネルをBSPを見ながら割り当てる
-#define DEBUG_UART_TX_PIN         1     //SWDIO
-#define DEBUG_UART_RX_PIN         1     //SWDIO
+#define DEBUG_UART_CORE           (1)   // USART3, //TODO: UARTのチャンネルをBSPを見ながら割り当てる
+#define DEBUG_UART_TX_PIN         GROVE_UART_TX_PIN
+#define DEBUG_UART_RX_PIN         GROVE_UART_RX_PIN
+//#define DEBUG_UART_TX_PIN         GROVE_UART_RX_PIN
+//#define DEBUG_UART_RX_PIN         GROVE_UART_TX_PIN
 
 
 
