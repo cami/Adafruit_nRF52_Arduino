@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _VARIANT_PCA10056_
-#define _VARIANT_PCA10056_
+#ifndef _VARIANT_NECTIS_
+#define _VARIANT_NECTIS_
 
 /** Master clock frequency */
 #define VARIANT_MCK       (64000000ul)
@@ -55,7 +55,7 @@ extern "C"
 //#define LED_BLUE             PIN_LED2
 //
 //#define LED_STATE_ON         0         // State when LED is litted
-//
+
 /*
  * Analog pins
  */
@@ -89,8 +89,8 @@ static const uint8_t AREF = PIN_AREF;
 /*
  * Serial interfaces
  */
-#define PIN_SERIAL_RX             (33)
-#define PIN_SERIAL_TX             (34)
+#define PIN_SERIAL_RX             (6)
+#define PIN_SERIAL_TX             (7)
 
 //#define PIN_SERIAL2_RX      (8)
 //#define PIN_SERIAL2_TX      (6)
@@ -112,10 +112,10 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 /*
  * Wire Interfaces
  */
-#define WIRE_INTERFACES_COUNT     1
-
-#define PIN_WIRE_SDA              (26)
-#define PIN_WIRE_SCL              (27)
+//#define WIRE_INTERFACES_COUNT     1
+//
+//#define PIN_WIRE_SDA              (26)
+//#define PIN_WIRE_SCL              (27)
 
 /*
  * QSPI interface for external flash
@@ -126,7 +126,6 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 #define PIN_QSPI_DATA1            21
 #define PIN_QSPI_DATA2            22
 #define PIN_QSPI_DATA3            23
-
 
 
 // nRF52 からBG96を制御するためのピン変換
@@ -150,10 +149,8 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 #define LED_RED                   PIN_LED1
 #define LED_BLUE                  PIN_LED2
 
-#define LED_STATE_ON              0         // State when LED is litted
+#define LED_STATE_ON              0     // State when LED is litted
 
-//#define SWDIO                   1     //SWD通信データ入出力
-//#define SWDCLK                  3     //SWD通信クロック
 #define QSPI_DIO3                 23    //Quad SPIデータ入出力
 #define QSPI_DIO2                 22    //Quad SPIデータ入出力
 #define QSPI_DIO1                 21    //Quad SPIデータ入出力
@@ -164,14 +161,17 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 #define MODULE_PWR_PIN            36    // Power Supply
 #define MODULE_PWRKEY_PIN         42    // Turn On/Off
 #define MODULE_UART_CORE          (1)   // USART2
-#define MODULE_UART_TX_PIN        6     //BG96への送信データ, BG96_TXD
-#define MODULE_UART_RX_PIN        7     //BG96からの受信データ, BG96_RXD
-#define MODULE_CTS_PIN            26    //BG96からの送信許可, BG96_CTS
-#define MODULE_RTS_PIN            27    //BG96への送信要求, BG96_RTS
+#define MODULE_UART_TX_PIN        (7)   //BG96への送信データ, BG96_RXD
+#define MODULE_UART_RX_PIN        (6)   //BG96からの受信データ, BG96_TXD
+#define MODULE_CTS_PIN            27    //BG96への送信要求, BG96_RTS
+#define MODULE_RTS_PIN            26    //BG96からの送信許可, BG96_CTS
 #define MODULE_DTR_PIN            44    //BG96のデータ端末レディ, BG96_DTR
 #define MODULE_RESET_PIN          43    //BG96のリセット, BG96_RESET
 #define MODULE_STATUS_PIN         37    //BG96のステータス, BG96_STATUS
 #define BG96_AP_READY             39    //BG96のAP_READY
+
+#define CRYSTAL_XL1               0
+#define CRYSTAL_XL2               1
 
 #define NFC1                      9     //NFC電源側
 #define NFC2                      10    //NFCグラウンド側
@@ -187,17 +187,14 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 #define GROVE_I2C_SCL_PIN         12    //out, GROVE_GPIO_4_1
 #define GROVE_I2C_SDA_PIN         11    //in/out, GROVE_GPIO_4_2
 #define GROVE_UART_CORE           (0)   // USART1, //TODO: UARTのチャンネルをBSPを見ながら割り当てる
-#define GROVE_UART_TX_PIN         13    //out, GROVE_GPIO_5_1
-#define GROVE_UART_RX_PIN         14    //in, GROVE_GPIO_5_2
+#define GROVE_UART_TX_PIN         (13)  //out, GROVE_GPIO_5_1
+#define GROVE_UART_RX_PIN         (14)  //in, GROVE_GPIO_5_2
 #define GROVE_GPIO_6_1            15    //GPIO, GROVE_GPIO_6_1
 #define GROVE_GPIO_6_2            16    //GPIO, GROVE_GPIO_6_2
 
-#define DEBUG_UART_CORE           (1)   // USART3, //TODO: UARTのチャンネルをBSPを見ながら割り当てる
+#define DEBUG_UART_CORE           (0)   // USART3, //TODO: UARTのチャンネルをBSPを見ながら割り当てる
 #define DEBUG_UART_TX_PIN         GROVE_UART_TX_PIN
 #define DEBUG_UART_RX_PIN         GROVE_UART_RX_PIN
-//#define DEBUG_UART_TX_PIN         GROVE_UART_RX_PIN
-//#define DEBUG_UART_RX_PIN         GROVE_UART_TX_PIN
-
 
 
 // On-board QSPI Flash
