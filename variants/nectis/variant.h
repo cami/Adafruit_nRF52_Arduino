@@ -1,21 +1,21 @@
- /*
-  Copyright (c) 2014-2015 Arduino LLC.  All right reserved.
-  Copyright (c) 2016 Sandeep Mistry All right reserved.
-  Copyright (c) 2018, Adafruit Industries (adafruit.com)
-  Copyright (c) 2019, CAMI&Co. All rights reserved.
+/*
+ Copyright (c) 2014-2015 Arduino LLC.  All right reserved.
+ Copyright (c) 2016 Sandeep Mistry All right reserved.
+ Copyright (c) 2018, Adafruit Industries (adafruit.com)
+ Copyright (c) 2019, CAMI&Co. All rights reserved.
 
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the GNU Lesser General Public License for more details.
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #ifndef _VARIANT_NECTIS_
@@ -44,23 +44,12 @@ extern "C"
 //#define NUM_ANALOG_INPUTS    (6)
 //#define NUM_ANALOG_OUTPUTS   (0)
 //
-//// LEDs
-//#define PIN_LED1             (13)
-//#define PIN_LED2             (14)
-//
-//#define LED_BUILTIN          PIN_LED1
-//#define LED_CONN             PIN_LED2
-//
-//#define LED_RED              PIN_LED1
-//#define LED_BLUE             PIN_LED2
-//
-//#define LED_STATE_ON         0         // State when LED is litted
 
 /*
  * Analog pins
  */
-#define PIN_A0                    (3)
-#define PIN_A1                    (4)
+#define PIN_A0                    (4)
+#define PIN_A1                    (5)
 #define PIN_A2                    (28)
 #define PIN_A3                    (29)
 #define PIN_A4                    (30)
@@ -80,9 +69,9 @@ static const uint8_t A7  = PIN_A7 ;
 
 // Other pins
 #define PIN_AREF                  (2)
-#define PIN_DFU                   (11)
-#define PIN_NFC1                  (9)
-#define PIN_NFC2                  (10)
+#define PIN_DFU                   (35)
+#define PIN_NFC1                  (NFC1)
+#define PIN_NFC2                  (NFC2)
 
 static const uint8_t AREF = PIN_AREF;
 
@@ -100,9 +89,9 @@ static const uint8_t AREF = PIN_AREF;
  */
 #define SPI_INTERFACES_COUNT      1
 
-#define PIN_SPI_MISO              (46)
-#define PIN_SPI_MOSI              (45)
-#define PIN_SPI_SCK               (47)
+#define PIN_SPI_MISO              (15)
+#define PIN_SPI_MOSI              (16)
+#define PIN_SPI_SCK               (19)
 
 static const uint8_t SS   = 44 ;
 static const uint8_t MOSI = PIN_SPI_MOSI ;
@@ -120,12 +109,12 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 /*
  * QSPI interface for external flash
  */
-#define PIN_QSPI_SCK              19
-#define PIN_QSPI_CS               17
-#define PIN_QSPI_DATA0            20
-#define PIN_QSPI_DATA1            21
-#define PIN_QSPI_DATA2            22
-#define PIN_QSPI_DATA3            23
+#define PIN_QSPI_SCK              QSPI_SCLK
+#define PIN_QSPI_CS               QSPI_CS
+#define PIN_QSPI_DATA0            QSPI_DIO0
+#define PIN_QSPI_DATA1            QSPI_DIO1
+#define PIN_QSPI_DATA2            QSPI_DIO2
+#define PIN_QSPI_DATA3            QSPI_DIO3
 
 
 // nRF52 からBG96を制御するためのピン変換
