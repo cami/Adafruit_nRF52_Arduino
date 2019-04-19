@@ -59,10 +59,34 @@ void Uart::setPins(uint8_t pin_rx, uint8_t pin_tx)
   uc_pinTX = pin_tx;
 }
 
+void Uart::setPins(uint8_t pin_rx, uint8_t pin_tx, uint8_t _pinCTS, uint8_t _pinRTS)
+{
+  uc_pinRX = pin_rx;
+  uc_pinTX = pin_tx;
+  uc_pinCTS = _pinCTS;
+  uc_pinRTS = _pinRTS;
+}
+
+#include <../../../../../libraries/bg96/src/WioCellularHardware.h>
+void Uart::getPins()
+{
+  SerialUSB.printf("uc_pinRX: %u\n", (long unsigned int) uc_pinRX);
+  SerialUSB.printf("uc_pinTX: %u\n", (long unsigned int) uc_pinTX);
+  SerialUSB.printf("uc_pinCTS: %u\n", (long unsigned int) uc_pinCTS);
+  SerialUSB.printf("uc_pinRTS: %u\n", (long unsigned int) uc_pinRTS);
+}
+
+void Uart::getGrovePins()
+{
+  SerialUSB.printf("GROVE_UART_RX_PIN: %u\n", (long unsigned int) GROVE_UART_RX_PIN);
+  SerialUSB.printf("GROVE_UART_TX_PIN: %u\n", (long unsigned int) GROVE_UART_TX_PIN);
+}
+
 void Uart::begin(unsigned long baudrate)
 {
   begin(baudrate, (uint8_t)SERIAL_8N1);
 }
+
 
 void Uart::begin(unsigned long baudrate, uint16_t /*config*/)
 {
@@ -71,6 +95,11 @@ void Uart::begin(unsigned long baudrate, uint16_t /*config*/)
 
   nrfUart->PSELTXD = uc_pinTX;
   nrfUart->PSELRXD = uc_pinRX;
+
+
+  SerialUSB.print("baudrate + config: ");
+  SerialUSB.println(baudrate);
+
 
   if (uc_hwFlow == 1) {
     nrfUart->PSELCTS = uc_pinCTS;
@@ -200,6 +229,8 @@ size_t Uart::write(const uint8_t data)
   nrfUart->EVENTS_TXDRDY = 0x0UL;
 
   xSemaphoreGive(_mutex);
+
+  SerialUSB.flush();
 
   return 1;
 }
