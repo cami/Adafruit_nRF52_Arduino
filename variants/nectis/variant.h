@@ -18,8 +18,8 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _VARIANT_NECTIS_
-#define _VARIANT_NECTIS_
+#ifndef NECTIS
+#define NECTIS
 
 /** Master clock frequency */
 #define VARIANT_MCK       (64000000ul)
@@ -78,8 +78,10 @@ static const uint8_t AREF = PIN_AREF;
 /*
  * Serial interfaces
  */
-#define PIN_SERIAL_RX             (6)
-#define PIN_SERIAL_TX             (7)
+//#define PIN_SERIAL_RX             (MODULE_UART_RX_PIN)
+//#define PIN_SERIAL_TX             (MODULE_UART_TX_PIN)
+#define PIN_SERIAL_RX             (GROVE_UART_RX_PIN)
+#define PIN_SERIAL_TX             (GROVE_UART_TX_PIN)
 
 //#define PIN_SERIAL2_RX      (8)
 //#define PIN_SERIAL2_TX      (6)
@@ -149,11 +151,18 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 
 #define MODULE_PWR_PIN            36    // Power Supply
 #define MODULE_PWRKEY_PIN         42    // Turn On/Off
-#define MODULE_UART_CORE          (1)   // USART2
-#define MODULE_UART_TX_PIN        (7)   //BG96への送信データ, BG96_RXD
-#define MODULE_UART_RX_PIN        (6)   //BG96からの受信データ, BG96_TXD
-#define MODULE_CTS_PIN            27    //BG96への送信要求, BG96_RTS
-#define MODULE_RTS_PIN            26    //BG96からの送信許可, BG96_CTS
+
+#define MODULE_UART_CORE          (0)   // USART2 => USART1
+//#define MODULE_UART_CORE          (1)   // USART2 => USART1
+#define MODULE_UART_RX_PIN        (7)   //BG96への送信データ, BG96_RXD
+#define MODULE_UART_TX_PIN        (6)   //BG96からの受信データ, BG96_TXD
+//#define MODULE_RTS_PIN            27    //BG96への送信要求, BG96_RTS
+//#define MODULE_CTS_PIN            26    //BG96からの送信許可, BG96_CTS
+//#define MODULE_UART_RX_PIN        (6)   //BG96への送信データ, BG96_TXD
+//#define MODULE_UART_TX_PIN        (7)   //BG96からの受信データ, BG96_RXD
+#define MODULE_RTS_PIN            26    //BG96への送信要求, BG96_CTS
+#define MODULE_CTS_PIN            27    //BG96からの送信許可, BG96_RTS
+
 #define MODULE_DTR_PIN            44    //BG96のデータ端末レディ, BG96_DTR
 #define MODULE_RESET_PIN          43    //BG96のリセット, BG96_RESET
 #define MODULE_STATUS_PIN         37    //BG96のステータス, BG96_STATUS
@@ -172,16 +181,16 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 #define GROVE_GPIO_2_2            29    //Analog in, GROVE_GPIO_2_2
 #define GROVE_GPIO_3_1            30    //Analog in, GROVE_GPIO_3_1
 #define GROVE_GPIO_3_2            31    //Analog in, GROVE_GPIO_3_2
-#define GROVE_I2C_CORE		        (0)   //TODO: UARTのチャンネルをBSPを見ながら割り当てる
+//#define GROVE_I2C_CORE		        (1)   //TODO: UARTのチャンネルをBSPを見ながら割り当てる
 #define GROVE_I2C_SCL_PIN         12    //out, GROVE_GPIO_4_1
 #define GROVE_I2C_SDA_PIN         11    //in/out, GROVE_GPIO_4_2
 #define GROVE_UART_CORE           (0)   // USART1, //TODO: UARTのチャンネルをBSPを見ながら割り当てる
-#define GROVE_UART_TX_PIN         (13)  //out, GROVE_GPIO_5_1
-#define GROVE_UART_RX_PIN         (14)  //in, GROVE_GPIO_5_2
+#define GROVE_UART_RX_PIN         (13)  //out, GROVE_GPIO_5_1
+#define GROVE_UART_TX_PIN         (14)  //in, GROVE_GPIO_5_2
 #define GROVE_GPIO_6_1            15    //GPIO, GROVE_GPIO_6_1
 #define GROVE_GPIO_6_2            16    //GPIO, GROVE_GPIO_6_2
 
-#define DEBUG_UART_CORE           (0)   // USART3, //TODO: UARTのチャンネルをBSPを見ながら割り当てる
+//#define DEBUG_UART_CORE           (2)   // USART3, //TODO: UARTのチャンネルをBSPを見ながら割り当てる
 #define DEBUG_UART_TX_PIN         GROVE_UART_TX_PIN
 #define DEBUG_UART_RX_PIN         GROVE_UART_RX_PIN
 
