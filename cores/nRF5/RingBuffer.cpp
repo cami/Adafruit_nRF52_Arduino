@@ -48,18 +48,18 @@ void RingBuffer::clear()
 
 int RingBuffer::read_char()
 {
-	if(_iTail == _iHead)
-		return -1;
+  if(_iTail == _iHead)
+    return -1;
 
-	uint8_t value = _aucBuffer[_iTail];
-	_iTail = nextIndex(_iTail);
+  uint8_t value = _aucBuffer[_iTail];
+  _iTail = nextIndex(_iTail);
 
-	return value;
+  return value;
 }
 
 int RingBuffer::available()
 {
-	int delta = _iHead - _iTail;
+  int delta = _iHead - _iTail;
 
 	if(delta < 0)
 		return SERIAL_BUFFER_SIZE + delta;
