@@ -86,7 +86,7 @@ int attachInterrupt(uint32_t pin, voidFuncPtr callback, uint32_t mode)
       break;
 
     default:
-      return;
+      return 0;
   }
 
   for (int ch = 0; ch < NUMBER_OF_GPIO_TE; ch++) {
@@ -145,7 +145,7 @@ void GPIOTE_IRQHandler()
       if (channelMap[ch] != -1 && callbacksInt[ch]) {
         if ( callbackDeferred[ch] )  {
           // Adafruit defer callback to non-isr if configured so
-          ada_callback_fromISR(NULL, callbacksInt[ch]);
+          ada_callback_fromISR(NULL, 0, callbacksInt[ch]);
         }else{
          callbacksInt[ch]();
         }

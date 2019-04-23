@@ -21,6 +21,9 @@
  */
 #include <bluefruit.h>
 
+// OTA DFU service
+BLEDfu bledfu;
+
 // Peripheral uart service
 BLEUart bleuart;
 
@@ -38,8 +41,7 @@ void setup()
   // Initialize Bluefruit with max concurrent connections as Peripheral = 1, Central = 1
   // SRAM usage required by SoftDevice will increase with number of connections
   Bluefruit.begin(1, 1);
-  // Set max power. Accepted values are: -40, -30, -20, -16, -12, -8, -4, 0, 4
-  Bluefruit.setTxPower(4);
+  Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
   Bluefruit.setName("Bluefruit52 duo");
 
   // Callbacks for Peripheral
@@ -49,6 +51,9 @@ void setup()
   // Callbacks for Central
   Bluefruit.Central.setConnectCallback(cent_connect_callback);
   Bluefruit.Central.setDisconnectCallback(cent_disconnect_callback);
+
+  // To be consistent OTA DFU should be added first if it exists
+  bledfu.begin();
 
   // Configure and Start BLE Uart Service
   bleuart.begin();
@@ -115,8 +120,11 @@ void loop()
  *------------------------------------------------------------------*/
 void prph_connect_callback(uint16_t conn_handle)
 {
+  // Get the reference to current connection
+  BLEConnection* connection = Bluefruit.Connection(conn_handle);
+
   char peer_name[32] = { 0 };
-  Bluefruit.getPeerName(conn_handle, peer_name, sizeof(peer_name));
+  connection->getPeerName(peer_name, sizeof(peer_name));
 
   Serial.print("[Prph] Connected to ");
   Serial.println(peer_name);
@@ -131,8 +139,10 @@ void prph_disconnect_callback(uint16_t conn_handle, uint8_t reason)
   Serial.println("[Prph] Disconnected");
 }
 
-void prph_bleuart_rx_callback(void)
+void prph_bleuart_rx_callback(uint16_t conn_handle)
 {
+  (void) conn_handle;
+  
   // Forward data from Mobile to our peripheral
   char str[20+1] = { 0 };
   bleuart.read(str, 20);
@@ -162,8 +172,11 @@ void scan_callback(ble_gap_evt_adv_report_t* report)
 
 void cent_connect_callback(uint16_t conn_handle)
 {
+  // Get the reference to current connection
+  BLEConnection* connection = Bluefruit.Connection(conn_handle);
+
   char peer_name[32] = { 0 };
-  Bluefruit.getPeerName(conn_handle, peer_name, sizeof(peer_name));
+  connection->getPeerName(peer_name, sizeof(peer_name));
 
   Serial.print("[Cent] Connected to ");
   Serial.println(peer_name);;

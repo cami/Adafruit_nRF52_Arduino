@@ -34,8 +34,7 @@ void setup()
   Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
 
   Bluefruit.begin();
-  // Set max power. Accepted values are: -40, -30, -20, -16, -12, -8, -4, 0, 4
-  Bluefruit.setTxPower(4);
+  Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
   Bluefruit.setName("Bluefruit52");
   Bluefruit.Periph.setConnectCallback(connect_callback);
   Bluefruit.Periph.setDisconnectCallback(disconnect_callback);  
@@ -90,16 +89,17 @@ void connect_callback(uint16_t conn_handle)
   Serial.println("Connected");
 
   // Get the reference to current connection
-  BLEConnection* conn = Bluefruit.Connection(conn_handle);
+  BLEConnection* connection = Bluefruit.Connection(conn_handle);
 
   // Start monitoring rssi of this connection
   // This function should be called in connect callback
   // Input argument is value difference (to current rssi) that triggers callback
-  conn->monitorRssi(10);
+  connection->monitorRssi(10);
 }
 
 void rssi_changed_callback(uint16_t conn_hdl, int8_t rssi)
 {
+  (void) conn_hdl;
   Serial.printf("Rssi = %d", rssi);
   Serial.println();
 }
@@ -108,7 +108,6 @@ void rssi_changed_callback(uint16_t conn_hdl, int8_t rssi)
  * Callback invoked when a connection is dropped
  * @param conn_handle connection where this event happens
  * @param reason is a BLE_HCI_STATUS_CODE which can be found in ble_hci.h
- * https://github.com/adafruit/Adafruit_nRF52_Arduino/blob/master/cores/nRF5/nordic/softdevice/s140_nrf52_6.1.1_API/include/ble_hci.h
  */
 void disconnect_callback(uint16_t conn_handle, uint8_t reason)
 {

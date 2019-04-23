@@ -74,10 +74,10 @@ class BLECharacteristic
 {
   public:
     /*--------- Callback Signatures ----------*/
-    typedef void (*read_authorize_cb_t)  (BLECharacteristic* chr, ble_gatts_evt_read_t * request);
-    typedef void (*write_authorize_cb_t) (BLECharacteristic* chr, ble_gatts_evt_write_t* request);
-    typedef void (*write_cb_t)           (BLECharacteristic* chr, uint8_t* data, uint16_t len, uint16_t offset);
-    typedef void (*write_cccd_cb_t)      (BLECharacteristic* chr, uint16_t value);
+    typedef void (*read_authorize_cb_t)  (uint16_t conn_hdl, BLECharacteristic* chr, ble_gatts_evt_read_t * request);
+    typedef void (*write_authorize_cb_t) (uint16_t conn_hdl, BLECharacteristic* chr, ble_gatts_evt_write_t* request);
+    typedef void (*write_cb_t)           (uint16_t conn_hdl, BLECharacteristic* chr, uint8_t* data, uint16_t len);
+    typedef void (*write_cccd_cb_t)      (uint16_t conn_hdl, BLECharacteristic* chr, uint16_t value);
 
     BLEUuid uuid;
 
@@ -133,11 +133,12 @@ class BLECharacteristic
     uint16_t read16(void);
     uint32_t read32(void);
 
-    /*------------- Notify -------------*/
-    uint16_t getCccd(void);
+    uint16_t getCccd(uint16_t conn_hdl);
 
     bool notifyEnabled(void);
+    bool notifyEnabled(uint16_t conn_hdl);
 
+    /*------------- Notify -------------*/
     bool notify   (const void* data, uint16_t len);
     bool notify   (const char* str);
 
@@ -146,8 +147,18 @@ class BLECharacteristic
     bool notify32 (uint32_t num);
     bool notify32 (int      num);
 
+    /*------------- Notify multiple connections -------------*/
+    bool notify   (uint16_t conn_hdl, const void* data, uint16_t len);
+    bool notify   (uint16_t conn_hdl, const char* str);
+
+    bool notify8  (uint16_t conn_hdl, uint8_t  num);
+    bool notify16 (uint16_t conn_hdl, uint16_t num);
+    bool notify32 (uint16_t conn_hdl, uint32_t num);
+    bool notify32 (uint16_t conn_hdl, int      num);
+
     /*------------- Indicate -------------*/
     bool indicateEnabled(void);
+    bool indicateEnabled(uint16_t conn_hdl);
 
     bool indicate   (const void* data, uint16_t len);
     bool indicate   (const char* str);
@@ -156,6 +167,15 @@ class BLECharacteristic
     bool indicate16 (uint16_t num);
     bool indicate32 (uint32_t num);
     bool indicate32 (int      num);
+
+    /*------------- Indicate multiple connections -------------*/
+    bool indicate   (uint16_t conn_hdl, const void* data, uint16_t len);
+    bool indicate   (uint16_t conn_hdl, const char* str);
+
+    bool indicate8  (uint16_t conn_hdl, uint8_t  num);
+    bool indicate16 (uint16_t conn_hdl, uint16_t num);
+    bool indicate32 (uint16_t conn_hdl, uint32_t num);
+    bool indicate32 (uint16_t conn_hdl, int      num);
 
     /*------------- Internal Functions -------------*/
     virtual void _eventHandler(ble_evt_t* event);
@@ -183,6 +203,12 @@ class BLECharacteristic
     ble_gatt_char_props_t     _properties;
     ble_gatts_attr_md_t       _attr_meta;
     ble_gatts_char_handles_t  _handles;
+
+    struct {
+        uint8_t* buffer;
+        uint16_t bufsize;
+        uint16_t count;
+    }_long_wr;
 
     /*------------- Callback pointers -------------*/
     read_authorize_cb_t       _rd_authorize_cb;

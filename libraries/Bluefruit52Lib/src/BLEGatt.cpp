@@ -85,57 +85,64 @@ void BLEGatt::_eventHandler(ble_evt_t* evt)
   BLEConnection* conn = Bluefruit.Connection(evt_conn_hdl);
 
   /*------------- Server service -------------*/
-  // TODO multiple peripherals
-//  if ( evt_conn_hdl == Bluefruit.connHandle() )
+  if ( evt_id == BLE_GAP_EVT_DISCONNECTED ||  evt_id == BLE_GAP_EVT_CONNECTED )
   {
-    if ( evt_id == BLE_GAP_EVT_DISCONNECTED ||  evt_id == BLE_GAP_EVT_CONNECTED )
+    for(uint8_t i=0; i<_server.svc_count; i++)
     {
-      for(uint8_t i=0; i<_server.svc_count; i++)
+      if ( evt_id == BLE_GAP_EVT_DISCONNECTED )
       {
-        if ( evt_id == BLE_GAP_EVT_DISCONNECTED )
-        {
-          _server.svc_list[i]->_disconnect_cb();
-        }else
-        {
-          _server.svc_list[i]->_connect_cb();
-        }
+        _server.svc_list[i]->svc_disconnect_hdl(evt_conn_hdl);
+      }else
+      {
+        _server.svc_list[i]->svc_connect_hdl(evt_conn_hdl);
       }
     }
   }
 
   /*------------- Server Characteristics -------------*/
-  // TODO multiple prph connection
-  if ( evt_conn_hdl == Bluefruit.connHandle() )
+  for(uint8_t i=0; i<_server.chr_count; i++)
   {
-    for(uint8_t i=0; i<_server.chr_count; i++)
+    BLECharacteristic* chr = _server.chr_list[i];
+    uint16_t req_handle = BLE_GATT_HANDLE_INVALID;
+
+    // BLE_GATTS_OP_EXEC_WRITE_REQ_NOW has no handle, uuid only command op
+    bool exec_write_now = false;
+
+    switch (evt_id)
     {
-      BLECharacteristic* chr = _server.chr_list[i];
-      uint16_t req_handle = BLE_GATT_HANDLE_INVALID;
-
-      switch (evt_id)
+      case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
       {
-        case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
-          // Handle has the same offset for read & write request
-          req_handle = evt->evt.gatts_evt.params.authorize_request.request.read.handle;
-        break;
+        // Handle has the same offset for read & write request
+        req_handle = evt->evt.gatts_evt.params.authorize_request.request.read.handle;
 
-        case BLE_GATTS_EVT_WRITE:
-          req_handle = evt->evt.gatts_evt.params.write.handle;
-        break;
-
-        default: break;
-      }
-
-      // invoke characteristic handler if matched
-      if ((req_handle != BLE_GATT_HANDLE_INVALID) && (req_handle == chr->handles().value_handle || req_handle == chr->handles().cccd_handle ))
-      {
-        chr->_eventHandler(evt);
-
-        // Save CCCD if paired
-        if ( conn->paired() && (evt_id == BLE_GATTS_EVT_WRITE) && (req_handle == chr->handles().cccd_handle) )
+        if ( evt->evt.gatts_evt.params.authorize_request.type == BLE_GATTS_AUTHORIZE_TYPE_WRITE )
         {
-          conn->storeCccd();
+          ble_gatts_evt_write_t * wr_req = &evt->evt.gatts_evt.params.authorize_request.request.write;
+          if ( wr_req->op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW )
+          {
+            exec_write_now = true;
+          }
         }
+      }
+      break;
+
+      case BLE_GATTS_EVT_WRITE:
+        req_handle = evt->evt.gatts_evt.params.write.handle;
+        break;
+
+      default: break;
+    }
+
+    // invoke characteristic handler if matched
+    if ( exec_write_now ||
+        ((req_handle != BLE_GATT_HANDLE_INVALID) && (req_handle == chr->handles().value_handle || req_handle == chr->handles().cccd_handle)) )
+    {
+      chr->_eventHandler(evt);
+
+      // Save CCCD if paired
+      if ( conn->paired() && (evt_id == BLE_GATTS_EVT_WRITE) && (req_handle == chr->handles().cccd_handle) )
+      {
+        conn->storeCccd();
       }
     }
   }

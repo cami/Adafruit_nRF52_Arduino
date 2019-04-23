@@ -42,11 +42,23 @@
 #include "usb/usb.h"
 #endif
 
+#ifndef CFG_BLE_TX_POWER_LEVEL
 #define CFG_BLE_TX_POWER_LEVEL           0
-#define CFG_DEFAULT_NAME                 "Bluefruit52"
+#endif
 
+#ifndef CFG_DEFAULT_NAME
+#define CFG_DEFAULT_NAME                 "Bluefruit52"
+#endif
+
+
+#ifndef CFG_BLE_TASK_STACKSIZE
 #define CFG_BLE_TASK_STACKSIZE          (512*3)
+#endif
+
+#ifndef CFG_SOC_TASK_STACKSIZE
 #define CFG_SOC_TASK_STACKSIZE          (200)
+#endif
+
 
 AdafruitBluefruit Bluefruit;
 
@@ -95,9 +107,7 @@ static void nrf_error_cb(uint32_t id, uint32_t pc, uint32_t info)
 #endif
 }
 
-/**
- * Constructor
- */
+// Constructor
 AdafruitBluefruit::AdafruitBluefruit(void)
 {
   /*------------------------------------------------------------------*/
@@ -136,8 +146,6 @@ AdafruitBluefruit::AdafruitBluefruit(void)
 
   _led_blink_th  = NULL;
   _led_conn      = true;
-
-  _ota_en = true;
 
   _tx_power      = CFG_BLE_TX_POWER_LEVEL;
 
@@ -256,11 +264,6 @@ void AdafruitBluefruit::configCentralBandwidth(uint8_t bw)
   }
 }
 
-void AdafruitBluefruit::enableOTA(bool en)
-{
-  _ota_en = en;
-}
-
 bool AdafruitBluefruit::begin(uint8_t prph_count, uint8_t central_count)
 {
   _prph_count    = prph_count;
@@ -318,20 +321,6 @@ bool AdafruitBluefruit::begin(uint8_t prph_count, uint8_t central_count)
    *  Note: Value is left as it is if already configured by user.
    */
   /*------------------------------------------------------------------*/
-//  if ( _prph_count )
-//  {
-//    // If not configured by user, set Attr Table Size large enough for
-//    // most peripheral applications
-//    if ( _sd_cfg.attr_table_size == 0 ) _sd_cfg.attr_table_size = 0x800;
-//  }
-//
-//  if ( _central_count)
-//  {
-//
-//  }
-//
-//  // Not configure, default value are used
-//  if ( _sd_cfg.attr_table_size == 0 ) _sd_cfg.attr_table_size = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
 
   /*------------- Configure BLE params  -------------*/
   extern uint32_t  __data_start__[]; // defined in linker
@@ -443,8 +432,7 @@ bool AdafruitBluefruit::begin(uint8_t prph_count, uint8_t central_count)
   opt.common_opt.conn_evt_ext.enable = 1; // enable Data Length Extension
   VERIFY_STATUS( sd_ble_opt_set(BLE_COMMON_OPT_CONN_EVT_EXT, &opt), false );
 
-  /*------------- Configure GAP  -------------*/
-
+  // Init Peripheral role
   VERIFY( Periph.begin() );
 
   // Default device name
@@ -458,10 +446,8 @@ bool AdafruitBluefruit::begin(uint8_t prph_count, uint8_t central_count)
   sd_power_usbremoved_enable(true);
 #endif
 
-  // Add DFU OTA service if enabled
-  if ( _ota_en ) _dfu_svc.begin();
-
-  if (_central_count)  Central.begin(); // Init Central
+  // Init Central role
+  if (_central_count)  Central.begin();
 
   // Create RTOS Semaphore & Task for BLE Event
   _ble_event_sem = xSemaphoreCreateBinary();
@@ -477,9 +463,7 @@ bool AdafruitBluefruit::begin(uint8_t prph_count, uint8_t central_count)
   TaskHandle_t soc_task_hdl;
   xTaskCreate( adafruit_soc_task, "SOC", CFG_SOC_TASK_STACKSIZE, NULL, TASK_PRIO_HIGH, &soc_task_hdl);
 
-  // Interrupt priority has already been set by the stack.
-//  NVIC_SetPriority(SD_EVT_IRQn, 6);
-  NVIC_EnableIRQ(SD_EVT_IRQn);
+  NVIC_EnableIRQ(SD_EVT_IRQn); // enable SD interrupt
 
   // Create Timer for led advertising blinky
   _led_blink_th = xTimerCreate(NULL, ms2tick(CFG_ADV_BLINKY_INTERVAL/2), true, NULL, bluefruit_blinky_cb);
@@ -523,7 +507,7 @@ bool AdafruitBluefruit::setAddr (ble_gap_addr_t* gap_addr)
 void AdafruitBluefruit::setName (char const * str)
 {
   ble_gap_conn_sec_mode_t sec_mode = BLE_SECMODE_OPEN;
-sd_ble_gap_device_name_set(&sec_mode, (uint8_t const *) str, strlen(str));
+  sd_ble_gap_device_name_set(&sec_mode, (uint8_t const *) str, strlen(str));
 }
 
 uint8_t AdafruitBluefruit::getName(char* name, uint16_t bufsize)
@@ -620,11 +604,6 @@ bool AdafruitBluefruit::disconnect(uint16_t conn_hdl)
   return true; // not connected still return true
 }
 
-uint16_t AdafruitBluefruit::getPeerName(uint16_t conn_hdl, char* buf, uint16_t bufsize)
-{
-  return Gatt.readCharByUuid(conn_hdl, BLEUuid(BLE_UUID_GAP_CHARACTERISTIC_DEVICE_NAME), buf, bufsize);
-}
-
 void AdafruitBluefruit::setEventCallback ( void (*fp) (ble_evt_t*) )
 {
   _event_cb = fp;
@@ -639,12 +618,6 @@ bool AdafruitBluefruit::connPaired(void)
 {
   BLEConnection* conn = Bluefruit.Connection(_conn_hdl);
   return conn && conn->paired();
-}
-
-ble_gap_addr_t AdafruitBluefruit::getPeerAddr(uint16_t conn_hdl)
-{
-  BLEConnection* conn = this->Connection(conn_hdl);
-  return conn ? conn->getPeerAddr() : ((ble_gap_addr_t) {0});
 }
 
 uint16_t AdafruitBluefruit::getMaxMtu(uint8_t role)
@@ -817,10 +790,10 @@ void AdafruitBluefruit::_ble_handler(ble_evt_t* evt)
       // Invoke connect callback
       if ( conn->getRole() == BLE_GAP_ROLE_PERIPH )
       {
-        if ( Periph._connect_cb ) ada_callback(NULL, Periph._connect_cb, conn_hdl);
+        if ( Periph._connect_cb ) ada_callback(NULL, 0, Periph._connect_cb, conn_hdl);
       }else
       {
-        if ( Central._connect_cb ) ada_callback(NULL, Central._connect_cb, conn_hdl);
+        if ( Central._connect_cb ) ada_callback(NULL, 0, Central._connect_cb, conn_hdl);
       }
     }
     break;
@@ -846,10 +819,10 @@ void AdafruitBluefruit::_ble_handler(ble_evt_t* evt)
       // Invoke disconnect callback
       if ( conn->getRole() == BLE_GAP_ROLE_PERIPH )
       {
-        if ( Periph._disconnect_cb ) ada_callback(NULL, Periph._disconnect_cb, conn_hdl, para->reason);
+        if ( Periph._disconnect_cb ) ada_callback(NULL, 0, Periph._disconnect_cb, conn_hdl, para->reason);
       }else
       {
-        if ( Central._disconnect_cb ) ada_callback(NULL, Central._disconnect_cb, conn_hdl, para->reason);
+        if ( Central._disconnect_cb ) ada_callback(NULL, 0, Central._disconnect_cb, conn_hdl, para->reason);
       }
 
       delete _connection[conn_hdl];
@@ -863,7 +836,7 @@ void AdafruitBluefruit::_ble_handler(ble_evt_t* evt)
       ble_gap_evt_rssi_changed_t const * rssi_changed = &evt->evt.gap_evt.params.rssi_changed;
       if ( _rssi_cb )
       {
-         ada_callback(NULL, _rssi_cb, conn_hdl, rssi_changed->rssi);
+         ada_callback(NULL, 0, _rssi_cb, conn_hdl, rssi_changed->rssi);
       }
     }
     break;
@@ -919,6 +892,15 @@ void AdafruitBluefruit::_ble_handler(ble_evt_t* evt)
     }
     break;
 
+    case BLE_EVT_USER_MEM_REQUEST:
+      // We will handle Long Write sequence (RW Authorize PREP_WRITE_REQ)
+      sd_ble_user_mem_reply(conn_hdl, NULL);
+    break;
+
+    case BLE_EVT_USER_MEM_RELEASE:
+      // nothing to do
+    break;
+
     default: break;
   }
 
@@ -955,14 +937,14 @@ void AdafruitBluefruit::_ble_handler(ble_evt_t* evt)
     }
   }
 
-  // Periph event handler, skip if it is central connection
-  if ( _prph_count && !(conn && (conn->getRole() == BLE_GAP_ROLE_CENTRAL)) )
+  // Periph event handler (also handle generic non-connection event)
+  if ( (conn == NULL) || (conn->getRole() == BLE_GAP_ROLE_PERIPH) )
   {
     Periph._eventHandler(evt);
   }
 
-  // Central Event Handler, skip if it is peripheral connection
-  if ( _central_count && !(conn && (conn->getRole() == BLE_GAP_ROLE_PERIPH)) )
+  // Central Event Handler (also handle generic non-connection event)
+  if ( (conn == NULL) || (conn->getRole() == BLE_GAP_ROLE_CENTRAL) )
   {
     Central._eventHandler(evt);
   }

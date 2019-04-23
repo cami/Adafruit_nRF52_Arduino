@@ -13,39 +13,50 @@
 *********************************************************************/
 #include <bluefruit.h>
 
+#define MAX_PRPH_CONNECTION   2
+uint8_t connection_count = 0;
+
+// BLE Service
+BLEDfu  bledfu;  // OTA DFU service
+BLEDis  bledis;  // device information
 BLEUart bleuart; // uart over ble
 
 void setup()
 {
   Serial.begin(115200);
   while ( !Serial ) delay(10);   // for nrf52840 with native usb
-
-  Serial.println("Bluefruit52 RSSI Example");
-  Serial.println("------------------------\n");
+  
+  Serial.println("Bluefruit52 BLEUART Example");
+  Serial.println("---------------------------\n");
 
   // Setup the BLE LED to be enabled on CONNECT
   // Note: This is actually the default behaviour, but provided
-  // here in case you want to control this LED manually
+  // here in case you want to control this LED manually via PIN 19
   Bluefruit.autoConnLed(true);
 
-  // Config the peripheral connection with maximum bandwidth 
-  // more SRAM required by SoftDevice
-  // Note: All config***() function must be called before begin()
-  Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
-
-  Bluefruit.begin();
+  // Initialize Bluefruit with max concurrent connections as Peripheral = 2, Central = 0
+  Bluefruit.begin(MAX_PRPH_CONNECTION, 0);
   Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
   Bluefruit.setName("Bluefruit52");
   Bluefruit.Periph.setConnectCallback(connect_callback);
-  Bluefruit.Periph.setDisconnectCallback(disconnect_callback);  
-  
+  Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
+
+  // To be consistent OTA DFU should be added first if it exists
+  bledfu.begin();
+
+  // Configure and Start Device Information Service
+  bledis.setManufacturer("Adafruit Industries");
+  bledis.setModel("Bluefruit Feather52");
+  bledis.begin();
+
   // Configure and Start BLE Uart Service
   bleuart.begin();
 
   // Set up and start advertising
   startAdv();
 
-  Serial.println("Please use Adafruit's Bluefruit LE app to connect");
+  Serial.println("Please use Adafruit's Bluefruit LE app to connect in UART mode");
+  Serial.println("Once connected, enter character(s) that you wish to send");
 }
 
 void startAdv(void)
@@ -76,38 +87,65 @@ void startAdv(void)
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds  
 }
 
-void loop()
+
+// print a string to Serial Uart and all connected BLE Uart
+void printAll(uint8_t* buf, int count)
 {
-  if ( Bluefruit.connected() )
+  Serial.write(buf, count);
+
+  // Send to all connected centrals
+  for (uint8_t conn_hdl=0; conn_hdl < MAX_PRPH_CONNECTION; conn_hdl++)
   {
-    uint16_t conn_hdl = Bluefruit.connHandle();
-
-    // Get the reference to current connected connection 
-    BLEConnection* connection = Bluefruit.Connection(conn_hdl);
-
-    // get the RSSI value of this connection
-    // monitorRssi() must be called previously (in connect callback)
-    int8_t rssi = connection->getRssi();
-    
-    Serial.printf("Rssi = %d", rssi);
-    Serial.println();
-
-    // print one per second
-    delay(1000);
+    bleuart.write(conn_hdl, buf, count);
   }
 }
 
+void loop()
+{
+  uint8_t buf[64];
+  int count;
+
+  // Forward data from HW Serial to BLEUART
+  while (Serial.available())
+  {
+    // Delay to wait for enough input
+    delay(2);
+    count = Serial.readBytes(buf, sizeof(buf));
+
+    printAll(buf, count);
+  }
+
+  // Forward from BLEUART to HW Serial
+  while ( bleuart.available() )
+  {
+    count = bleuart.read(buf, sizeof(buf));
+
+    printAll(buf, count);
+  }
+}
+
+// callback invoked when central connects
 void connect_callback(uint16_t conn_handle)
 {
-  Serial.println("Connected");
-
   // Get the reference to current connection
-  BLEConnection* conn = Bluefruit.Connection(conn_handle);
+  BLEConnection* connection = Bluefruit.Connection(conn_handle);
 
-  // Start monitoring rssi of this connection
-  // This function should be called in connect callback
-  // no parameters means we don't use rssi changed callback 
-  conn->monitorRssi();
+  char central_name[32] = { 0 };
+  connection->getPeerName(central_name, sizeof(central_name));
+
+  Serial.print("Connected to ");
+  Serial.println(central_name);
+
+  connection_count++;
+  Serial.print("Connection count: ");
+  Serial.println(connection_count);
+  
+  // Keep advertising if not reaching max
+  if (connection_count < MAX_PRPH_CONNECTION)
+  {
+    Serial.println("Keep advertising");
+    Bluefruit.Advertising.start(0);
+  }
 }
 
 /**
@@ -122,4 +160,6 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason)
 
   Serial.println();
   Serial.println("Disconnected");
+
+  connection_count--;
 }

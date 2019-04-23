@@ -59,6 +59,10 @@ void BLECharacteristic::_init(void)
   _handles.sccd_handle      = BLE_GATT_HANDLE_INVALID;
   _handles.cccd_handle      = BLE_GATT_HANDLE_INVALID;
 
+  _long_wr.buffer = NULL;
+  _long_wr.bufsize = 0;
+  _long_wr.count = 0;
+
   _rd_authorize_cb = NULL;
   _wr_authorize_cb = NULL;
   _wr_cb           = NULL;
@@ -344,44 +348,117 @@ err_t BLECharacteristic::addDescriptor(BLEUuid bleuuid, void const * content, ui
  */
 void BLECharacteristic::_eventHandler(ble_evt_t* event)
 {
+  uint16_t const conn_hdl = event->evt.common_evt.conn_handle;
+
   switch(event->header.evt_id)
   {
     case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
     {
       ble_gatts_evt_rw_authorize_request_t * request = &event->evt.gatts_evt.params.authorize_request;
 
-      if ( (request->type == BLE_GATTS_AUTHORIZE_TYPE_WRITE) && (_wr_authorize_cb != NULL))
-      {
-        if ( _use_ada_cb.write_authorize )
-        {
-          uint8_t* data = (uint8_t*) rtos_malloc(sizeof(request->request.write));
-          VERIFY(data,);
-
-          memcpy(data, &request->request.write, sizeof(request->request.write));
-
-          // data is free after callback
-          ada_callback(data, _wr_authorize_cb, this, data);
-        }else
-        {
-          _wr_authorize_cb(this, &request->request.write);
-        }
-      }
-
+      // Read authorization
       if ( (request->type == BLE_GATTS_AUTHORIZE_TYPE_READ) && (_rd_authorize_cb != NULL))
       {
+        ble_gatts_evt_read_t * rd_req = &request->request.read;
+
         if ( _use_ada_cb.read_authorize )
         {
-          uint8_t* data = (uint8_t*) rtos_malloc(sizeof(request->request.read));
-          VERIFY(data,);
-
-          memcpy(data, &request->request.read, sizeof(request->request.read));
-
-          // data is free after callback
-          ada_callback(data, _rd_authorize_cb, this, data);
+          ada_callback(rd_req, sizeof(*rd_req), _rd_authorize_cb, conn_hdl, this, rd_req);
         }
         else
         {
-          _rd_authorize_cb(this, &request->request.read);
+          _rd_authorize_cb(conn_hdl, this, rd_req);
+        }
+      }
+
+      // Write Authorization and Long Write sequence handling
+      if (request->type == BLE_GATTS_AUTHORIZE_TYPE_WRITE)
+      {
+        ble_gatts_evt_write_t * wr_req = &request->request.write;
+
+        switch(wr_req->op)
+        {
+          case BLE_GATTS_OP_WRITE_REQ:
+            // Write Request with authorization
+            if (_wr_authorize_cb != NULL)
+            {
+              if ( _use_ada_cb.write_authorize )
+              {
+                ada_callback(wr_req, sizeof(*wr_req), _wr_authorize_cb, conn_hdl, this, wr_req);
+              }else
+              {
+                _wr_authorize_cb(conn_hdl, this, wr_req);
+              }
+            }
+          break;
+
+          case BLE_GATTS_OP_PREP_WRITE_REQ:
+          {
+            // Prepare Long Write
+            if ( !_long_wr.buffer )
+            {
+              // Allocate long write buffer if not previously
+              _long_wr.bufsize = 1024; // TODO bufsize is 10x MTU
+              _long_wr.buffer = (uint8_t*) rtos_malloc(_long_wr.bufsize);
+              _long_wr.count = 0;
+            }
+
+            ble_gatts_rw_authorize_reply_params_t reply = { .type = BLE_GATTS_AUTHORIZE_TYPE_WRITE };
+
+            if ( wr_req->offset + wr_req->len > _long_wr.bufsize )
+            {
+              reply.params.write.gatt_status = BLE_GATT_STATUS_ATTERR_PREPARE_QUEUE_FULL;
+            }else
+            {
+              reply.params.write = ((ble_gatts_authorize_params_t) {
+                  .gatt_status = BLE_GATT_STATUS_SUCCESS,
+                  .update      = 1,
+                  .offset      = wr_req->offset,
+                  .len         = wr_req->len,
+                  .p_data      = wr_req->data
+              });
+
+              memcpy(_long_wr.buffer+wr_req->offset, wr_req->data, wr_req->len);
+              _long_wr.count = max16(_long_wr.count, wr_req->offset + wr_req->len);
+            }
+
+            sd_ble_gatts_rw_authorize_reply(conn_hdl, &reply);
+          }
+          break;
+
+          case BLE_GATTS_OP_EXEC_WRITE_REQ_NOW:
+            // Execute Long Write
+            if ( _long_wr.buffer )
+            {
+              ble_gatts_rw_authorize_reply_params_t reply = { .type = BLE_GATTS_AUTHORIZE_TYPE_WRITE };
+              reply.params.write.gatt_status = BLE_GATT_STATUS_SUCCESS;
+
+              sd_ble_gatts_rw_authorize_reply(conn_hdl, &reply);
+
+              // Long write complete, call write callback if set
+              if (_wr_cb)
+              {
+                if (_use_ada_cb.write)
+                {
+                  ada_callback(_long_wr.buffer, _long_wr.count, _wr_cb, conn_hdl, this, _long_wr.buffer, _long_wr.count);
+                }else
+                {
+                  _wr_cb(conn_hdl, this, _long_wr.buffer, _long_wr.count);
+                }
+              }
+
+              // free up memory
+              rtos_free(_long_wr.buffer);
+              _long_wr.buffer = NULL;
+              _long_wr.bufsize = _long_wr.count = 0;
+            }
+          break;
+
+          case BLE_GATTS_OP_EXEC_WRITE_REQ_CANCEL:
+            // Cancel Long Write
+          break;
+
+          default: break;
         }
       }
     }
@@ -391,25 +468,21 @@ void BLECharacteristic::_eventHandler(ble_evt_t* event)
     {
       ble_gatts_evt_write_t* request = &event->evt.gatts_evt.params.write;
 
+      LOG_LV2_BUFFER(NULL, request->data, request->len);
+
       // Value write
       if (request->handle == _handles.value_handle)
       {
         LOG_LV2("GATTS", "attr's value, uuid = 0x%04X", request->uuid.uuid);
-        LOG_LV2_BUFFER(NULL, request->data, request->len);
 
         if (_wr_cb)
         {
           if (_use_ada_cb.write)
           {
-            uint8_t* data = (uint8_t*) rtos_malloc(request->len);
-            VERIFY(data,);
-            memcpy(data, request->data, request->len);
-
-            ada_callback(data, _wr_cb, this, data, request->len, request->offset);
+            ada_callback(request->data, request->len, _wr_cb, conn_hdl, this, request->data, request->len);
           }else
           {
-            // invoke directly if cannot allocate memory for data
-            _wr_cb(this, request->data, request->len, request->offset);
+            _wr_cb(conn_hdl, this, request->data, request->len);
           }
         }
       }
@@ -418,7 +491,6 @@ void BLECharacteristic::_eventHandler(ble_evt_t* event)
       if ( request->handle == _handles.cccd_handle )
       {
         LOG_LV2("GATTS", "attr's cccd");
-        LOG_LV2_BUFFER(NULL, request->data, request->len);
 
         if (_cccd_wr_cb)
         {
@@ -427,11 +499,11 @@ void BLECharacteristic::_eventHandler(ble_evt_t* event)
 
           if ( _use_ada_cb.cccd_write )
           {
-            ada_callback(NULL, _cccd_wr_cb, this, value);
+            ada_callback(NULL, 0, _cccd_wr_cb, conn_hdl, this, value);
           }
           else
           {
-            _cccd_wr_cb(this, value);
+            _cccd_wr_cb(conn_hdl, this, value);
           }
         }
       }
@@ -524,14 +596,13 @@ uint16_t BLECharacteristic::read16(void)
 
 uint32_t BLECharacteristic::read32(void)
 {
-  uint16_t num;
+  uint32_t num;
   return read(&num, sizeof(num)) ? num : 0;
 }
 
-
-uint16_t BLECharacteristic::getCccd(void)
+uint16_t BLECharacteristic::getCccd(uint16_t conn_hdl)
 {
-  VERIFY( Bluefruit.connected() && (_handles.cccd_handle != BLE_GATT_HANDLE_INVALID), 0 );
+  VERIFY( Bluefruit.connected(conn_hdl) && (_handles.cccd_handle != BLE_GATT_HANDLE_INVALID), 0 );
 
   uint16_t cccd;
   ble_gatts_value_t value =
@@ -541,7 +612,7 @@ uint16_t BLECharacteristic::getCccd(void)
       .p_value = (uint8_t*) &cccd
   };
 
-  err_t err = sd_ble_gatts_value_get(Bluefruit.connHandle(), _handles.cccd_handle, &value);
+  err_t err = sd_ble_gatts_value_get(conn_hdl, _handles.cccd_handle, &value);
 
   // CCCD is not set, count as not enabled
   if ( BLE_ERROR_GATTS_SYS_ATTR_MISSING == err )
@@ -560,21 +631,28 @@ uint16_t BLECharacteristic::getCccd(void)
  *------------------------------------------------------------------*/
 bool BLECharacteristic::notifyEnabled(void)
 {
-  VERIFY( _properties.notify );
-  return  (getCccd() & BLE_GATT_HVX_NOTIFICATION);
+  return this->notifyEnabled(Bluefruit.connHandle());
 }
 
-bool BLECharacteristic::notify(const void* data, uint16_t len)
+bool BLECharacteristic::notifyEnabled(uint16_t conn_hdl)
 {
   VERIFY( _properties.notify );
+  return  (getCccd(conn_hdl) & BLE_GATT_HVX_NOTIFICATION);
+}
+
+bool BLECharacteristic::notify(uint16_t conn_hdl, const void* data, uint16_t len)
+{
+  VERIFY( _properties.notify );
+
+  // use default conn handle if not passed
+  if ( conn_hdl == BLE_CONN_HANDLE_INVALID ) conn_hdl = Bluefruit.connHandle();
 
   // could not exceed max len
   uint16_t remaining = min16(len, _max_len);
 
-  if ( notifyEnabled() )
+  if ( notifyEnabled(conn_hdl) )
   {
-    // TODO multiple connection support
-    BLEConnection* conn = Bluefruit.Connection( Bluefruit.connHandle() );
+    BLEConnection* conn = Bluefruit.Connection( conn_hdl );
     VERIFY(conn);
 
     uint16_t const max_payload = conn->getMtu() - 3;
@@ -597,7 +675,7 @@ bool BLECharacteristic::notify(const void* data, uint16_t len)
       };
 
       LOG_LV2("CHR", "Notify %d bytes", packet_len);
-      VERIFY_STATUS( sd_ble_gatts_hvx(Bluefruit.connHandle(), &hvx_params), false );
+      VERIFY_STATUS( sd_ble_gatts_hvx(conn_hdl, &hvx_params), false );
 
       remaining -= packet_len;
       u8data    += packet_len;
@@ -612,50 +690,91 @@ bool BLECharacteristic::notify(const void* data, uint16_t len)
   return true;
 }
 
-bool BLECharacteristic::notify(const char * str)
+bool BLECharacteristic::notify(uint16_t conn_hdl, const char * str)
 {
-  return notify( (const uint8_t*) str, strlen(str) );
+  return notify(conn_hdl, (const uint8_t*) str, strlen(str));
+}
+
+bool BLECharacteristic::notify8(uint16_t conn_hdl, uint8_t num)
+{
+  return notify(conn_hdl, (uint8_t*) &num, sizeof(num));
+}
+
+bool BLECharacteristic::notify16(uint16_t conn_hdl, uint16_t num)
+{
+  return notify(conn_hdl, (uint8_t*) &num, sizeof(num));
+}
+
+bool BLECharacteristic::notify32(uint16_t conn_hdl, uint32_t num)
+{
+  return notify(conn_hdl, (uint8_t*) &num, sizeof(num));
+}
+
+bool BLECharacteristic::notify32(uint16_t conn_hdl, int num)
+{
+  return notify32((uint32_t) num, conn_hdl);
+}
+
+//--------------------------------------------------------------------+
+// Notify with single connection
+//--------------------------------------------------------------------+
+bool BLECharacteristic::notify(const void* data, uint16_t len)
+{
+  return notify(BLE_CONN_HANDLE_INVALID, data, len);
+}
+
+bool BLECharacteristic::notify(const char* str)
+{
+  return notify(BLE_CONN_HANDLE_INVALID, str);
 }
 
 bool BLECharacteristic::notify8(uint8_t num)
 {
-  return notify( (uint8_t*) &num, sizeof(num));
+  return notify8(BLE_CONN_HANDLE_INVALID, num);
 }
 
 bool BLECharacteristic::notify16(uint16_t num)
 {
-  return notify( (uint8_t*) &num, sizeof(num));
+  return notify16(BLE_CONN_HANDLE_INVALID, num);
 }
 
 bool BLECharacteristic::notify32(uint32_t num)
 {
-  return notify( (uint8_t*) &num, sizeof(num));
+  return notify32(BLE_CONN_HANDLE_INVALID, num);
 }
 
 bool BLECharacteristic::notify32(int num)
 {
-  return notify32( (uint32_t) num);
+  return notify32(BLE_CONN_HANDLE_INVALID, num);
 }
 
+
 /*------------------------------------------------------------------*/
-/* INDICATE
+/* INDICATE multiple connections
  *------------------------------------------------------------------*/
 bool BLECharacteristic::indicateEnabled(void)
 {
-  VERIFY( _properties.indicate );
-  return  (getCccd() & BLE_GATT_HVX_INDICATION);
+  return this->indicateEnabled(Bluefruit.connHandle());
 }
 
-bool BLECharacteristic::indicate(const void* data, uint16_t len)
+bool BLECharacteristic::indicateEnabled(uint16_t conn_hdl)
 {
   VERIFY( _properties.indicate );
+  return  (getCccd(conn_hdl) & BLE_GATT_HVX_INDICATION);
+}
+
+bool BLECharacteristic::indicate(uint16_t conn_hdl, const void* data, uint16_t len)
+{
+  VERIFY( _properties.indicate );
+
+  // use default conn handle if not passed
+  if ( conn_hdl == BLE_CONN_HANDLE_INVALID ) conn_hdl = Bluefruit.connHandle();
 
   // could not exceed max len
   uint16_t remaining = min16(len, _max_len);
 
-  if ( indicateEnabled() )
+  if ( indicateEnabled(conn_hdl) )
   {
-    uint16_t conn_hdl = Bluefruit.connHandle();
     BLEConnection* conn = Bluefruit.Connection( conn_hdl );
     VERIFY(conn);
 
@@ -678,7 +797,7 @@ bool BLECharacteristic::indicate(const void* data, uint16_t len)
       LOG_LV2("CHR", "Indicate %d bytes", packet_len);
 
       // Blocking wait until receiving confirmation from peer
-      VERIFY_STATUS( sd_ble_gatts_hvx( conn_hdl, &hvx_params), false );
+      VERIFY_STATUS( sd_ble_gatts_hvx(conn_hdl, &hvx_params), false );
       VERIFY ( conn->waitForIndicateConfirm() );
 
       remaining -= packet_len;
@@ -694,27 +813,60 @@ bool BLECharacteristic::indicate(const void* data, uint16_t len)
   return true;
 }
 
-bool BLECharacteristic::indicate(const char * str)
+bool BLECharacteristic::indicate(uint16_t conn_hdl, const char * str)
 {
-  return indicate( (const uint8_t*) str, strlen(str) );
+  return indicate(conn_hdl, (const uint8_t*) str, strlen(str));
+}
+
+bool BLECharacteristic::indicate8(uint16_t conn_hdl, uint8_t num)
+{
+  return indicate(conn_hdl, (uint8_t*) &num, sizeof(num));
+}
+
+bool BLECharacteristic::indicate16(uint16_t conn_hdl, uint16_t num)
+{
+  return indicate(conn_hdl, (uint8_t*) &num, sizeof(num));
+}
+
+bool BLECharacteristic::indicate32(uint16_t conn_hdl, uint32_t num)
+{
+  return indicate(conn_hdl, (uint8_t*) &num, sizeof(num));
+}
+
+bool BLECharacteristic::indicate32(uint16_t conn_hdl, int num)
+{
+  return indicate32(conn_hdl, (uint32_t) num);
+}
+
+/*------------------------------------------------------------------*/
+/* INDICATE single connections
+ *------------------------------------------------------------------*/
+bool BLECharacteristic::indicate(const void* data, uint16_t len)
+{
+  return indicate(BLE_CONN_HANDLE_INVALID, data, len);
+}
+
+bool BLECharacteristic::indicate(const char* str)
+{
+  return indicate(BLE_CONN_HANDLE_INVALID, str);
 }
 
 bool BLECharacteristic::indicate8(uint8_t num)
 {
-  return indicate( (uint8_t*) &num, sizeof(num));
+  return indicate8(BLE_CONN_HANDLE_INVALID, num);
 }
 
 bool BLECharacteristic::indicate16(uint16_t num)
 {
-  return indicate( (uint8_t*) &num, sizeof(num));
+  return indicate16(BLE_CONN_HANDLE_INVALID, num);
 }
 
 bool BLECharacteristic::indicate32(uint32_t num)
 {
-  return indicate( (uint8_t*) &num, sizeof(num));
+  return indicate32(BLE_CONN_HANDLE_INVALID, num);
 }
 
 bool BLECharacteristic::indicate32(int num)
 {
-  return indicate32( (uint32_t) num);
+  return indicate32(BLE_CONN_HANDLE_INVALID, num);
 }

@@ -105,7 +105,7 @@ extern "C"
 class AdafruitBluefruit
 {
   public:
-    typedef void (*rssi_callback_t       ) (uint16_t conn_hdl, int8_t rssi);
+    typedef void (*rssi_callback_t) (uint16_t conn_hdl, int8_t rssi);
 
     AdafruitBluefruit(void); // Constructor
 
@@ -135,8 +135,6 @@ class AdafruitBluefruit
     void configPrphBandwidth   (uint8_t bw);
     void configCentralBandwidth(uint8_t bw);
 
-    void enableOTA(bool en);
-
     bool begin(uint8_t prph_count = 1, uint8_t central_count = 0);
 
     /*------------------------------------------------------------------*/
@@ -149,6 +147,9 @@ class AdafruitBluefruit
     void     setName            (const char* str);
     uint8_t  getName            (char* name, uint16_t bufsize);
 
+    // Supported tx_power values depending on mcu:
+    // - nRF52832: -40dBm, -20dBm, -16dBm, -12dBm, -8dBm, -4dBm, 0dBm, +3dBm and +4dBm.
+    // - nRF52840: -40dBm, -20dBm, -16dBm, -12dBm, -8dBm, -4dBm, 0dBm, +2dBm, +3dBm, +4dBm, +5dBm, +6dBm, +7dBm and +8dBm.
     bool     setTxPower         (int8_t power);
     int8_t   getTxPower         (void);
 
@@ -163,23 +164,20 @@ class AdafruitBluefruit
     void     autoConnLed        (bool enabled);
     void     setConnLedInterval (uint32_t ms);
 
+    void     clearBonds        (void);
+
     /*------------------------------------------------------------------*/
     /* GAP, Connections and Bonding
      *------------------------------------------------------------------*/
     uint8_t  connected         (void); // Number of connected
+    bool     connected         (uint16_t conn_hdl);
 
     uint16_t connHandle        (void);
     bool     connPaired        (void);
 
-    void     clearBonds        (void);
-
     // Alias to BLEConnection API()
-    bool     connected         (uint16_t conn_hdl);
     bool     disconnect        (uint16_t conn_hdl);
-    ble_gap_addr_t getPeerAddr (uint16_t conn_hdl);
     bool     requestPairing    (uint16_t conn_hdl);
-
-    uint16_t getPeerName       (uint16_t conn_hdl, char* buf, uint16_t bufsize);
 
     uint16_t getMaxMtu(uint8_t role);
 
@@ -189,7 +187,7 @@ class AdafruitBluefruit
     /* Callbacks
      *------------------------------------------------------------------*/
     void setRssiCallback(rssi_callback_t fp);
-    void setEventCallback ( void (*fp) (ble_evt_t*) );
+    void setEventCallback( void (*fp) (ble_evt_t*) );
 
     COMMENT_OUT ( bool setPIN(const char* pin); )
 
@@ -232,10 +230,6 @@ class AdafruitBluefruit
 
     TimerHandle_t _led_blink_th;
     bool _led_conn;
-
-    bool _ota_en;
-
-    BLEDfu _dfu_svc;
 
     uint16_t _conn_hdl;
 

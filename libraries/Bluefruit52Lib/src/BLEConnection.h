@@ -54,7 +54,7 @@ class BLEConnection
     bool _paired;
     bool _hvc_received;
 
-    ble_gap_addr_t _addr;
+    ble_gap_addr_t _peer_addr;
 
     SemaphoreHandle_t _hvn_sem;
     SemaphoreHandle_t _wrcmd_sem;
@@ -76,11 +76,13 @@ class BLEConnection
     uint8_t  getRole(void);
     uint16_t getMtu (void);
     uint16_t getConnInterval(void);
+
     ble_gap_addr_t getPeerAddr(void);
+    uint16_t getPeerName(char* buf, uint16_t bufsize);
 
     bool disconnect(void);
 
-    bool setTxPower(int8_t power);
+    bool setTxPower(int8_t power); // set power for this connection
 
     bool monitorRssi(uint8_t threshold = BLE_GAP_RSSI_THRESHOLD_INVALID);
     int8_t getRssi(void);

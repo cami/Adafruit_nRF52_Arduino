@@ -413,12 +413,7 @@ void BLEClientCharacteristic::_eventHandler(ble_evt_t* evt)
             // use AdaCallback or invoke directly
             if (_use_ada_cb.notify)
             {
-              uint8_t* data = (uint8_t*) rtos_malloc(hvx->len);
-              if (!data) return;
-              memcpy(data, hvx->data, hvx->len);
-
-              // data is free after callback
-              ada_callback(data, _notify_cb, this, data, hvx->len);
+              ada_callback(hvx->data, hvx->len, _notify_cb, this, hvx->data, hvx->len);
             }else
             {
               _notify_cb(this, hvx->data, hvx->len);
@@ -432,12 +427,7 @@ void BLEClientCharacteristic::_eventHandler(ble_evt_t* evt)
             // use AdaCallback or invoke directly
             if (_use_ada_cb.indicate)
             {
-              uint8_t* data = (uint8_t*) rtos_malloc(hvx->len);
-              if (!data) return;
-              memcpy(data, hvx->data, hvx->len);
-
-              // data is free by callback
-              ada_callback(data, _indicate_cb, this, data, hvx->len);
+              ada_callback(hvx->data, hvx->len, _indicate_cb, this, hvx->data, hvx->len);
             }else
             {
               _indicate_cb(this, hvx->data, hvx->len);
@@ -478,10 +468,9 @@ void BLEClientCharacteristic::_eventHandler(ble_evt_t* evt)
         uint16_t const max_payload = conn->getMtu() - 3;
         uint16_t packet_len = min16(_adamsg.remaining, max_payload-2);
 
-        // still has data, continue to prepare
         if ( packet_len )
         {
-          // Long Write Prepare
+          // still has data, continue to prepare Long Write sequence
           ble_gattc_write_params_t param =
           {
               .write_op = BLE_GATT_OP_PREP_WRITE_REQ,
@@ -499,7 +488,7 @@ void BLEClientCharacteristic::_eventHandler(ble_evt_t* evt)
           }
         }else
         {
-          // Long Write Execute
+          // All data is prepared, execute Long Write
           ble_gattc_write_params_t param =
           {
               .write_op = BLE_GATT_OP_EXEC_WRITE_REQ,
