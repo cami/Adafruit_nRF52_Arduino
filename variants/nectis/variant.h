@@ -18,6 +18,8 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+//ToDo: Merge variant.h of  branch 'master' of github.com:adafruit/Adafruit_nRF52_Arduino
+
 #ifndef NECTIS
 #define NECTIS
 
@@ -75,6 +77,8 @@ static const uint8_t A7  = PIN_A7 ;
 
 static const uint8_t AREF = PIN_AREF;
 
+//ToDo: First we have to get data from grove uart sensor, then communicate with BG96 via uart.
+//See Uart.cpp
 /*
  * Serial interfaces
  */
@@ -191,8 +195,8 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 #define GROVE_GPIO_6_2            16    //GPIO, GROVE_GPIO_6_2
 
 //#define DEBUG_UART_CORE           (2)   // USART3, //TODO: UARTのチャンネルをBSPを見ながら割り当てる
-#define DEBUG_UART_TX_PIN         GROVE_UART_TX_PIN
-#define DEBUG_UART_RX_PIN         GROVE_UART_RX_PIN
+//#define DEBUG_UART_TX_PIN         MODULE_UART_TX_PIN
+//#define DEBUG_UART_RX_PIN         MODULE_UART_RX_PIN
 
 
 // On-board QSPI Flash
