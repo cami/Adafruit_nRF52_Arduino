@@ -43,7 +43,7 @@ nrfjprog.program.cmd=nrfjprog
 nrfjprog.program.cmd.windows=nrfjprog.exe
 
 # Burn bootloader pattern
-nrfjprog.program.bootfile={runtime.platform.path}/bootloader/{build.variant}/{build.variant}_bootloader-0.2.7_{build.sd_name}_{build.sd_version}.hex
+nrfjprog.program.bootfile={runtime.platform.path}/bootloader/{build.variant}/{build.variant}_bootloader-0.2.9_{build.sd_name}_{build.sd_version}.hex
 nrfjprog.program.burn_pattern="{program.cmd}" --program "{program.bootfile}" -f nrf52 --chiperase --reset
 
 # Jlink to upload sketch
