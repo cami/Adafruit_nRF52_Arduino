@@ -33,7 +33,8 @@
 #define BUTTON_B    30
 #define BUTTON_C    27
 
-#elif defined ARDUINO_NRF52840_FEATHER
+//#elif defined ARDUINO_NRF52840_FEATHER
+#elif defined ARDUINO_NRF52840_NECTIS
 // Feather nRF52840
 #define BUTTON_A    9
 #define BUTTON_B    6
