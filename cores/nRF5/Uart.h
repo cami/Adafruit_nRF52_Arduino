@@ -37,8 +37,6 @@ class Uart : public HardwareSerial
 
     void setPins(uint8_t pin_rx, uint8_t pin_tx, uint8_t _pinCTS, uint8_t _pinRTS);
     void getPins();
-    void getGrovePins();
-
 
     void begin(unsigned long baudRate);
     void begin(unsigned long baudrate, uint16_t config);

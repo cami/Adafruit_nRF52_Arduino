@@ -76,12 +76,6 @@ void Uart::getPins()
   SerialUSB.printf("uc_pinRTS: %u\n", (long unsigned int) uc_pinRTS);
 }
 
-void Uart::getGrovePins()
-{
-  SerialUSB.printf("GROVE_UART_RX_PIN: %u\n", (long unsigned int) GROVE_UART_RX_PIN);
-  SerialUSB.printf("GROVE_UART_TX_PIN: %u\n", (long unsigned int) GROVE_UART_TX_PIN);
-}
-
 void Uart::begin(unsigned long baudrate)
 {
   begin(baudrate, (uint8_t)SERIAL_8N1);
