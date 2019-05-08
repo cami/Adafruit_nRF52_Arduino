@@ -40,6 +40,7 @@ nrfutil_boot.program.pattern=echo Please select <J-Link for Bluefruit nRF52> as 
 nrfjprog.name=J-Link for qibanca nectis series on nRF52
 nrfjprog.program.tool=bootburn
 nrfjprog.program.cmd=nrfjprog
+nrfjprog.program.cmd.macosx=/usr/local/bin/nrfjprog
 nrfjprog.program.cmd.windows=nrfjprog.exe
 
 # Burn bootloader pattern
