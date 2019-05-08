@@ -160,10 +160,6 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 //#define MODULE_UART_CORE          (1)   // USART2 => USART1
 #define MODULE_UART_RX_PIN        (7)   //BG96への送信データ, BG96_RXD
 #define MODULE_UART_TX_PIN        (6)   //BG96からの受信データ, BG96_TXD
-//#define MODULE_RTS_PIN            27    //BG96への送信要求, BG96_RTS
-//#define MODULE_CTS_PIN            26    //BG96からの送信許可, BG96_CTS
-//#define MODULE_UART_RX_PIN        (6)   //BG96への送信データ, BG96_TXD
-//#define MODULE_UART_TX_PIN        (7)   //BG96からの受信データ, BG96_RXD
 #define MODULE_RTS_PIN            26    //BG96への送信要求, BG96_CTS
 #define MODULE_CTS_PIN            27    //BG96からの送信許可, BG96_RTS
 
