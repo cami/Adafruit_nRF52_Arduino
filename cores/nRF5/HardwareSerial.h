@@ -81,12 +81,12 @@ class HardwareSerial : public Stream
     virtual void begin(unsigned long) {};
     virtual void begin(unsigned long baudrate, uint16_t config) {};
     virtual void end() {};
-    virtual int available(void) {};
-    virtual int peek(void) {};
-    virtual int read(void) {};
-    virtual void flush(void) {};
-    virtual size_t write(uint8_t) {};
-    virtual operator bool() {};
+    virtual int available(void) = 0;
+    virtual int peek(void) = 0;
+    virtual int read(void) = 0;
+    virtual void flush(void) = 0;
+    virtual size_t write(uint8_t) = 0;
+    virtual operator bool() = 0;
 
     unsigned long _TxTimeout;
     int _RxBufferCapacity;
