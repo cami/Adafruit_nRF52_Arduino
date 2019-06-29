@@ -107,10 +107,10 @@ static const uint8_t SCK = PIN_SPI_SCK;
 /*
  * Wire Interfaces
  */
-//#define WIRE_INTERFACES_COUNT     1
-//
-//#define PIN_WIRE_SDA              (26)
-//#define PIN_WIRE_SCL              (27)
+#define WIRE_INTERFACES_COUNT     1
+
+#define PIN_WIRE_SDA              (GROVE_I2C_SDA_PIN)
+#define PIN_WIRE_SCL              (GROVE_I2C_SCL_PIN)
 
 /*
  * QSPI interface for external flash
