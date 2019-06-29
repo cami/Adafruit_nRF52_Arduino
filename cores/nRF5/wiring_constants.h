@@ -42,8 +42,8 @@ extern "C"{
 #define DISPLAY 0x1
 
 enum BitOrder {
-	LSBFIRST = 0,
-	MSBFIRST = 1
+    LSBFIRST = 0,
+    MSBFIRST = 1
 };
 
 // moved to WInterrupts.h
@@ -58,9 +58,8 @@ enum BitOrder {
 
 typedef uint32_t err_t;
 
-enum
-{
-  ERROR_NONE = 0
+enum {
+    ERROR_NONE = 0
 };
 
 #ifdef __cplusplus

@@ -25,45 +25,40 @@
 extern "C" {
 #endif
 
-uint32_t millis( void )
-{
-  return tick2ms(xTaskGetTickCount());
+uint32_t millis(void) {
+    return tick2ms(xTaskGetTickCount());
 }
 
-uint32_t micros( void )
-{
-  return tick2us(xTaskGetTickCount());
+uint32_t micros(void) {
+    return tick2us(xTaskGetTickCount());
 }
 
-void delay( uint32_t ms )
-{
-  uint32_t ticks = ms2tick(ms);
+void delay(uint32_t ms) {
+    uint32_t ticks = ms2tick(ms);
 
 #ifdef NRF52840_XXAA
-  // Take chance to flush usb cdc
-  uint32_t flush_tick = xTaskGetTickCount();
-  tud_cdc_write_flush();
-
-  flush_tick = xTaskGetTickCount()-flush_tick;
-  if (flush_tick >= ticks) return;
-
-  ticks -= flush_tick;
+    // Take chance to flush usb cdc
+    uint32_t flush_tick = xTaskGetTickCount();
+    tud_cdc_write_flush();
+  
+    flush_tick = xTaskGetTickCount()-flush_tick;
+    if (flush_tick >= ticks) return;
+  
+    ticks -= flush_tick;
 #endif
-
-  vTaskDelay(ticks);
+    
+    vTaskDelay(ticks);
 }
 
-void dwt_enable(void)
-{
-  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; /* Global Enable for DWT */
-  DWT->CYCCNT = 0;                                /* Reset the counter */
-  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;            /* Enable cycle counter */
+void dwt_enable(void) {
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; /* Global Enable for DWT */
+    DWT->CYCCNT = 0;                                /* Reset the counter */
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;            /* Enable cycle counter */
 }
 
-void dwt_disable(void)
-{
-  DWT->CTRL &= ~DWT_CTRL_CYCCNTENA_Msk;
-  CoreDebug->DEMCR &= ~CoreDebug_DEMCR_TRCENA_Msk;
+void dwt_disable(void) {
+    DWT->CTRL &= ~DWT_CTRL_CYCCNTENA_Msk;
+    CoreDebug->DEMCR &= ~CoreDebug_DEMCR_TRCENA_Msk;
 }
 
 

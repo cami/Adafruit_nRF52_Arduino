@@ -20,7 +20,7 @@
 #define _WIRING_DIGITAL_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 // #include "WVariant.h"
@@ -31,7 +31,7 @@
  * \param ulPin The number of the pin whose mode you wish to set
  * \param ulMode Can be INPUT, OUTPUT, INPUT_PULLUP or INPUT_PULLDOWN
  */
-extern void pinMode( uint32_t dwPin, uint32_t dwMode ) ;
+extern void pinMode(uint32_t dwPin, uint32_t dwMode);
 
 /**
  * \brief Write a HIGH or a LOW value to a digital pin.
@@ -53,7 +53,7 @@ extern void pinMode( uint32_t dwPin, uint32_t dwMode ) ;
  * \param dwPin the pin number
  * \param dwVal HIGH or LOW
  */
-extern void digitalWrite( uint32_t dwPin, uint32_t dwVal ) ;
+extern void digitalWrite(uint32_t dwPin, uint32_t dwVal);
 
 /**
  * \brief Reads the value from a specified digital pin, either HIGH or LOW.
@@ -62,9 +62,9 @@ extern void digitalWrite( uint32_t dwPin, uint32_t dwVal ) ;
  *
  * \return HIGH or LOW
  */
-extern int digitalRead( uint32_t ulPin ) ;
+extern int digitalRead(uint32_t ulPin);
 
-extern void digitalToggle( uint32_t pin );
+extern void digitalToggle(uint32_t pin);
 
 void ledOn(uint32_t pin);
 void ledOff(uint32_t pin);

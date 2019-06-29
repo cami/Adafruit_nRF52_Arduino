@@ -51,13 +51,12 @@
 #include "semphr.h"
 
 #define DELAY_FOREVER   portMAX_DELAY
-enum
-{
-  TASK_PRIO_LOWEST  = 0, // Idle task, should not be used
-  TASK_PRIO_LOW     = 1, // Loop
-  TASK_PRIO_NORMAL  = 2, // Timer Task, Callback Task
-  TASK_PRIO_HIGH    = 3, // Bluefruit Task
-  TASK_PRIO_HIGHEST = 4,
+enum {
+    TASK_PRIO_LOWEST = 0, // Idle task, should not be used
+    TASK_PRIO_LOW = 1, // Loop
+    TASK_PRIO_NORMAL = 2, // Timer Task, Callback Task
+    TASK_PRIO_HIGH = 3, // Bluefruit Task
+    TASK_PRIO_HIGHEST = 4,
 };
 
 #define ms2tick              pdMS_TO_TICKS
@@ -74,14 +73,12 @@ enum
 
 #define rtos_malloc_type(_type)   (_type*) rtos_malloc(sizeof(_type))
 
-static inline void* rtos_malloc(size_t _size)
-{
-  return (xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED) ? malloc(_size) : pvPortMalloc(_size);
+static inline void *rtos_malloc(size_t _size) {
+    return (xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED) ? malloc(_size) : pvPortMalloc(_size);
 }
 
-static inline void rtos_free( void *pv )
-{
-  return (xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED) ? free(pv) : vPortFree(pv);
+static inline void rtos_free(void *pv) {
+    return (xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED) ? free(pv) : vPortFree(pv);
 }
 
 #endif

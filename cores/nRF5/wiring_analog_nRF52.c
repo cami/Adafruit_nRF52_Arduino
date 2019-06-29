@@ -128,40 +128,40 @@ void analogReference( eAnalogReference ulMode )
 
 void analogOversampling( uint32_t ulOversampling )
 {
-	saadcBurst = SAADC_CH_CONFIG_BURST_Enabled;
+    saadcBurst = SAADC_CH_CONFIG_BURST_Enabled;
 
-	switch (ulOversampling) {
-		case 0:
-		case 1:
-			saadcBurst = SAADC_CH_CONFIG_BURST_Disabled;
-			NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Bypass;
-			return;
-			break;
-		case 2:
-			NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over2x;
-			break;
-		case 4:
-			NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over4x;
-			break;
-		case 8:
-			NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over8x;
-			break;
-		case 16:
-			NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over16x;
-			break;
-		case 32:
-			NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over32x;
-			break;
-		case 64:
-			NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over64x;
-			break;
-		case 128:
-			NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over128x;
-			break;
-		case 256:
-			NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over256x;
-			break;
-	}
+    switch (ulOversampling) {
+        case 0:
+        case 1:
+            saadcBurst = SAADC_CH_CONFIG_BURST_Disabled;
+            NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Bypass;
+            return;
+            break;
+        case 2:
+            NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over2x;
+            break;
+        case 4:
+            NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over4x;
+            break;
+        case 8:
+            NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over8x;
+            break;
+        case 16:
+            NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over16x;
+            break;
+        case 32:
+            NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over32x;
+            break;
+        case 64:
+            NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over64x;
+            break;
+        case 128:
+            NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over128x;
+            break;
+        case 256:
+            NRF_SAADC->OVERSAMPLE = SAADC_OVERSAMPLE_OVERSAMPLE_Over256x;
+            break;
+    }
 }
 
 uint32_t analogRead( uint32_t ulPin )

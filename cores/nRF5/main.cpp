@@ -14,6 +14,7 @@
 */
 
 #define ARDUINO_MAIN
+
 #include "Arduino.h"
 
 // DEBUG Level 1
@@ -29,94 +30,88 @@ void Bluefruit_printInfo() {}
 #include "SEGGER_SYSVIEW.h"
 #endif
 
-static TaskHandle_t  _loopHandle;
+static TaskHandle_t _loopHandle;
 
 
 // Weak empty variant initialization function.
 // May be redefined by variant files.
 void initVariant() __attribute__((weak));
-void initVariant() { }
+void initVariant() {}
 
-uint32_t _loopStacksize = 512*3;
+uint32_t _loopStacksize = 512 * 3;
 
 uint32_t setLoopStacksize(void) __attribute__ ((weak));
 
-static void loop_task(void* arg)
-{
-  (void) arg;
-
-  setup();
+static void loop_task(void *arg) {
+    (void) arg;
+    
+    setup();
 
 #if CFG_DEBUG
-  // If Serial is not begin(), call it to avoid hard fault
-  if ( !Serial ) Serial.begin(115200);
-  dbgPrintVersion();
-  // dbgMemInfo();
-  Bluefruit_printInfo();
+    // If Serial is not begin(), call it to avoid hard fault
+    if ( !Serial ) Serial.begin(115200);
+    dbgPrintVersion();
+    // dbgMemInfo();
+    Bluefruit_printInfo();
 #endif
-
-  while (1)
-  {
-    loop();
+    
+    while (1) {
+        loop();
 
 #ifdef NRF52840_XXAA
-    tud_cdc_write_flush();
+        tud_cdc_write_flush();
 #endif
-
-    // Serial events
-    if (serialEvent && serialEventRun) serialEventRun();
-  }
+        
+        // Serial events
+        if (serialEvent && serialEventRun)
+            serialEventRun();
+    }
 }
 
 /*
  * \brief Main entry point of Arduino application
  */
-int main( void )
-{
-  init();
-  initVariant();
-
-  if (setLoopStacksize)
-  {
-    _loopStacksize = setLoopStacksize();
-  }
+int main(void) {
+    init();
+    initVariant();
+    
+    if (setLoopStacksize) {
+        _loopStacksize = setLoopStacksize();
+    }
 
 #if CFG_DEBUG >= 3
-  SEGGER_SYSVIEW_Conf();
+    SEGGER_SYSVIEW_Conf();
 #endif
-
-  // Create a task for loop()
-  xTaskCreate( loop_task, "loop", _loopStacksize, NULL, TASK_PRIO_LOW, &_loopHandle);
-
-  // Initialize callback task
-  ada_callback_init();
-
-  // Start FreeRTOS scheduler.
-  vTaskStartScheduler();
-
-  NVIC_SystemReset();
-
-  return 0;
+    
+    // Create a task for loop()
+    xTaskCreate(loop_task, "loop", _loopStacksize, NULL, TASK_PRIO_LOW, &_loopHandle);
+    
+    // Initialize callback task
+    ada_callback_init();
+    
+    // Start FreeRTOS scheduler.
+    vTaskStartScheduler();
+    
+    NVIC_SystemReset();
+    
+    return 0;
 }
 
-void suspendLoop(void)
-{
-  vTaskSuspend(_loopHandle);
+void suspendLoop(void) {
+    vTaskSuspend(_loopHandle);
 }
 
 extern "C"
 {
 
 // nanolib printf() retarget
-int _write (int fd, const void *buf, size_t count)
-{
-  (void) fd;
-
-  if ( Serial )
-  {
-    return Serial.write( (const uint8_t *) buf, count);
-  }
-  return 0;
+int _write(int fd, const void *buf, size_t count) {
+    (void) fd;
+    
+    if (Serial) {
+        return Serial.write((const uint8_t *) buf, count);
+    }
+    return 0;
 }
 
 }

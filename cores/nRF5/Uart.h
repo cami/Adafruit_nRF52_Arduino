@@ -27,17 +27,16 @@
 
 #include <cstddef>
 
-class Uart : public HardwareSerial
-{
-  public:
+class Uart : public HardwareSerial {
+    public:
     Uart(NRF_UART_Type *_nrfUart, IRQn_Type _IRQn, uint8_t _pinRX, uint8_t _pinTX);
-    Uart(NRF_UART_Type *_nrfUart, IRQn_Type _IRQn, uint8_t _pinRX, uint8_t _pinTX, uint8_t _pinCTS, uint8_t _pinRTS );
-
+    Uart(NRF_UART_Type *_nrfUart, IRQn_Type _IRQn, uint8_t _pinRX, uint8_t _pinTX, uint8_t _pinCTS, uint8_t _pinRTS);
+    
     void setPins(uint8_t pin_rx, uint8_t pin_tx);
-
+    
     void setPins(uint8_t pin_rx, uint8_t pin_tx, uint8_t _pinCTS, uint8_t _pinRTS);
     void getPins();
-
+    
     void begin(unsigned long baudRate);
     void begin(unsigned long baudrate, uint16_t config);
     void end();
@@ -47,28 +46,27 @@ class Uart : public HardwareSerial
     void flush();
     size_t write(const uint8_t data);
     using Print::write; // pull in write(str) and write(buf, size) from Print
-
+    
     void IrqHandler();
-
-    operator bool ()
-    {
-      return _begun;
+    
+    operator bool() {
+        return _begun;
     }
-
-  private:
+    
+    private:
     NRF_UART_Type *nrfUart;
     RingBuffer rxBuffer;
-
+    
     IRQn_Type IRQn;
-
+    
     uint8_t uc_pinRX;
     uint8_t uc_pinTX;
     uint8_t uc_pinCTS;
     uint8_t uc_pinRTS;
     uint8_t uc_hwFlow;
-
+    
     bool _begun;
-
+    
     // Adafruit
     SemaphoreHandle_t _mutex;
 };

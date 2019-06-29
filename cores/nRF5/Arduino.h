@@ -29,11 +29,11 @@ extern "C"{
 #define clockCyclesToMicroseconds(a) ( ((a) * 1000L) / (SystemCoreClock / 1000L) )
 #define microsecondsToClockCycles(a) ( (a) * (SystemCoreClock / 1000000L) )
 
-void yield( void ) ;
+void yield(void);
 
 /* sketch */
-void setup( void ) ;
-void loop( void ) ;
+void setup(void);
+void loop(void);
 
 void suspendLoop(void);
 uint32_t setLoopStacksize(void);
@@ -49,16 +49,16 @@ uint32_t setLoopStacksize(void);
 
 // The following headers are for C++ only compilation
 #ifdef __cplusplus
-  #include "WCharacter.h"
-  #include "WString.h"
-  // #include "Tone.h"
-  #include "WMath.h"
-  #include "HardwareSerial.h"
-  #include "pulse.h"
-  #include "HardwarePWM.h"
-  #include "utility/SoftwareTimer.h"
+    #include "WCharacter.h"
+    #include "WString.h"
+// #include "Tone.h"
+    #include "WMath.h"
+    #include "HardwareSerial.h"
+    #include "pulse.h"
+    #include "HardwarePWM.h"
+    #include "utility/SoftwareTimer.h"
 
-  #include "Uart.h"
+    #include "Uart.h"
 #endif
 
 #include "delay.h"
@@ -69,10 +69,10 @@ uint32_t setLoopStacksize(void);
 #include "utility/AdaCallback.h"
 
 #ifdef NRF52840_XXAA
-  #include "tusb.h"
+    #include "tusb.h"
 
 #ifdef __cplusplus
-  #include "USBSerial.h"
+    #include "USBSerial.h"
 #endif
 
 #endif
@@ -91,10 +91,10 @@ uint32_t setLoopStacksize(void);
 #undef abs
 #endif // abs
 
-#define min(a,b) ((a)<(b)?(a):(b))
-#define max(a,b) ((a)>(b)?(a):(b))
+#define min(a, b) ((a)<(b)?(a):(b))
+#define max(a, b) ((a)>(b)?(a):(b))
 #define abs(x) ((x)>0?(x):-(x))
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+#define constrain(amt, low, high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 #define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
 #define radians(deg) ((deg)*DEG_TO_RAD)
 #define degrees(rad) ((rad)*RAD_TO_DEG)

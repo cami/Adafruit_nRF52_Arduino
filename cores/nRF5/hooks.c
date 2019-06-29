@@ -26,7 +26,7 @@
  * real cooperative scheduler.
  */
 static void __empty() {
-	// Empty
+    // Empty
 }
 void yield(void) __attribute__ ((weak, alias("__empty")));
 
@@ -37,8 +37,8 @@ void yield(void) __attribute__ ((weak, alias("__empty")));
  * handler provided by Arduino.
  */
 static int __false() {
-	// Return false
-	return 0;
+    // Return false
+    return 0;
 }
 int sysTickHook(void) __attribute__ ((weak, alias("__false")));
 
@@ -50,9 +50,8 @@ int sysTickHook(void) __attribute__ ((weak, alias("__false")));
  * Default action is halting.
  */
 static void __halt() {
-	// Halts
-	while (1)
-		;
+    // Halts
+    while (1);
 }
 void svcHook(void)    __attribute__ ((weak, alias("__halt")));
 void pendSVHook(void) __attribute__ ((weak, alias("__halt")));

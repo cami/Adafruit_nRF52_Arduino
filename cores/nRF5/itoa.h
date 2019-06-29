@@ -22,8 +22,8 @@
 extern "C"{
 #endif
 
-extern char* ltoa( long value, char *string, int radix ) ;
-extern char* ultoa( unsigned long value, char *string, int radix ) ;
+extern char *ltoa(long value, char *string, int radix);
+extern char *ultoa(unsigned long value, char *string, int radix);
 
 #ifdef __cplusplus
 } // extern "C"

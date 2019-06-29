@@ -52,36 +52,32 @@ static unsigned char *sbrk_heap_top = __HeapBase;
 //volatile uint32_t first_sbrk = 0;
 //volatile uint32_t last_sbrk = 0;
 
-caddr_t _sbrk( int incr )
-{
-  unsigned char *prev_heap;
-
-  if ( sbrk_heap_top + incr > __HeapLimit )
-  {
-    /* Out of dynamic memory heap space */
-    errno = ENOMEM;
-    return (caddr_t) -1;
-  }
-
-  prev_heap = sbrk_heap_top;
+caddr_t _sbrk(int incr) {
+    unsigned char *prev_heap;
+    
+    if (sbrk_heap_top + incr > __HeapLimit) {
+        /* Out of dynamic memory heap space */
+        errno = ENOMEM;
+        return (caddr_t) - 1;
+    }
+    
+    prev_heap = sbrk_heap_top;
 
 //  if ( !first_sbrk) first_sbrk = sbrk_heap_top;
 //  last_sbrk = sbrk_heap_top;
-
-  sbrk_heap_top += incr;
-
-  return (caddr_t) prev_heap;
+    
+    sbrk_heap_top += incr;
+    
+    return (caddr_t) prev_heap;
 }
 
-void __malloc_lock(struct _reent *ptr)
-{
-  (void) ptr;
-  vTaskSuspendAll();
+void __malloc_lock(struct _reent *ptr) {
+    (void) ptr;
+    vTaskSuspendAll();
 }
 
-void __malloc_unlock(struct _reent *ptr)
-{
-  (void) ptr;
-  xTaskResumeAll();
+void __malloc_unlock(struct _reent *ptr) {
+    (void) ptr;
+    xTaskResumeAll();
 }
 

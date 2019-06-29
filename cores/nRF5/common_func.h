@@ -38,7 +38,7 @@
 #define _COMMON_FUNC_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #define COMMENT_OUT(x)
@@ -52,12 +52,12 @@
 #define __swap32(x)    __REV(x)                   ///< built-in function to swap Endian of 32-bit number
 #define __swap16(u16)  ((uint16_t) __REV16(u16))  ///< built-in function to swap Endian of 16-bit number
 
-#define maxof(a,b) \
+#define maxof(a, b) \
     ({ typeof (a) _a = (a); \
        typeof (b) _b = (b); \
        _a > _b ? _a : _b; })
 
-#define minof(a,b) \
+#define minof(a, b) \
     ({ typeof (a) _a = (a); \
        typeof (b) _b = (b); \
        _a < _b ? _a : _b; })
@@ -70,16 +70,16 @@
  * Nth position is the same as the number of arguments
  * - ##__VA_ARGS__ is used to deal with 0 paramerter (swallows comma)
  *------------------------------------------------------------------*/
-#define VA_ARGS_NUM(...) 	 NARG_(_0, ##__VA_ARGS__,_RSEQ_N())
+#define VA_ARGS_NUM(...)     NARG_(_0, ##__VA_ARGS__,_RSEQ_N())
 #define NARG_(...)   _GET_NTH_ARG(__VA_ARGS__)
-#define _GET_NTH_ARG( \
-          _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, \
-         _11,_12,_13,_14,_15,_16,_17,_18,_19,_20, \
-         _21,_22,_23,_24,_25,_26,_27,_28,_29,_30, \
-         _31,_32,_33,_34,_35,_36,_37,_38,_39,_40, \
-         _41,_42,_43,_44,_45,_46,_47,_48,_49,_50, \
-         _51,_52,_53,_54,_55,_56,_57,_58,_59,_60, \
-         _61,_62,_63,N,...) N
+#define _GET_NTH_ARG(\
+          _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, \
+         _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, \
+         _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, \
+         _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, \
+         _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, \
+         _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, \
+         _61, _62, _63, N, ...) N
 #define _RSEQ_N() \
          62,61,60,                      \
          59,58,57,56,55,54,53,52,51,50, \
@@ -115,12 +115,12 @@
 // DEBUG HELPER
 //--------------------------------------------------------------------+
 #if CFG_DEBUG == 2
-  #define malloc_named( name, size )            ({ ::printf("[malloc] %s : %d\r\n", name, size); malloc(size); })
+    #define malloc_named( name, size )            ({ ::printf("[malloc] %s : %d\r\n", name, size); malloc(size); })
 #else
-  #define malloc_named( name, size )            malloc ( size )
+    #define malloc_named(name, size)            malloc ( size )
 #endif
 
-const char* dbg_err_str(int32_t err_id); // TODO move to other place
+const char *dbg_err_str(int32_t err_id); // TODO move to other place
 
 #if CFG_DEBUG
 #define LOG_LV1(...)          ADALOG(__VA_ARGS__)
@@ -192,93 +192,81 @@ const char* dbg_err_str(int32_t err_id); // TODO move to other place
 // INLINE FUNCTION
 //--------------------------------------------------------------------+
 /// Checks is all values in the supplied array are zero
-static inline bool mem_test_zero(void const* buffer, uint32_t size)
-{
-  uint8_t const* p_mem = (uint8_t const*) buffer;
-  for(uint32_t i=0; i<size; i++) if (p_mem[i] != 0)  return false;
-  return true;
+static inline bool mem_test_zero(void const *buffer, uint32_t size) {
+    uint8_t const *p_mem = (uint8_t const *) buffer;
+    for (uint32_t i = 0; i < size; i++)
+        if (p_mem[i] != 0)
+            return false;
+    return true;
 }
 
 //------------- Min, Max -------------//
-static inline uint8_t  min8 (uint8_t  x, uint8_t  y) { return (x < y) ? x : y; }
+static inline uint8_t min8(uint8_t x, uint8_t y) { return (x < y) ? x : y; }
 static inline uint16_t min16(uint16_t x, uint16_t y) { return (x < y) ? x : y; }
 static inline uint32_t min32(uint32_t x, uint32_t y) { return (x < y) ? x : y; }
 
-static inline uint8_t  max8 (uint8_t  x, uint8_t  y) { return (x > y) ? x : y; }
+static inline uint8_t max8(uint8_t x, uint8_t y) { return (x > y) ? x : y; }
 static inline uint16_t max16(uint16_t x, uint16_t y) { return (x > y) ? x : y; }
 static inline uint32_t max32(uint32_t x, uint32_t y) { return (x > y) ? x : y; }
 
 //------------- Conversion -------------//
 /// form an uint32_t from 4 x uint8_t
-static inline uint32_t u32_from_u8(uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4)
-{
-  return (b1 << 24) + (b2 << 16) + (b3 << 8) + b4;
+static inline uint32_t u32_from_u8(uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4) {
+    return (b1 << 24) + (b2 << 16) + (b3 << 8) + b4;
 }
 
-static inline uint16_t u32_high_u16(uint32_t u32)
-{
-  return (uint16_t) ((u32 >> 16) & 0xffff);
+static inline uint16_t u32_high_u16(uint32_t u32) {
+    return (uint16_t)((u32 >> 16) & 0xffff);
 }
 
-static inline uint16_t u32_low_u16(uint32_t u32)
-{
-  return (uint16_t) (u32 & 0xffff);
+static inline uint16_t u32_low_u16(uint32_t u32) {
+    return (uint16_t)(u32 & 0xffff);
 }
 
-static inline uint16_t u16_from_u8(uint8_t b1, uint8_t b2)
-{
-  return (b1 << 8) + b2;
+static inline uint16_t u16_from_u8(uint8_t b1, uint8_t b2) {
+    return (b1 << 8) + b2;
 }
 
-static inline uint8_t u16_high_u8(uint16_t u16)
-{
-  return (uint8_t) ((u16 >> 8) & 0x00ff);
+static inline uint8_t u16_high_u8(uint16_t u16) {
+    return (uint8_t)((u16 >> 8) & 0x00ff);
 }
 
-static inline uint8_t u16_low_u8(uint16_t u16)
-{
-  return (uint8_t) (u16 & 0x00ff);
+static inline uint8_t u16_low_u8(uint16_t u16) {
+    return (uint8_t)(u16 & 0x00ff);
 }
 
 //------------- Align -------------//
-static inline uint32_t align32 (uint32_t value)
-{
-  return (value & 0xFFFFFFE0UL);
+static inline uint32_t align32(uint32_t value) {
+    return (value & 0xFFFFFFE0UL);
 }
 
-static inline uint32_t align16 (uint32_t value)
-{
-  return (value & 0xFFFFFFF0UL);
+static inline uint32_t align16(uint32_t value) {
+    return (value & 0xFFFFFFF0UL);
 }
 
-static inline uint32_t align4 (uint32_t value)
-{
-  return (value & 0xFFFFFFFCUL);
+static inline uint32_t align4(uint32_t value) {
+    return (value & 0xFFFFFFFCUL);
 }
 
-static inline uint32_t align_n (uint32_t alignment, uint32_t value)
-{
-  return value & (~(alignment-1));
+static inline uint32_t align_n(uint32_t alignment, uint32_t value) {
+    return value & (~(alignment - 1));
 }
 
-static inline uint32_t align4k (uint32_t value)
-{
-  return (value & 0xFFFFF000UL);
+static inline uint32_t align4k(uint32_t value) {
+    return (value & 0xFFFFF000UL);
 }
 
-static inline uint32_t offset4k(uint32_t value)
-{
-  return (value & 0xFFFUL);
+static inline uint32_t offset4k(uint32_t value) {
+    return (value & 0xFFFUL);
 }
 
 //------------- Mathematics -------------//
-static inline bool is_within(uint32_t lower, uint32_t value, uint32_t upper)
-{
-  return (lower <= value) && (value <= upper);
+static inline bool is_within(uint32_t lower, uint32_t value, uint32_t upper) {
+    return (lower <= value) && (value <= upper);
 }
 
 #ifdef __cplusplus
- }
+}
 #endif
 
 #endif /* _COMMON_FUNC_H_ */

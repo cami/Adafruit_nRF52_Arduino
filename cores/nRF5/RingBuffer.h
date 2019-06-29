@@ -27,24 +27,23 @@
 // location from which to read.
 #define SERIAL_BUFFER_SIZE 128
 
-class RingBuffer
-{
-  public:
-    uint8_t _aucBuffer[SERIAL_BUFFER_SIZE] ;
-    int _iHead ;
-    int _iTail ;
-
-  public:
-    RingBuffer( void ) ;
-    void store_char( uint8_t c ) ;
-	void clear();
-	int read_char();
-	int available();
-	int peek();
-	bool isFull();
-
-  private:
-	int nextIndex(int index);
-} ;
+class RingBuffer {
+    public:
+    uint8_t _aucBuffer[SERIAL_BUFFER_SIZE];
+    int _iHead;
+    int _iTail;
+    
+    public:
+    RingBuffer(void);
+    void store_char(uint8_t c);
+    void clear();
+    int read_char();
+    int available();
+    int peek();
+    bool isFull();
+    
+    private:
+    int nextIndex(int index);
+};
 
 #endif /* _RING_BUFFER_ */
