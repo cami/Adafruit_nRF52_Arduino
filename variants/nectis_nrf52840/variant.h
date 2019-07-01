@@ -148,6 +148,7 @@ static const uint8_t SCK = PIN_SPI_SCK;
 
 #define BATTERY_VOLTAGE_PIN       (A0)
 #define USB_VOLTAGE_PIN           (A1)
+#define BATTERY_LEVEL_ENABLE      45
 
 #define QSPI_DIO3                 23    //Quad SPIデータ入出力
 #define QSPI_DIO2                 22    //Quad SPIデータ入出力
