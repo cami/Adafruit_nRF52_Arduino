@@ -50,14 +50,14 @@ extern "C"
 /*
  * Analog pins
  */
-#define PIN_A0                    (4)
-#define PIN_A1                    (5)
-#define PIN_A2                    (28)
-#define PIN_A3                    (29)
-#define PIN_A4                    (30)
-#define PIN_A5                    (31)
-#define PIN_A6                    (0xff)
-#define PIN_A7                    (0xff)
+#define PIN_A0                    (2)
+#define PIN_A1                    (3)
+#define PIN_A2                    (4)
+#define PIN_A3                    (5)
+#define PIN_A4                    (28)
+#define PIN_A5                    (29)
+#define PIN_A6                    (30)
+#define PIN_A7                    (31)
 
 static const uint8_t A0 = PIN_A0;
 static const uint8_t A1 = PIN_A1;
@@ -145,6 +145,9 @@ static const uint8_t SCK = PIN_SPI_SCK;
 #define LED_BLUE                  PIN_LED2
 
 #define LED_STATE_ON              0     // State when LED is litted
+
+#define BATTERY_VOLTAGE_PIN       (A0)
+#define USB_VOLTAGE_PIN           (A1)
 
 #define QSPI_DIO3                 23    //Quad SPIデータ入出力
 #define QSPI_DIO2                 22    //Quad SPIデータ入出力
