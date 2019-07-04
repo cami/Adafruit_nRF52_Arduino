@@ -133,7 +133,7 @@ static const uint8_t SCK = PIN_SPI_SCK;
 
 // LEDs
 #define LED_PIN                   33    //Indicator_LED1
-#define LED_VDD_PIN               34     //フルカラーLEDを使用した場合に使用, TP4に仮置き
+#define LED_VDD_PIN               34    //フルカラーLEDを使用した場合に使用, TP4に仮置き
 
 #define PIN_LED1                  LED_PIN
 #define PIN_LED2                  LED_VDD_PIN
