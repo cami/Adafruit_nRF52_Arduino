@@ -179,18 +179,18 @@ static const uint8_t SCK = PIN_SPI_SCK;
 #define NFC2                      10    //NFCグラウンド側
 
 #define GROVE_VCCB_PIN            25    //GROVE_PWR
-#define GROVE_GPIO_1_1            4     //Analog in/out, GROVE_GPIO_1_1
-#define GROVE_GPIO_1_2            5     //Analog in/out, GROVE_GPIO_1_2
-#define GROVE_GPIO_2_1            28    //Analog in/out, GROVE_GPIO_2_1
-#define GROVE_GPIO_2_2            29    //Analog in/out, GROVE_GPIO_2_2
-#define GROVE_GPIO_3_1            30    //Analog in/out, GROVE_GPIO_3_1
-#define GROVE_GPIO_3_2            31    //Analog in/out, GROVE_GPIO_3_2
+#define GROVE_ANALOG_1_1          4     //Analog in/out, GROVE_GPIO_1_1
+#define GROVE_ANALOG_1_2          5     //Analog in/out, GROVE_GPIO_1_2
+#define GROVE_ANALOG_2_1          28    //Analog in/out, GROVE_GPIO_2_1
+#define GROVE_ANALOG_2_2          29    //Analog in/out, GROVE_GPIO_2_2
+#define GROVE_ANALOG_3_1          30    //Analog in/out, GROVE_GPIO_3_1
+#define GROVE_ANALOG_3_2          31    //Analog in/out, GROVE_GPIO_3_2
 //#define GROVE_I2C_CORE		        (1)   //TODO: UARTのチャンネルをBSPを見ながら割り当てる
-#define GROVE_I2C_SCL_PIN         12    //out, GROVE_GPIO_4_1
-#define GROVE_I2C_SDA_PIN         11    //in/out, GROVE_GPIO_4_2
+#define GROVE_I2C_SCL_PIN         12    //I2C, GROVE_GPIO_4_1
+#define GROVE_I2C_SDA_PIN         11    //I2C, GROVE_GPIO_4_2
 #define GROVE_UART_CORE           (0)   // USART1, //TODO: UARTのチャンネルをBSPを見ながら割り当てる
-#define GROVE_UART_RX_PIN         (13)  //out, GROVE_GPIO_5_1
-#define GROVE_UART_TX_PIN         (14)  //in, GROVE_GPIO_5_2
+#define GROVE_UART_RX_PIN         (13)  //UART, GROVE_GPIO_5_1
+#define GROVE_UART_TX_PIN         (14)  //UART, GROVE_GPIO_5_2
 #define GROVE_GPIO_6_1            15    //GPIO, GROVE_GPIO_6_1
 #define GROVE_GPIO_6_2            16    //GPIO, GROVE_GPIO_6_2
 
