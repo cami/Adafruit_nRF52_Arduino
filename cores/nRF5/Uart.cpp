@@ -211,6 +211,7 @@ size_t Uart::write(const uint8_t data) {
     
     xSemaphoreGive(_mutex);
     
+//    Needed to print on Serial Monitor of ArduinoIDE.
     SerialUSB.flush();
     
     return 1;
