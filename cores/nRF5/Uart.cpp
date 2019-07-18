@@ -63,7 +63,7 @@ void Uart::setPins(uint8_t pin_rx, uint8_t pin_tx, uint8_t _pinCTS, uint8_t _pin
     uc_pinRTS = _pinRTS;
 }
 
-#include <../../../../../libraries/bg96/src/WioCellularHardware.h>
+#include "../../../../../libraries/bg96/src/WioCellularHardware.h"
 
 void Uart::getPins() {
     SerialUSB.printf("uc_pinRX: %u\n", (long unsigned int) uc_pinRX);
