@@ -63,13 +63,11 @@ void Uart::setPins(uint8_t pin_rx, uint8_t pin_tx, uint8_t _pinCTS, uint8_t _pin
     uc_pinRTS = _pinRTS;
 }
 
-#include "../../../../../libraries/bg96/src/WioCellularHardware.h"
-
 void Uart::getPins() {
-    SerialUSB.printf("uc_pinRX: %u\n", (long unsigned int) uc_pinRX);
-    SerialUSB.printf("uc_pinTX: %u\n", (long unsigned int) uc_pinTX);
-    SerialUSB.printf("uc_pinCTS: %u\n", (long unsigned int) uc_pinCTS);
-    SerialUSB.printf("uc_pinRTS: %u\n", (long unsigned int) uc_pinRTS);
+    Serial.printf("uc_pinRX: %u\n", (long unsigned int) uc_pinRX);
+    Serial.printf("uc_pinTX: %u\n", (long unsigned int) uc_pinTX);
+    Serial.printf("uc_pinCTS: %u\n", (long unsigned int) uc_pinCTS);
+    Serial.printf("uc_pinRTS: %u\n", (long unsigned int) uc_pinRTS);
 }
 
 void Uart::begin(unsigned long baudrate) {
@@ -86,8 +84,8 @@ void Uart::begin(unsigned long baudrate, uint16_t /*config*/) {
     nrfUart->PSELRXD = uc_pinRX;
     
     
-    SerialUSB.print("baudrate + config: ");
-    SerialUSB.println(baudrate);
+    Serial.print("baudrate + config: ");
+    Serial.println(baudrate);
     
     
     if (uc_hwFlow == 1) {
@@ -212,7 +210,7 @@ size_t Uart::write(const uint8_t data) {
     xSemaphoreGive(_mutex);
     
 //    Needed to print on Serial Monitor of ArduinoIDE.
-    SerialUSB.flush();
+    Serial.flush();
     
     return 1;
 }
