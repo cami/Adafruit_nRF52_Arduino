@@ -8,10 +8,10 @@ void setup() {
 }
 
 void loop() {
-    float LipoVoltageLevelMv;
-    LipoVoltageLevelMv = Nectis.ReadVbat();
+    float UsbVoltageLevelMv;
+    UsbVoltageLevelMv = Nectis.ReadVusb();
     
-    Serial.printf("%f[mV]\n", LipoVoltageLevelMv);
+    Serial.printf("%f[mV]\n",UsbVoltageLevelMv);
     
     delay(5000);
 }
