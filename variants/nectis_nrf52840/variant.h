@@ -81,16 +81,17 @@ static const uint8_t AREF = PIN_AREF;
 /*
  * SPI Interfaces
  */
-//#define SPI_INTERFACES_COUNT      (1)
-//
-//#define PIN_SPI_MISO              (15)
-//#define PIN_SPI_MOSI              (16)
-//#define PIN_SPI_SCK               (19)
-//
-//static const uint8_t SS = 44;
-//static const uint8_t MOSI = PIN_SPI_MOSI;
-//static const uint8_t MISO = PIN_SPI_MISO;
-//static const uint8_t SCK = PIN_SPI_SCK;
+#define SPI_INTERFACES_COUNT      (1)
+
+#define PIN_SPI_MISO              (21)
+#define PIN_SPI_MOSI              (20)
+#define PIN_SPI_SCK               (19)
+#define PIN_SPI_CS                (24)
+
+static const uint8_t SS = PIN_SPI_CS;
+static const uint8_t MOSI = PIN_SPI_MOSI;
+static const uint8_t MISO = PIN_SPI_MISO;
+static const uint8_t SCK = PIN_SPI_SCK;
 
 /*
  * Wire Interfaces
