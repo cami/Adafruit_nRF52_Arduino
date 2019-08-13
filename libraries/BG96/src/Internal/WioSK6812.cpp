@@ -1,4 +1,4 @@
-#include "../WioCellularConfig.h"
+#include "../NectisCellularConfig.h"
 #include "WioSK6812.h"
 
 #include <nrf.h>

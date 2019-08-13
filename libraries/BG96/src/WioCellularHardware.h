@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WioCellularConfig.h"
+#include "NectisCellularConfig.h"
 
 #include "Arduino.h"
 #include "HardwareSerial.h"
