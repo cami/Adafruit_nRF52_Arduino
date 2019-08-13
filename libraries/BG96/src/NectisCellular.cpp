@@ -1,8 +1,10 @@
-#include "WioCellular.h"
 #include "NectisCellular.h"
+
+#include <limits.h>
+
+#include "WioCellular.h"
 #include "Internal/Debug.h"
 #include "Internal/ArgumentParser.h"
-#include <limits.h>
 
 #define APN                             "soracom.io"
 #define USERNAME                        "sora"
@@ -27,7 +29,7 @@
 #define RET_ERR(val, err)               (ReturnError(__LINE__, val, err))
 #define LINEAR_SCALE(val, inMin, inMax, outMin, outMax)    (((val) - (inMin)) / ((inMax) - (inMin)) * ((outMax) - (outMin)) + (outMin))
 
-char HexConvertedFromDecimal[16];
+char hexConvertedFromDecimal[16];
 
 
 NectisCellular::NectisCellular() : _SerialAPI(&SerialUART), _AtSerial(&_SerialAPI, &_Wio) {
@@ -89,8 +91,13 @@ void NectisCellular::Bg96End() {
     Serial1.end();
 }
 
-void NectisCellular::BG96TurnOff() {
-    _Wio.TurnOff();
+void NectisCellular::Bg96TurnOff() {
+  if (!_AtSerial.WriteCommandAndReadResponse("AT+QPOWD", "^OK$", 500, NULL))
+    return RET_ERR(false, E_UNKNOWN);
+  if (!_AtSerial.ReadResponse("^POWERED DOWN$", 60000, NULL))
+    return RET_ERR(false, E_UNKNOWN);
+
+  return RET_OK(true);
 }
 
 void NectisCellular::InitLteM() {
@@ -352,16 +359,16 @@ void NectisCellular::PwmActivate(int pin, uint8_t flash_interval) {
 
 char* NectisCellular::ConvertDecimalToHex(unsigned long int const decimal, int byte_size) {
     // The last index of post_data is filled with 0x00 for print function.
-    memset(&HexConvertedFromDecimal[0], 0x00, sizeof(HexConvertedFromDecimal));
+    memset(&hexConvertedFromDecimal[0], 0x00, sizeof(hexConvertedFromDecimal));
     // Serial.printf("ConvertDecimalToHex decimal: %u\n", decimal);
     
     for (int i = 0; i < (int) byte_size; i++) {
         // 16進数に変換し、４ビットずつ post_data を埋めていく
-        HexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
+        hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
         // Serial.printf("(decimal >> (8*((byte_size-1)-i))):%x\n", (decimal >> (8 * ((byte_size - 1) - i))));
-        // Serial.printf("HexConvertedFromDecimal[i]:%02x\n", HexConvertedFromDecimal[i]);
+        // Serial.printf("hexConvertedFromDecimal[i]:%02x\n", hexConvertedFromDecimal[i]);
     }
-    return HexConvertedFromDecimal;
+    return hexConvertedFromDecimal;
 }
 
 unsigned int NectisCellular::GetDataDigits(unsigned int data) {

@@ -1,10 +1,10 @@
 /*
- * Get JST.
+ * Post uptime when the Grove-button is pressed.
  */
 
 #include <NectisCellular.h>
 
-#define INTERVAL  (5000)
+#define BUTTON_PIN  (GROVE_ANALOG_1_1)
 
 NectisCellular Nectis;
 
@@ -22,6 +22,10 @@ void setup() {
   Serial.println("### Power supply cellular ON.");
   Nectis.PowerSupplyCellular(true);
   delay(100);
+  Serial.println("### Power supply ON.");
+//  Make sure that the MODULE_PWR_PIN is set to HIGH.
+  Nectis.PowerSupplyGrove(true);
+  delay(100);
 
   Nectis.Bg96Begin();
   Nectis.InitLteM();
@@ -29,16 +33,14 @@ void setup() {
   Serial.println("### Setup completed.");
 }
 
+
 void loop() {
-  Serial.println("### Get time.");
+  char postData[64];
 
-  //    Get the current time.
-  struct tm currentTime;
-  char currentTimeStr[64];
+  sprintf(postData, "{\"uptime\":%lu}", millis() / 1000);
+  Serial.println(postData);
 
-  Nectis.GetCurrentTime(&currentTime);
-  strftime(currentTimeStr, sizeof(currentTimeStr), "%Y/%m/%d %H:%M:%S", &currentTime);
+  Nectis.PostDataViaHttp(postData);
 
-  Serial.print("JST:");
-  Serial.println(currentTimeStr);
+  delay(10000);
 }

@@ -39,7 +39,7 @@ void setup() {
     Nectis.InitLteM();
     
     //    // Enter BG96 into sleep mode with AT command
-    //    Nectis.BG96TurnOff();
+    //    Nectis.Bg96TurnOff();
     //    // End the Uart between nRF52840 and BG96
     //    Nectis.Bg96End();
     
