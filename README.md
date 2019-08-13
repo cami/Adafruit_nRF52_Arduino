@@ -1,4 +1,4 @@
-# Arduino Core for Adafruit Bluefruit nRF52 Boards
+# Arduino Core for CAMI qibanca Nectis series on nRF52 Boards
 
 This repository contains the Arduino BSP for Adafruit nRF52 series:
 
@@ -83,8 +83,8 @@ $ ln -s $HOME/prog/nordic/nrfjprog/nrfjprog /usr/local/bin/nrfjprog
 
 Once the tools above have been installed and added to your system path, from the Arduino IDE:
 
-- Select `Tools > Board > Adafruit Bluefruit Feather52`
-- Select `Tools > Programmer > J-Link for Feather52`
+- Select `Tools > Board > CAMI qibanca nectis series on nRF52840`
+- Select `Tools > Programmer > J-Link for qibanca nectis series on nRF52`
 - Select `Tools > Burn Bootloader` with the board and J-Link connected
 
 If you wish to modify bootloader to your own need, check out its repo here [Adafruit_nRF52_Bootloader](https://github.com/adafruit/Adafruit_nRF52_Bootloader)
@@ -95,12 +95,13 @@ The bootloader hex file can be found at `bin/bootloader` run the command as foll
 
 ```
 $ nrfjprog -e -f nrf52
-$ nrfjprog --program feather_nrf52832_bootloader.hex -f nrf52
+$ nrfjprog --program nectis_nrf52840_bootloader-0.2.9_s140_6.1.1.hex -f nrf52
 $ nrfjprog --reset -f nrf52
 ```
 
 ## Credits
 
+This core is based on [ArduinoCore-nRF52](https://github.com/cami/ArduinoCore-nRF52/tree/7c9438c3149020b8887848a8d03d551302e86904) by Adafruit.
 This core is based on [Arduino-nRF5](https://github.com/sandeepmistry/arduino-nRF5) by Sandeep Mistry,
 which in turn is based on the [Arduino SAMD Core](https://github.com/arduino/ArduinoCore-samd).
 

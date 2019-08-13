@@ -1,93 +1,51 @@
-#define VBAT_PIN          (A7)
-#define VBAT_MV_PER_LSB   (0.73242188F)   // 3.0V ADC range and 12-bit ADC resolution = 3000mV/4096
-#define VBAT_DIVIDER      (0.71275837F)   // 2M + 0.806M voltage divider on VBAT = (2M / (0.806M + 2M))
-#define VBAT_DIVIDER_COMP (1.403F)        // Compensation factor for the VBAT divider
+void setup() {
+  Serial.begin(115200);
+  Serial.println("setup");
+}
 
-int readVBAT(void) {
-  int raw;
+void loop() {
+  float lipo_voltage_level_mv;
+  lipo_voltage_level_mv = readVbat();
 
-  // Set the analog reference to 3.0V (default = 3.6V)
-  analogReference(AR_INTERNAL_3_0);
+  Serial.printf("%f[mV]\n", lipo_voltage_level_mv);
 
-  // Set the resolution to 12-bit (0..4095)
-  analogReadResolution(12); // Can be 8, 10, 12 or 14
+  delay(5000);
+}
+
+float readVbat(void) {
+#define VBAT_MV_PER_LSB   (1.171875F)       // 1.2V ADC range and 10-bit ADC resolution = 1200mV/1024
+#define VBAT_DIVIDER      (0.25F)           // From IC: RP124N334E
+
+  digitalWrite(BATTERY_LEVEL_ENABLE_PIN, HIGH);
+
+  int adc_value = 0;
+
+  // Set the analog reference to 1.2V (default = 3.6V)
+  analogReference(AR_INTERNAL_1_2);
+
+  // Set the resolution to 10-bit (0..1023)
+  analogReadResolution(10); // Can be 8, 10, 12 or 14
 
   // Let the ADC settle
-  delay(1);
+  delay(100);
 
-  // Get the raw 12-bit, 0..3000mV ADC value
-  raw = analogRead(VBAT_PIN);
+  // Get the raw 10-bit, 0..1200mV ADC value
+  adc_value = analogRead(BATTERY_VOLTAGE_PIN);
+  while ((adc_value < 0) || (adc_value > 1023)) {
+    adc_value = analogRead(BATTERY_VOLTAGE_PIN);
+  }
+
+  Serial.printf("adc_value: %d\n", adc_value);
+
+  // Convert the raw value to compensated mv, taking the resistor-
+  // divider into account (providing the actual LIPO voltage)
+  float battery_voltage_mv = (float)adc_value * VBAT_MV_PER_LSB * (1 / VBAT_DIVIDER);
 
   // Set the ADC back to the default settings
   analogReference(AR_DEFAULT);
   analogReadResolution(10);
 
-  return raw;
-}
+  digitalWrite(BATTERY_LEVEL_ENABLE_PIN, LOW);
 
-uint8_t mvToPercent(float mvolts) {
-    uint8_t battery_level;
-
-    if (mvolts >= 3000)
-    {
-        battery_level = 100;
-    }
-    else if (mvolts > 2900)
-    {
-        battery_level = 100 - ((3000 - mvolts) * 58) / 100;
-    }
-    else if (mvolts > 2740)
-    {
-        battery_level = 42 - ((2900 - mvolts) * 24) / 160;
-    }
-    else if (mvolts > 2440)
-    {
-        battery_level = 18 - ((2740 - mvolts) * 12) / 300;
-    }
-    else if (mvolts > 2100)
-    {
-        battery_level = 6 - ((2440 - mvolts) * 6) / 340;
-    }
-    else
-    {
-        battery_level = 0;
-    }
-
-    return battery_level;
-}
-
-void setup() {
-  Serial.begin(115200);
-  while ( !Serial ) delay(10);   // for nrf52840 with native usb
-
-  // Get a single ADC sample and throw it away
-  readVBAT();
-}
-
-void loop() {
-  // Get a raw ADC reading
-  int vbat_raw = readVBAT();
-
-  // Convert from raw mv to percentage (based on LIPO chemistry)
-  uint8_t vbat_per = mvToPercent(vbat_raw * VBAT_MV_PER_LSB);
-
-  // Convert the raw value to compensated mv, taking the resistor-
-  // divider into account (providing the actual LIPO voltage)
-  // ADC range is 0..3000mV and resolution is 12-bit (0..4095),
-  // VBAT voltage divider is 2M + 0.806M, which needs to be added back
-  float vbat_mv = (float)vbat_raw * VBAT_MV_PER_LSB * VBAT_DIVIDER_COMP;
-
-  // Display the results
-  Serial.print("ADC = ");
-  Serial.print(vbat_raw * VBAT_MV_PER_LSB);
-  Serial.print(" mV (");
-  Serial.print(vbat_raw);
-  Serial.print(") ");
-  Serial.print("LIPO = ");
-  Serial.print(vbat_mv);
-  Serial.print(" mV (");
-  Serial.print(vbat_per);
-  Serial.println("%)");
-
-  delay(1000);
+  return battery_voltage_mv;
 }

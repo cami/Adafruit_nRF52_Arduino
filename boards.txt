@@ -22,7 +22,6 @@ menu.debug=Debug Mode
 #**********************************************
 # CAMI qibanca nectis series on nRF52840
 #**********************************************
-# nectis.name=Adafruit Bluefruit nRF52840 Feather Express
 nectis.name=CAMI qibanca nectis series on nRF52840
 
 # DFU Mode with CDC only
