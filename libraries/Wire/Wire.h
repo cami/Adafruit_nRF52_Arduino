@@ -31,6 +31,8 @@
 // WIRE_HAS_END means Wire has end()
 #define WIRE_HAS_END 1
 
+#define BUFFER_LENGTH 32
+
 class TwoWire : public Stream
 {
   public:
