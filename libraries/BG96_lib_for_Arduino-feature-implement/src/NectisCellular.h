@@ -4,19 +4,19 @@
 #include "Internal/AtSerial.h"
 
 class NectisCellular {
-    public:
+public:
     enum ErrorCodeType {
         E_OK = 0,
         E_UNKNOWN,
     };
 
-    private:
+private:
     WioCellular _Wio;
     SerialAPI _SerialAPI;
     AtSerial _AtSerial;
     ErrorCodeType _LastErrorCode;
-    
-    private:
+
+private:
     bool ReturnOk(bool value) {
         _LastErrorCode = E_OK;
         return value;
@@ -27,8 +27,8 @@ class NectisCellular {
     }
     bool ReturnError(int lineNumber, bool value, ErrorCodeType errorCode);
     int ReturnError(int lineNumber, int value, ErrorCodeType errorCode);
-    
-    public:
+
+public:
     NectisCellular();
     ErrorCodeType GetLastError() const;
     void Init();
@@ -36,7 +36,7 @@ class NectisCellular {
     void PowerSupplyGrove(bool on);
     void Bg96Begin();
     void Bg96End();
-    void Bg96TurnOff();
+    bool Bg96TurnOff();
     void InitLteM();
     void SoftReset();
     

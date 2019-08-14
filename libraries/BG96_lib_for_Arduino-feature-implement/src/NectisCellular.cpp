@@ -75,7 +75,7 @@ void NectisCellular::PowerSupplyCellular(bool on) {
 }
 
 void NectisCellular::PowerSupplyGrove(bool on) {
-//    digitalWrite(MODULE_PWR_PIN, on ? HIGH : LOW);
+    //    digitalWrite(MODULE_PWR_PIN, on ? HIGH : LOW);
     digitalWrite(GROVE_VCCB_PIN, on ? HIGH : LOW);
 }
 
@@ -91,13 +91,13 @@ void NectisCellular::Bg96End() {
     Serial1.end();
 }
 
-void NectisCellular::Bg96TurnOff() {
-  if (!_AtSerial.WriteCommandAndReadResponse("AT+QPOWD", "^OK$", 500, NULL))
-    return RET_ERR(false, E_UNKNOWN);
-  if (!_AtSerial.ReadResponse("^POWERED DOWN$", 60000, NULL))
-    return RET_ERR(false, E_UNKNOWN);
-
-  return RET_OK(true);
+bool NectisCellular::Bg96TurnOff() {
+    if (!_AtSerial.WriteCommandAndReadResponse("AT+QPOWD", "^OK$", 500, NULL))
+        return RET_ERR(false, E_UNKNOWN);
+    if (!_AtSerial.ReadResponse("^POWERED DOWN$", 60000, NULL))
+        return RET_ERR(false, E_UNKNOWN);
+    
+    return RET_OK(true);
 }
 
 void NectisCellular::InitLteM() {
@@ -126,23 +126,23 @@ void NectisCellular::SoftReset() {
 
 bool NectisCellular::ReturnError(int lineNumber, bool value, NectisCellular::ErrorCodeType errorCode) {
     _LastErrorCode = errorCode;
-
+    
     char str[100];
     sprintf(str, "%d", lineNumber);
     DEBUG_PRINT("ERROR! ");
     DEBUG_PRINTLN(str);
-
+    
     return value;
 }
 
 int NectisCellular::ReturnError(int lineNumber, int value, NectisCellular::ErrorCodeType errorCode) {
     _LastErrorCode = errorCode;
-
+    
     char str[100];
     sprintf(str, "%d", lineNumber);
     DEBUG_PRINT("ERROR! ");
     DEBUG_PRINTLN(str);
-
+    
     return value;
 }
 
@@ -226,10 +226,10 @@ bool NectisCellular::IsTimeGot(struct tm *tim) {
     tim->tm_wday = 0;
     tim->tm_yday = 0;
     tim->tm_isdst = 0;
-
+    
     // Update tm_wday and tm_yday
     mktime(tim);
-
+    
     return RET_OK(true);
 }
 
@@ -295,8 +295,8 @@ float NectisCellular::ReadVbat(void) {
 float NectisCellular::mvToPercent(float mvolts) {
     float battery_level;
     
-//    When mvolts drops to (3200mA * 102%), the power supply from the battery shut down.
-//    Therefore, 0% of the battery level is set to 3250mA.
+    //    When mvolts drops to (3200mA * 102%), the power supply from the battery shut down.
+    //    Therefore, 0% of the battery level is set to 3250mA.
     if (mvolts >= 4150) {
         battery_level = 100;
     } else if (mvolts > 3750) {
@@ -435,8 +435,8 @@ void NectisCellular::PostDataViaHttp(char *post_data) {
     }
     Serial.print("Status:");
     Serial.println(status);
-    
-    err:
+
+err:
     Serial.println("### Wait.");
     delay(INTERVAL);
 }
@@ -519,14 +519,14 @@ void NectisCellular::PostDataViaUdp(char *post_data, int data_length) {
     Serial.print("Receive:");
     Serial.print(post_data);
     Serial.println("");
-    
-    err_close:
+
+err_close:
     Serial.println("### Close.");
     if (!_Wio.SocketClose(connectId)) {
         Serial.println("### ERROR! ###");
         goto err;
     }
-    
-    err:
+
+err:
     delay(INTERVAL);
 }
