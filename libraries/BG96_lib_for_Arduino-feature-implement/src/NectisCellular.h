@@ -36,7 +36,7 @@ class NectisCellular {
     void PowerSupplyGrove(bool on);
     void Bg96Begin();
     void Bg96End();
-    void BG96TurnOff();
+    void Bg96TurnOff();
     void InitLteM();
     void SoftReset();
     
