@@ -68,14 +68,15 @@ void NectisCellular::Init() {
 
 void NectisCellular::PowerSupplyCellular(bool on) {
     digitalWrite(MODULE_PWR_PIN, on ? HIGH : LOW);
-    delay(100);
+    delay(200);
     digitalWrite(MODULE_PWRKEY_PIN, on ? HIGH : LOW);
     delay(600);
     digitalWrite(MODULE_PWRKEY_PIN, LOW);
 }
 
 void NectisCellular::PowerSupplyGrove(bool on) {
-    //    digitalWrite(MODULE_PWR_PIN, on ? HIGH : LOW);
+    digitalWrite(MODULE_PWR_PIN, on ? HIGH : LOW);
+    delay(100);
     digitalWrite(GROVE_VCCB_PIN, on ? HIGH : LOW);
 }
 
