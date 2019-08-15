@@ -481,6 +481,14 @@ bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCo
   return _Wio.HttpPost(url, data, responseCode, header);
 }
 
+bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode , char *recv_data, int recv_dataSize) {
+    return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize);
+}
+
+bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const WioCellularHttpHeader &header) {
+    return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize, header);
+}
+
 void NectisCellular::PostDataViaHttp(char *post_data) {
     Serial.println("### Post.");
     Serial.print("Post:");

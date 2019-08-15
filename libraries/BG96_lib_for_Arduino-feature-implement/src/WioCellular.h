@@ -119,4 +119,8 @@ class WioCellular {
     bool HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header);
     
     bool SendUSSD(const char *in, char *out, int outSize);
+    
+    // ToDo: Pull Request
+    bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize);
+    bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize, const WioCellularHttpHeader &header);
 };

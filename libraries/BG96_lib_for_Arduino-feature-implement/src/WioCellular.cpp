@@ -1127,3 +1127,123 @@ bool WioCellular::SendUSSD(const char *in, char *out, int outSize) {
     
     return RET_OK(true);
 }
+
+bool WioCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize) {
+    WioCellularHttpHeader header;
+    header["Accept"] = "*/*";
+    header["User-Agent"] = HTTP_USER_AGENT;
+    header["Connection"] = "Keep-Alive";
+    header["Content-Type"] = HTTP_CONTENT_TYPE;
+    
+    return HttpPost2(url, data, responseCode, recv_data , recv_dataSize , header);
+}
+
+bool WioCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize,const WioCellularHttpHeader &header) {
+    std::string response;
+    ArgumentParser parser;
+    
+    if (strncmp(url, "https:", 6) == 0) {
+        if (!_AtSerial.WriteCommandAndReadResponse("AT+QHTTPCFG=\"sslctxid\",1", "^OK$", 500, NULL))
+            return RET_ERR(false, E_UNKNOWN);
+        if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"sslversion\",1,4", "^OK$", 500, NULL))
+            return RET_ERR(false, E_UNKNOWN);
+#if defined ARDUINO_WIO_3G
+        if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"ciphersuite\",1,\"0XFFFF\"", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+    //  #elif defined ARDUINO_WIO_LTE_M1NB1_BG96
+#elif defined NRF52840_XXAA
+        if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"ciphersuite\",1,0XFFFF", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+#endif
+        if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"seclevel\",1,0", "^OK$", 500, NULL))
+            return RET_ERR(false, E_UNKNOWN);
+    }
+    
+    if (!_AtSerial.WriteCommandAndReadResponse("AT+QHTTPCFG=\"requestheader\",1", "^OK$", 500, NULL))
+        return RET_ERR(false, E_UNKNOWN);
+    
+    if (!HttpSetUrl(url))
+        return RET_ERR(false, E_UNKNOWN);
+    
+    const char *host;
+    int hostLength;
+    const char *uri;
+    int uriLength;
+    if (!SplitUrl(url, &host, &hostLength, &uri, &uriLength))
+        return RET_ERR(false, E_UNKNOWN);
+    
+    StringBuilder headerSb;
+    headerSb.Write("POST ");
+    if (uriLength <= 0) {
+        headerSb.Write("/");
+    } else {
+        headerSb.Write(uri, uriLength);
+    }
+    headerSb.Write(" HTTP/1.1\r\n");
+    headerSb.Write("Host: ");
+    headerSb.Write(host, hostLength);
+    headerSb.Write("\r\n");
+    if (!headerSb.WriteFormat("Content-Length: %d\r\n", strlen(data)))
+        return RET_ERR(false, E_UNKNOWN);
+    for (auto it = header.begin(); it != header.end(); it++) {
+        headerSb.Write(it->first.c_str());
+        headerSb.Write(": ");
+        headerSb.Write(it->second.c_str());
+        headerSb.Write("\r\n");
+    }
+    headerSb.Write("\r\n");
+    DEBUG_PRINTLN("=== header");
+    DEBUG_PRINTLN(headerSb.GetString());
+    DEBUG_PRINTLN("===");
+    
+    StringBuilder str;
+    if (!str.WriteFormat("AT+QHTTPPOST=%d", headerSb.Length() + strlen(data)))
+        return RET_ERR(false, E_UNKNOWN);
+    _AtSerial.WriteCommand(str.GetString());
+    if (!_AtSerial.ReadResponse("^CONNECT$", 60000, NULL))
+        return RET_ERR(false, E_UNKNOWN);
+    const char *headerStr = headerSb.GetString();
+    _AtSerial.WriteBinary((const byte *) headerStr, strlen(headerStr));
+    _AtSerial.WriteBinary((const byte *) data, strlen(data));
+    if (!_AtSerial.ReadResponse("^OK$", 1000, NULL))
+        return RET_ERR(false, E_UNKNOWN);
+    if (!_AtSerial.ReadResponse("^\\+QHTTPPOST: (.*)$", 60000, &response))
+        return RET_ERR(false, E_UNKNOWN);
+    parser.Parse(response.c_str());
+    if (parser.Size() < 1)
+        return RET_ERR(false, E_UNKNOWN);
+    if (strcmp(parser[0], "0") != 0)
+        return RET_ERR(false, E_UNKNOWN);
+    if (parser.Size() < 2) {
+        *responseCode = -1;
+    } else {
+        *responseCode = atoi(parser[1]);
+    }
+    
+    if(parser.Size() == 3) {
+        int contentLength = atoi(parser[2]);
+        
+        Serial.print("contentLength=");
+        Serial.print(contentLength);
+        Serial.println("");
+        
+        if(contentLength > 0)
+        {
+            if((contentLength + 1) < recv_dataSize) {
+                _AtSerial.WriteCommand("AT+QHTTPREAD");
+                if (!_AtSerial.ReadResponse("^CONNECT$", 1000, NULL))
+                    return RET_ERR(-1, E_UNKNOWN);
+                if (!_AtSerial.ReadBinary((byte *) recv_data, contentLength, 60000))
+                    return RET_ERR(-1, E_UNKNOWN);
+                recv_data[contentLength] = '\0';
+                
+                if (!_AtSerial.ReadResponse("^OK$", 1000, NULL))
+                    return RET_ERR(-1, E_UNKNOWN);
+            }
+        }
+        else
+        {
+            return RET_ERR(-1, E_UNKNOWN);
+        }
+    }
+    
+    return RET_OK(true);
+}
