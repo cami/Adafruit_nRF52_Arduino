@@ -61,7 +61,26 @@ public:
     char* ConvertIntoBinary(char* PostDataBinary, uint16_t data, unsigned int data_length);
     char* ConvertIntoBinary(char* PostDataBinary, uint32_t data, unsigned int data_length);
     char* ConvertIntoBinary(char* PostDataBinary, int data, unsigned int data_length);
-    
+
+    int GetIMEI(char *imei, int imeiSize);
+    int GetIMSI(char *imsi, int imsiSize);
+    int GetICCID(char *iccid, int iccidSize);
+    int GetPhoneNumber(char *number, int numberSize);
+
+    int SocketOpen(const char *host, int port, SocketType type);
+    bool SocketSend(int connectId, const byte *data, int dataSize);
+    bool SocketSend(int connectId, const char *data);
+    int SocketReceive(int connectId, byte *data, int dataSize);
+    int SocketReceive(int connectId, char *data, int dataSize);
+    int SocketReceive(int connectId, byte *data, int dataSize, long timeout);
+    int SocketReceive(int connectId, char *data, int dataSize, long timeout);
+    bool SocketClose(int connectId);
+
+    int HttpGet(const char *url, char *data, int dataSize);
+    int HttpGet(const char *url, char *data, int dataSize, const WioCellularHttpHeader &header);
+    bool HttpPost(const char *url, const char *data, int *responseCode);
+    bool HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header);
+
     void PostDataViaHttp(char *post_data);
     void PostDataViaUdp(char *post_data);
     void PostDataViaUdp(char *post_data, int data_length);

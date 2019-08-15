@@ -417,6 +417,70 @@ char* NectisCellular::ConvertIntoBinary(char* PostDataBinary, int data, unsigned
     return PostDataBinary;
 }
 
+int NectisCellular::GetIMEI(char *imei, int imeiSize){
+  return _Wio.GetIMEI(imei,imeiSize);
+}
+
+int NectisCellular::GetIMSI(char *imsi, int imsiSize){
+  return _Wio.GetIMSI(imsi,imsiSize);
+}
+
+int NectisCellular::GetICCID(char *iccid, int iccidSize){
+  return _Wio.GetICCID(iccid, iccidSize);
+}
+
+int NectisCellular::GetPhoneNumber(char *number, int numberSize){
+  return _Wio.GetPhoneNumber(number,numberSize);
+}
+
+int NectisCellular::SocketOpen(const char *host, int port, SocketType type){
+  return _Wio.SocketOpen(host, port, (WioCellular::SocketType)type);
+}
+
+bool NectisCellular::SocketSend(int connectId, const byte *data, int dataSize){
+  return _Wio.SocketSend(connectId, data, dataSize);
+}
+
+bool NectisCellular::SocketSend(int connectId, const char *data){
+  return _Wio.SocketSend(connectId, data);
+}
+
+int NectisCellular::SocketReceive(int connectId, byte *data, int dataSize){
+  return _Wio.SocketReceive(connectId, data, dataSize);
+}
+
+int NectisCellular::SocketReceive(int connectId, byte *data, int dataSize, long timeout){
+  return _Wio.SocketReceive(connectId, data, dataSize, timeout);
+}
+
+int NectisCellular::SocketReceive(int connectId, char *data, int dataSize){
+  return _Wio.SocketReceive(connectId, data, dataSize);
+}
+
+int NectisCellular::SocketReceive(int connectId, char *data, int dataSize, long timeout){
+  return _Wio.SocketReceive(connectId, data, dataSize,timeout);
+}
+
+bool NectisCellular::SocketClose(int connectId){
+  return _Wio.SocketClose(connectId);
+}
+
+int NectisCellular::HttpGet(const char *url, char *data, int dataSize) {
+  return _Wio.HttpGet(url, data, dataSize);
+}
+
+int NectisCellular::HttpGet(const char *url, char *data, int dataSize, const WioCellularHttpHeader &header) {
+  return _Wio.HttpGet(url,data,dataSize, header);
+}
+
+bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode) {
+  return _Wio.HttpPost(url, data, responseCode);
+}
+
+bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header) {
+  return _Wio.HttpPost(url, data, responseCode, header);
+}
+
 void NectisCellular::PostDataViaHttp(char *post_data) {
     Serial.println("### Post.");
     Serial.print("Post:");
