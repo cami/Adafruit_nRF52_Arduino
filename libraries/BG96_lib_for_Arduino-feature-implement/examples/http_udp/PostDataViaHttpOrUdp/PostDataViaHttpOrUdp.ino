@@ -9,9 +9,9 @@
 NectisCellular Nectis;
 
 // Uncomment following line to use Http
-//#define HTTP
+#define HTTP
 // Uncomment following line to use Udp
-#define UDP
+//#define UDP
 
 
 void setup() {
@@ -46,7 +46,7 @@ void loop() {
   Serial.println(postData);
 
 #ifdef HTTP
-  Nectis.PostDataViaHttp(post_data);
+  Nectis.PostDataViaHttp(postData);
 #endif  // HTTP
 
 #ifdef UDP
