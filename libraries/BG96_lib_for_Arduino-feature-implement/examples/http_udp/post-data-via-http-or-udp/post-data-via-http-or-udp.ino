@@ -50,7 +50,7 @@ void loop() {
 #endif  // HTTP
 
 #ifdef UDP
-  Nectis.PostDataViaUdp(postData, , sizeof(postData)-1);
+  Nectis.PostDataViaUdp(postData, sizeof(postData)-1);
 #endif  // UDP
 
   delay(10000);

@@ -39,8 +39,8 @@ void loop() {
 
   sprintf(postData, "{\"uptime\":%lu}", millis() / 1000);
   Serial.println(postData);
-
-  Nectis.PostDataViaUdp(postData, , sizeof(postData)-1);
+  
+  Nectis.PostDataViaUdp(postData, sizeof(postData)-1);
 
   delay(10000);
 }

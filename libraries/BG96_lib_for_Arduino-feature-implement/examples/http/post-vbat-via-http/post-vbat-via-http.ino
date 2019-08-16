@@ -4,8 +4,6 @@
 
 #include <NectisCellular.h>
 
-#define GROVE_LED_PIN                 (GROVE_ANALOG_1_1)
-
 NectisCellular Nectis;
 
 char postData[2];
@@ -31,9 +29,7 @@ void setup() {
 
   Nectis.Bg96Begin();
   Nectis.InitLteM();
-
-  pinMode(GROVE_LED_PIN, OUTPUT);
-
+  
   Serial.println("### Setup completed.");
 }
 
