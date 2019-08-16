@@ -3,7 +3,6 @@
 #include "WioCellLibforArduino.h"
 #include <IPAddress.h>
 #include <string>
-#include <string>
 
 #include "Internal/AtSerial.h"
 #include "Internal/WioSK6812.h"
