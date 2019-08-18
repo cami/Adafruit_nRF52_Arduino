@@ -39,6 +39,28 @@ NectisCellular::ErrorCodeType NectisCellular::GetLastError() const {
     return _LastErrorCode;
 }
 
+bool NectisCellular::ReturnError(int lineNumber, bool value, NectisCellular::ErrorCodeType errorCode) {
+  _LastErrorCode = errorCode;
+
+  char str[100];
+  sprintf(str, "%d", lineNumber);
+  DEBUG_PRINT("ERROR! ");
+  DEBUG_PRINTLN(str);
+
+  return value;
+}
+
+int NectisCellular::ReturnError(int lineNumber, int value, NectisCellular::ErrorCodeType errorCode) {
+  _LastErrorCode = errorCode;
+
+  char str[100];
+  sprintf(str, "%d", lineNumber);
+  DEBUG_PRINT("ERROR! ");
+  DEBUG_PRINTLN(str);
+
+  return value;
+}
+
 void NectisCellular::Init() {
     ////////////////////
     // Module
@@ -80,72 +102,164 @@ void NectisCellular::PowerSupplyGrove(bool on) {
     digitalWrite(GROVE_VCCB_PIN, on ? HIGH : LOW);
 }
 
+// TODO
+// void NectisCellular::LedSetRGB(uint8_t red, uint8_t green, uint8_t blue) {
+//
+//}
+
+// TODO
+//bool NectisCellular::TurnOnOrReset() {
+//
+//}
+
+// TODO
+// bool NectisCellular::TurnOff() {
+//
+//}
+
+int NectisCellular::GetIMEI(char *imei, int imeiSize){
+  return _Wio.GetIMEI(imei,imeiSize);
+}
+
+int NectisCellular::GetIMSI(char *imsi, int imsiSize){
+  return _Wio.GetIMSI(imsi,imsiSize);
+}
+
+int NectisCellular::GetICCID(char *iccid, int iccidSize){
+  return _Wio.GetICCID(iccid, iccidSize);
+}
+
+int NectisCellular::GetPhoneNumber(char *number, int numberSize){
+  return _Wio.GetPhoneNumber(number,numberSize);
+}
+
+// TODO
+// bool NectisCellular::GetTime(struct tm *tim) {
+//
+//}
+
+//TODO
+//#if defined NRF52840_XXAA
+//    void SetAccessTechnology(AccessTechnologyType technology);
+//#endif // NRF52840_XXAA
+//    void SetSelectNetwork(SelectNetworkModeType mode, const char *plmn = NULL);
+
+//    bool WaitForCSRegistration(long timeout = 120000);
+//    bool WaitForPSRegistration(long timeout = 120000);
+// bool Activate(const char *accessPointName, const char *userName, const char *password, long waitForRegistTimeout = 120000);
+// bool Deactivate();
+
+//bool GetLocation(double* longitude, double* latitude);
+
+//    bool GetDNSAddress(IPAddress *ip1, IPAddress *ip2);
+//    bool SetDNSAddress(const IPAddress &ip1);
+//    bool SetDNSAddress(const IPAddress &ip1, const IPAddress &ip2);
+
+int NectisCellular::SocketOpen(const char *host, int port, SocketType type){
+  return _Wio.SocketOpen(host, port, (WioCellular::SocketType)type);
+}
+
+bool NectisCellular::SocketSend(int connectId, const byte *data, int dataSize){
+  return _Wio.SocketSend(connectId, data, dataSize);
+}
+
+bool NectisCellular::SocketSend(int connectId, const char *data){
+  return _Wio.SocketSend(connectId, data);
+}
+
+int NectisCellular::SocketReceive(int connectId, byte *data, int dataSize){
+  return _Wio.SocketReceive(connectId, data, dataSize);
+}
+
+int NectisCellular::SocketReceive(int connectId, byte *data, int dataSize, long timeout){
+  return _Wio.SocketReceive(connectId, data, dataSize, timeout);
+}
+
+int NectisCellular::SocketReceive(int connectId, char *data, int dataSize){
+  return _Wio.SocketReceive(connectId, data, dataSize);
+}
+
+int NectisCellular::SocketReceive(int connectId, char *data, int dataSize, long timeout){
+  return _Wio.SocketReceive(connectId, data, dataSize,timeout);
+}
+
+bool NectisCellular::SocketClose(int connectId){
+  return _Wio.SocketClose(connectId);
+}
+
+int NectisCellular::HttpGet(const char *url, char *data, int dataSize) {
+  return _Wio.HttpGet(url, data, dataSize);
+}
+
+int NectisCellular::HttpGet(const char *url, char *data, int dataSize, const WioCellularHttpHeader &header) {
+  return _Wio.HttpGet(url,data,dataSize, header);
+}
+
+bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode) {
+  return _Wio.HttpPost(url, data, responseCode);
+}
+
+bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header) {
+  return _Wio.HttpPost(url, data, responseCode, header);
+}
+
+//TODO
+// bool SendUSSD(const char *in, char *out, int outSize);
+
+
 void NectisCellular::Bg96Begin() {
-    //  Initialize Uart between BL654 and BG96.
-    Serial1.setPins(MODULE_UART_RX_PIN, MODULE_UART_TX_PIN, MODULE_RTS_PIN, MODULE_CTS_PIN);
-    Serial1.begin(115200);
-    
-    delay(200);
+  //  Initialize Uart between BL654 and BG96.
+  Serial1.setPins(MODULE_UART_RX_PIN, MODULE_UART_TX_PIN, MODULE_RTS_PIN, MODULE_CTS_PIN);
+  Serial1.begin(115200);
+
+  delay(200);
 }
 
 void NectisCellular::Bg96End() {
-    Serial1.end();
+  Serial1.end();
 }
 
 bool NectisCellular::Bg96TurnOff() {
-    if (!_AtSerial.WriteCommandAndReadResponse("AT+QPOWD", "^OK$", 500, NULL))
-        return RET_ERR(false, E_UNKNOWN);
-    if (!_AtSerial.ReadResponse("^POWERED DOWN$", 60000, NULL))
-        return RET_ERR(false, E_UNKNOWN);
-    
-    return RET_OK(true);
+  if (!_AtSerial.WriteCommandAndReadResponse("AT+QPOWD", "^OK$", 500, NULL))
+    return RET_ERR(false, E_UNKNOWN);
+  if (!_AtSerial.ReadResponse("^POWERED DOWN$", 60000, NULL))
+    return RET_ERR(false, E_UNKNOWN);
+
+  return RET_OK(true);
 }
 
 void NectisCellular::InitLteM() {
-    #ifdef NRF52840_XXAA
-    _Wio.SetAccessTechnology(WioCellular::ACCESS_TECHNOLOGY_LTE_M1);
+#ifdef NRF52840_XXAA
+  _Wio.SetAccessTechnology(WioCellular::ACCESS_TECHNOLOGY_LTE_M1);
     _Wio.SetSelectNetwork(WioCellular::SELECT_NETWORK_MODE_MANUAL_IMSI);
-    #endif
-    
-    Serial.println("### Turn on or reset.");
-    if (!_Wio.TurnOnOrReset()) {
-        Serial.println("### ERROR!; TurnOnOrReset ###");
-        return;
-    }
-    
-    delay(100);
-    Serial.println("### Connecting to \"" APN "\".");
-    if (!_Wio.Activate(APN, USERNAME, PASSWORD)) {
-        Serial.println("### ERROR!; Activate ###");
-        return;
-    }
+#endif
+
+  Serial.println("### Turn on or reset.");
+  if (!_Wio.TurnOnOrReset()) {
+    Serial.println("### ERROR!; TurnOnOrReset ###");
+    return;
+  }
+
+  delay(100);
+  Serial.println("### Connecting to \"" APN "\".");
+  if (!_Wio.Activate(APN, USERNAME, PASSWORD)) {
+    Serial.println("### ERROR!; Activate ###");
+    return;
+  }
 }
 
 void NectisCellular::SoftReset() {
-    NVIC_SystemReset();
+  NVIC_SystemReset();
 }
 
-bool NectisCellular::ReturnError(int lineNumber, bool value, NectisCellular::ErrorCodeType errorCode) {
-    _LastErrorCode = errorCode;
-    
-    char str[100];
-    sprintf(str, "%d", lineNumber);
-    DEBUG_PRINT("ERROR! ");
-    DEBUG_PRINTLN(str);
-    
-    return value;
+bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode , char *recv_data, int recv_dataSize) {
+  return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize);
 }
 
-int NectisCellular::ReturnError(int lineNumber, int value, NectisCellular::ErrorCodeType errorCode) {
-    _LastErrorCode = errorCode;
-    
-    char str[100];
-    sprintf(str, "%d", lineNumber);
-    DEBUG_PRINT("ERROR! ");
-    DEBUG_PRINTLN(str);
-    
-    return value;
+bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const WioCellularHttpHeader &header) {
+  return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize, header);
 }
+
 
 int NectisCellular::GetReceivedSignalStrength() {
     std::string response;
@@ -415,78 +529,6 @@ char* NectisCellular::ConvertIntoBinary(char* PostDataBinary, int data, unsigned
     memcpy(&PostDataBinary[0], ConvertDecimalToHex(data, data_length), data_length);
     
     return PostDataBinary;
-}
-
-int NectisCellular::GetIMEI(char *imei, int imeiSize){
-  return _Wio.GetIMEI(imei,imeiSize);
-}
-
-int NectisCellular::GetIMSI(char *imsi, int imsiSize){
-  return _Wio.GetIMSI(imsi,imsiSize);
-}
-
-int NectisCellular::GetICCID(char *iccid, int iccidSize){
-  return _Wio.GetICCID(iccid, iccidSize);
-}
-
-int NectisCellular::GetPhoneNumber(char *number, int numberSize){
-  return _Wio.GetPhoneNumber(number,numberSize);
-}
-
-int NectisCellular::SocketOpen(const char *host, int port, SocketType type){
-  return _Wio.SocketOpen(host, port, (WioCellular::SocketType)type);
-}
-
-bool NectisCellular::SocketSend(int connectId, const byte *data, int dataSize){
-  return _Wio.SocketSend(connectId, data, dataSize);
-}
-
-bool NectisCellular::SocketSend(int connectId, const char *data){
-  return _Wio.SocketSend(connectId, data);
-}
-
-int NectisCellular::SocketReceive(int connectId, byte *data, int dataSize){
-  return _Wio.SocketReceive(connectId, data, dataSize);
-}
-
-int NectisCellular::SocketReceive(int connectId, byte *data, int dataSize, long timeout){
-  return _Wio.SocketReceive(connectId, data, dataSize, timeout);
-}
-
-int NectisCellular::SocketReceive(int connectId, char *data, int dataSize){
-  return _Wio.SocketReceive(connectId, data, dataSize);
-}
-
-int NectisCellular::SocketReceive(int connectId, char *data, int dataSize, long timeout){
-  return _Wio.SocketReceive(connectId, data, dataSize,timeout);
-}
-
-bool NectisCellular::SocketClose(int connectId){
-  return _Wio.SocketClose(connectId);
-}
-
-int NectisCellular::HttpGet(const char *url, char *data, int dataSize) {
-  return _Wio.HttpGet(url, data, dataSize);
-}
-
-int NectisCellular::HttpGet(const char *url, char *data, int dataSize, const WioCellularHttpHeader &header) {
-  return _Wio.HttpGet(url,data,dataSize, header);
-}
-
-bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode) {
-  return _Wio.HttpPost(url, data, responseCode);
-}
-
-bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header) {
-  return _Wio.HttpPost(url, data, responseCode, header);
-}
-
-bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode , char *recv_data, int recv_dataSize) {
-    return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize);
-}
-
-bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const WioCellularHttpHeader &header) {
-    return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize, header);
 }
 
 void NectisCellular::PostDataViaHttp(char *post_data) {
