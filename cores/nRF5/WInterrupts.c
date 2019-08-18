@@ -30,6 +30,12 @@
 #define NUMBER_OF_GPIO_TE 4
 #endif
 
+#ifdef GPIOTE_CONFIG_PORT_Msk
+#define GPIOTE_CONFIG_PORT_PIN_Msk (GPIOTE_CONFIG_PORT_Msk | GPIOTE_CONFIG_PSEL_Msk)
+#else
+#define GPIOTE_CONFIG_PORT_PIN_Msk GPIOTE_CONFIG_PSEL_Msk
+#endif
+
 static voidFuncPtr callbacksInt[NUMBER_OF_GPIO_TE];
 static bool callbackDeferred[NUMBER_OF_GPIO_TE];
 static int8_t channelMap[NUMBER_OF_GPIO_TE];
@@ -53,10 +59,56 @@ static void __initialize() {
  *
  * \return Interrupt Mask
  */
-int attachInterrupt(uint32_t pin, voidFuncPtr callback, uint32_t mode) {
-    if (!enabled) {
-        __initialize();
-        enabled = 1;
+int attachInterrupt(uint32_t pin, voidFuncPtr callback, uint32_t mode)
+{
+  if (!enabled) {
+    __initialize();
+    enabled = 1;
+  }
+
+  if (pin >= PINS_COUNT) {
+    return 0;
+  }
+
+  pin = g_ADigitalPinMap[pin];
+
+  bool deferred = (mode & ISR_DEFERRED) ? true : false;
+  mode &= ~ISR_DEFERRED;
+
+  uint32_t polarity;
+
+  switch (mode) {
+    case CHANGE:
+      polarity = GPIOTE_CONFIG_POLARITY_Toggle;
+      break;
+
+    case FALLING:
+      polarity = GPIOTE_CONFIG_POLARITY_HiToLo;
+      break;
+
+    case RISING:
+      polarity = GPIOTE_CONFIG_POLARITY_LoToHi;
+      break;
+
+    default:
+      return 0;
+  }
+
+  for (int ch = 0; ch < NUMBER_OF_GPIO_TE; ch++) {
+    if (channelMap[ch] == -1 || (uint32_t)channelMap[ch] == pin) {
+      channelMap[ch] = pin;
+      callbacksInt[ch] = callback;
+      callbackDeferred[ch] = deferred;
+
+      NRF_GPIOTE->CONFIG[ch] &= ~(GPIOTE_CONFIG_PORT_PIN_Msk | GPIOTE_CONFIG_POLARITY_Msk);
+      NRF_GPIOTE->CONFIG[ch] |= ((pin << GPIOTE_CONFIG_PSEL_Pos) & GPIOTE_CONFIG_PORT_PIN_Msk) |
+                              ((polarity << GPIOTE_CONFIG_POLARITY_Pos) & GPIOTE_CONFIG_POLARITY_Msk);
+
+      NRF_GPIOTE->CONFIG[ch] |= GPIOTE_CONFIG_MODE_Event;
+
+      NRF_GPIOTE->INTENSET = (1 << ch);
+
+      return (1 << ch);
     }
     
     if (pin >= PINS_COUNT) {
@@ -115,20 +167,21 @@ void detachInterrupt(uint32_t pin) {
     if (pin >= PINS_COUNT) {
         return;
     }
-    
-    pin = g_ADigitalPinMap[pin];
-    
-    for (int ch = 0; ch < NUMBER_OF_GPIO_TE; ch++) {
-        if ((uint32_t) channelMap[ch] == pin) {
-            channelMap[ch] = -1;
-            callbacksInt[ch] = NULL;
-            callbackDeferred[ch] = false;
-            
-            NRF_GPIOTE->CONFIG[ch] &= ~GPIOTE_CONFIG_MODE_Event;
-            
-            NRF_GPIOTE->INTENCLR = (1 << ch);
-            
-            break;
+  }
+}
+
+void GPIOTE_IRQHandler()
+{
+  uint32_t event = offsetof(NRF_GPIOTE_Type, EVENTS_IN[0]);
+
+  for (int ch = 0; ch < NUMBER_OF_GPIO_TE; ch++) {
+    if ((*(uint32_t *)((uint32_t)NRF_GPIOTE + event) == 0x1UL) && (NRF_GPIOTE->INTENSET & (1 << ch))) {
+      if (channelMap[ch] != -1 && callbacksInt[ch]) {
+        if ( callbackDeferred[ch] )  {
+          // Adafruit defer callback to non-isr if configured so
+          ada_callback(NULL, 0, callbacksInt[ch]);
+        }else{
+         callbacksInt[ch]();
         }
     }
 }

@@ -38,9 +38,7 @@ static TaskHandle_t _loopHandle;
 void initVariant() __attribute__((weak));
 void initVariant() {}
 
-uint32_t _loopStacksize = 512 * 3;
-
-uint32_t setLoopStacksize(void) __attribute__ ((weak));
+#define LOOP_STACK_SZ   (512*3)
 
 static void loop_task(void *arg) {
     (void) arg;
@@ -54,47 +52,43 @@ static void loop_task(void *arg) {
     // dbgMemInfo();
     Bluefruit_printInfo();
 #endif
-    
-    while (1) {
-        loop();
 
-#ifdef NRF52840_XXAA
-        tud_cdc_write_flush();
-#endif
-        
-        // Serial events
-        if (serialEvent && serialEventRun)
-            serialEventRun();
-    }
+  while (1)
+  {
+    loop();
+    yield(); // yield run usb background task
+
+    // Serial events
+    if (serialEvent && serialEventRun) serialEventRun();
+  }
 }
 
-/*
- * \brief Main entry point of Arduino application
- */
-int main(void) {
-    init();
-    initVariant();
-    
-    if (setLoopStacksize) {
-        _loopStacksize = setLoopStacksize();
-    }
+// \brief Main entry point of Arduino application
+int main( void )
+{
+  init();
+  initVariant();
+
+#ifdef USE_TINYUSB
+  Adafruit_TinyUSB_Core_init();
+#endif
 
 #if CFG_DEBUG >= 3
     SEGGER_SYSVIEW_Conf();
 #endif
-    
-    // Create a task for loop()
-    xTaskCreate(loop_task, "loop", _loopStacksize, NULL, TASK_PRIO_LOW, &_loopHandle);
-    
-    // Initialize callback task
-    ada_callback_init();
-    
-    // Start FreeRTOS scheduler.
-    vTaskStartScheduler();
-    
-    NVIC_SystemReset();
-    
-    return 0;
+
+  // Create a task for loop()
+  xTaskCreate( loop_task, "loop", LOOP_STACK_SZ, NULL, TASK_PRIO_LOW, &_loopHandle);
+
+  // Initialize callback task
+  ada_callback_init();
+
+  // Start FreeRTOS scheduler.
+  vTaskStartScheduler();
+
+  NVIC_SystemReset();
+
+  return 0;
 }
 
 void suspendLoop(void) {

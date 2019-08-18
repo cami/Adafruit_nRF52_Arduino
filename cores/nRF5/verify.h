@@ -50,19 +50,15 @@ extern "C"
 //--------------------------------------------------------------------+
 // Compile-time Assert
 //--------------------------------------------------------------------+
-#if defined __COUNTER__ && __COUNTER__ != __COUNTER__
-    #define _VERIFY_COUNTER __COUNTER__
-#else
-    #define _VERIFY_COUNTER __LINE__
-#endif
-
-#define VERIFY_STATIC(const_expr) enum { XSTRING_CONCAT_(static_verify_, _VERIFY_COUNTER) = 1/(!!(const_expr)) }
+#define VERIFY_STATIC(const_expr) TU_VERIFY_STATIC(const_expr, "Assert failed")
 
 //--------------------------------------------------------------------+
 // VERIFY Helper
 //--------------------------------------------------------------------+
 #if CFG_DEBUG >= 1
-    #define VERIFY_MESS(_status, _funcstr) \
+#include <stdio.h>
+
+  #define VERIFY_MESS(_status, _funcstr) \
     do { \
       const char* (*_fstr)(int32_t) = _funcstr;\
       printf("%s: %d: verify failed, error = ", __PRETTY_FUNCTION__, __LINE__);\

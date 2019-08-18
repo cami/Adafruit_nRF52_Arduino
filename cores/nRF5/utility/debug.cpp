@@ -115,7 +115,7 @@ void dbgMemInfo(void)
   printf("| Name | Addr 0x2000xxxx | Usage               |\n");
   printf("| ---------------------------------------------|\n");
 
-  // Pritn SRAM used for Stack executed by S132 and ISR
+  // Pritn SRAM used for Stack executed by Softdevice and ISR
   printMemRegion("Stack", ((uint32_t) __StackTop), ((uint32_t) __StackLimit), dbgStackUsed() );
 
   // Print Heap usage overall (including memory malloced to tasks)
@@ -125,7 +125,7 @@ void dbgMemInfo(void)
   printMemRegion("Bss", ((uint32_t) __bss_end__), ((uint32_t) __data_start__), 0);
 
   // Print SRAM Used by SoftDevice
-  printMemRegion("S132", (uint32_t) __data_start__, 0x20000000, 0);
+  printMemRegion("SD", (uint32_t) __data_start__, 0x20000000, 0);
 
   printf("|______________________________________________|\n");
   printf("\n");
@@ -182,7 +182,7 @@ void dbgDumpMemory(void const *buf, uint8_t size, uint16_t count, bool printOffs
 
   const uint8_t  item_per_line  = 16 / size;
 
-  for(int i=0; i<count; i++)
+  for(uint32_t i=0; i<count; i++)
   {
     uint32_t value=0;
 
@@ -246,10 +246,8 @@ void dbgDumpMemoryCFormat(const char* str, void const *buf, uint16_t count)
 
   uint8_t const *buf8 = (uint8_t const *) buf;
 
-  for(int i=0; i<count; i++)
+  for(uint32_t i=0; i<count; i++)
   {
-    uint32_t value=0;
-
     if ( i%16 == 0 )
     {
       if ( i != 0 ) printf(",\n  ");
@@ -258,11 +256,11 @@ void dbgDumpMemoryCFormat(const char* str, void const *buf, uint16_t count)
       if ( i != 0 ) printf(", ");
     }
 
-    printf("0x%02lX", *buf8);
+    printf("0x%02X", *buf8);
     buf8++;
   }
 
-  printf("\n\};\n");
+  printf("\n};\n");
 }
 
 
@@ -427,12 +425,13 @@ lookup_table_t const _strerr_table =
 
 const char* dbg_err_str(int32_t err_id)
 {
+  // TODO: verify it would be safe to change to int16_t
   const char * str = (const char *) lookup_find(&_strerr_table, err_id);
   static char unknown_str[7] = {0};
 
   if ( str == NULL )
   {
-    sprintf(unknown_str, "0x%04X", err_id);
+    sprintf(unknown_str, "0x%04lX", (uint32_t)err_id);
     str = unknown_str;
   }
 

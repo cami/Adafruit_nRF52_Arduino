@@ -36,15 +36,15 @@ uint32_t micros(void) {
 void delay(uint32_t ms) {
     uint32_t ticks = ms2tick(ms);
 
-#ifdef NRF52840_XXAA
-    // Take chance to flush usb cdc
-    uint32_t flush_tick = xTaskGetTickCount();
-    tud_cdc_write_flush();
-  
-    flush_tick = xTaskGetTickCount()-flush_tick;
-    if (flush_tick >= ticks) return;
-  
-    ticks -= flush_tick;
+#ifdef USE_TINYUSB
+  // Take chance to flush usb cdc
+  uint32_t flush_tick = xTaskGetTickCount();
+  tud_cdc_write_flush();
+
+  flush_tick = xTaskGetTickCount()-flush_tick;
+  if (flush_tick >= ticks) return;
+
+  ticks -= flush_tick;
 #endif
     
     vTaskDelay(ticks);

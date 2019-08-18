@@ -37,11 +37,6 @@
 #include "bluefruit.h"
 #include "utility/bonding.h"
 
-#ifdef NRF52840_XXAA
-#include "nrfx_power.h"
-#include "usb/usb.h"
-#endif
-
 #ifndef CFG_BLE_TX_POWER_LEVEL
 #define CFG_BLE_TX_POWER_LEVEL           0
 #endif
@@ -59,6 +54,32 @@
 #define CFG_SOC_TASK_STACKSIZE          (200)
 #endif
 
+#ifdef USE_TINYUSB
+#include "nrfx_power.h"
+
+/* tinyusb function that handles power event (detected, ready, removed)
+ * We must call it within SD's SOC event handler, or set it as power event handler if SD is not enabled. */
+extern "C" void tusb_hal_nrf_power_event(uint32_t event);
+
+// Must be called before sd_softdevice_enable()
+// NRF_POWER is restricted prph used by Softdevice, must be release before enable SD
+void usb_softdevice_pre_enable(void)
+{
+  nrfx_power_usbevt_disable();
+  nrfx_power_usbevt_uninit();
+  nrfx_power_uninit();
+}
+
+// Must be called after sd_softdevice_enable()
+// To re-enable USB
+void usb_softdevice_post_enable(void)
+{
+  sd_power_usbdetected_enable(true);
+  sd_power_usbpwrrdy_enable(true);
+  sd_power_usbremoved_enable(true);
+}
+
+#endif
 
 AdafruitBluefruit Bluefruit;
 
@@ -85,6 +106,7 @@ static void bluefruit_blinky_cb( TimerHandle_t xTimer )
 
 static void nrf_error_cb(uint32_t id, uint32_t pc, uint32_t info)
 {
+#if CFG_DEBUG
   PRINT_INT(id);
   PRINT_HEX(pc);
   PRINT_HEX(info);
@@ -102,7 +124,6 @@ static void nrf_error_cb(uint32_t id, uint32_t pc, uint32_t info)
     LOG_LV1("SD Err", "assert at %s : %d", assert_info->p_file_name, assert_info->line_num);
   }
 
-#if CFG_DEBUG
   while(1) { }
 #endif
 }
@@ -154,7 +175,7 @@ AdafruitBluefruit::AdafruitBluefruit(void)
   _event_cb = NULL;
   _rssi_cb = NULL;
 
-  _sec_param = (ble_gap_sec_params_t)
+  _sec_param = ((ble_gap_sec_params_t)
                 {
                   .bond         = 1,
                   .mitm         = 0,
@@ -166,7 +187,7 @@ AdafruitBluefruit::AdafruitBluefruit(void)
                   .max_key_size = 16,
                   .kdist_own    = { .enc = 1, .id = 1},
                   .kdist_peer   = { .enc = 1, .id = 1},
-                };
+                });
 
 COMMENT_OUT(
   _auth_type = BLE_GAP_AUTH_KEY_TYPE_NONE;
@@ -269,7 +290,7 @@ bool AdafruitBluefruit::begin(uint8_t prph_count, uint8_t central_count)
   _prph_count    = prph_count;
   _central_count = central_count;
 
-#ifdef NRF52840_XXAA
+#ifdef USE_TINYUSB
   usb_softdevice_pre_enable();
 #endif
 
@@ -298,7 +319,7 @@ bool AdafruitBluefruit::begin(uint8_t prph_count, uint8_t central_count)
 
   VERIFY_STATUS( sd_softdevice_enable(&clock_cfg, nrf_error_cb), false );
 
-#ifdef NRF52840_XXAA
+#ifdef USE_TINYUSB
   usb_softdevice_post_enable();
 #endif
 
@@ -440,7 +461,7 @@ bool AdafruitBluefruit::begin(uint8_t prph_count, uint8_t central_count)
   VERIFY_STATUS(sd_ble_gap_device_name_set(&sec_mode, (uint8_t const *) CFG_DEFAULT_NAME, strlen(CFG_DEFAULT_NAME)), false);
 
   //------------- USB -------------//
-#if NRF52840_XXAA
+#ifdef USE_TINYUSB
   sd_power_usbdetected_enable(true);
   sd_power_usbpwrrdy_enable(true);
   sd_power_usbremoved_enable(true);
@@ -559,12 +580,12 @@ void AdafruitBluefruit::setConnLedInterval(uint32_t ms)
   if ( !active ) xTimerStop(_led_blink_th, 0);
 }
 
-bool AdafruitBluefruit::setApperance(uint16_t appear)
+bool AdafruitBluefruit::setAppearance(uint16_t appear)
 {
   return ERROR_NONE == sd_ble_gap_appearance_set(appear);
 }
 
-uint16_t AdafruitBluefruit::getApperance(void)
+uint16_t AdafruitBluefruit::getAppearance(void)
 {
   uint16_t appear = 0;
   (void) sd_ble_gap_appearance_get(&appear);
@@ -614,9 +635,9 @@ uint16_t AdafruitBluefruit::connHandle(void)
   return _conn_hdl;
 }
 
-bool AdafruitBluefruit::connPaired(void)
+bool AdafruitBluefruit::connPaired(uint16_t conn_hdl)
 {
-  BLEConnection* conn = Bluefruit.Connection(_conn_hdl);
+  BLEConnection* conn = Bluefruit.Connection(conn_hdl);
   return conn && conn->paired();
 }
 
@@ -692,7 +713,7 @@ void adafruit_soc_task(void* arg)
               if ( flash_nrf5x_event_cb ) flash_nrf5x_event_cb(soc_evt);
             break;
 
-            #ifdef NRF52840_XXAA
+            #ifdef USE_TINYUSB
             /*------------- usb power event handler -------------*/
             case NRF_EVT_POWER_USB_DETECTED:
             case NRF_EVT_POWER_USB_POWER_READY:
@@ -758,7 +779,7 @@ void AdafruitBluefruit::_ble_handler(ble_evt_t* evt)
   uint16_t const conn_hdl = evt->evt.common_evt.conn_handle;
   BLEConnection* conn = this->Connection(conn_hdl);
 
-  LOG_LV1("BLE", "%s : Conn Handle = %d", dbg_ble_event_str(evt->header.evt_id), conn_hdl);
+  LOG_LV2("BLE", "%s : Conn Handle = %d", dbg_ble_event_str(evt->header.evt_id), conn_hdl);
 
   // GAP handler
   if ( conn ) conn->_eventHandler(evt);
@@ -772,6 +793,9 @@ void AdafruitBluefruit::_ble_handler(ble_evt_t* evt)
       _setConnLed(true);
 
       ble_gap_evt_connected_t const * para = &evt->evt.gap_evt.params.connected;
+
+      LOG_LV1("GAP", "Conn Interval= %.2f ms, Latency = %d, Supervisor Timeout = %d ms",
+              para->conn_params.max_conn_interval*1.25f, para->conn_params.slave_latency, 10*para->conn_params.conn_sup_timeout);
 
       if ( _connection[conn_hdl] )
       {
@@ -805,16 +829,7 @@ void AdafruitBluefruit::_ble_handler(ble_evt_t* evt)
       LOG_LV2("GAP", "Disconnect Reason 0x%02X", evt->evt.gap_evt.params.disconnected.reason);
 
       // Turn off Conn LED If not connected at all
-      bool still_connected = false;
-      for (uint8_t i=0; i<BLE_MAX_CONNECTION; i++)
-      {
-        if ( _connection[i] && _connection[i]->connected() )
-        {
-          still_connected = true;
-          break;
-        }
-      }
-      if ( !still_connected ) _setConnLed(false);
+      if ( !this->connected() ) _setConnLed(false);
 
       // Invoke disconnect callback
       if ( conn->getRole() == BLE_GAP_ROLE_PERIPH )
@@ -827,7 +842,6 @@ void AdafruitBluefruit::_ble_handler(ble_evt_t* evt)
 
       delete _connection[conn_hdl];
       _connection[conn_hdl] = NULL;
-
     }
     break;
 
@@ -838,57 +852,6 @@ void AdafruitBluefruit::_ble_handler(ble_evt_t* evt)
       {
          ada_callback(NULL, 0, _rssi_cb, conn_hdl, rssi_changed->rssi);
       }
-    }
-    break;
-
-    case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
-    {
-      ble_gap_data_length_params_t* param = &evt->evt.gap_evt.params.data_length_update_request.peer_params;
-      LOG_LV2("GAP", "Data Length Req is (tx, rx) octets = (%d, %d), (tx, rx) time = (%d, %d) us",
-              param->max_tx_octets, param->max_rx_octets, param->max_tx_time_us, param->max_rx_time_us);
-
-      // Let Softdevice decide the data length
-      VERIFY_STATUS( sd_ble_gap_data_length_update(conn_hdl, NULL, NULL), );
-    }
-    break;
-
-    case BLE_GAP_EVT_DATA_LENGTH_UPDATE:
-    {
-      ble_gap_data_length_params_t* datalen =  &evt->evt.gap_evt.params.data_length_update.effective_params;
-      LOG_LV2("GAP", "Data Length is (tx, rx) octets = (%d, %d), (tx, rx) time = (%d, %d) us",
-                   datalen->max_tx_octets, datalen->max_rx_octets, datalen->max_tx_time_us, datalen->max_rx_time_us);
-    }
-    break;
-
-    case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
-    {
-      ble_gap_phys_t* req_phy = &evt->evt.gap_evt.params.phy_update_request.peer_preferred_phys;
-
-      #if CFG_DEBUG >= 1
-      char const *phy_str[] = { "Auto", "1 Mbps", "2 Mbps", "Coded" };
-      LOG_LV1("GAP", "PHY request tx: %s, rx: %s", phy_str[req_phy->tx_phys], phy_str[req_phy->rx_phys]);
-      #endif
-
-      // Tell SoftDevice to choose PHY automatically
-      ble_gap_phys_t phy = { BLE_GAP_PHY_AUTO, BLE_GAP_PHY_AUTO };
-      (void) sd_ble_gap_phy_update(conn_hdl, &phy);
-    }
-    break;
-
-    case BLE_GAP_EVT_PHY_UPDATE:
-    {
-      ble_gap_evt_phy_update_t* active_phy = &evt->evt.gap_evt.params.phy_update;
-
-      #if CFG_DEBUG >= 1
-      if ( active_phy->status != BLE_HCI_STATUS_CODE_SUCCESS )
-      {
-        LOG_LV1("GAP", "Failed HCI status = 0x%02X", active_phy->status);
-      }else
-      {
-        char const *phy_str[] = { "Auto", "1 Mbps", "2 Mbps", "Coded" };
-        LOG_LV1("GAP", "PHY active tx: %s, rx: %s", phy_str[active_phy->tx_phy], phy_str[active_phy->rx_phy]);
-      }
-      #endif
     }
     break;
 
@@ -970,6 +933,8 @@ void AdafruitBluefruit::_startConnLed(void)
 void AdafruitBluefruit::_stopConnLed(void)
 {
   xTimerStop(_led_blink_th, 0);
+
+  _setConnLed( this->connected() );
 }
 
 void AdafruitBluefruit::_setConnLed (bool on_off)

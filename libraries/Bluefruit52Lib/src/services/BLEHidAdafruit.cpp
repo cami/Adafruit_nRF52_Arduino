@@ -267,8 +267,8 @@ bool BLEHidAdafruit::keyPress(uint16_t conn_hdl, char ch)
   hid_keyboard_report_t report;
   varclr(&report);
 
-  report.modifier = ( HID_ASCII_TO_KEYCODE[(uint8_t)ch].shift ) ? KEYBOARD_MODIFIER_LEFTSHIFT : 0;
-  report.keycode[0] = HID_ASCII_TO_KEYCODE[(uint8_t)ch].keycode;
+  report.modifier = ( hid_ascii_to_keycode[(uint8_t)ch][0] ) ? KEYBOARD_MODIFIER_LEFTSHIFT : 0;
+  report.keycode[0] = hid_ascii_to_keycode[(uint8_t)ch][1];
 
   return keyboardReport(conn_hdl, &report);
 }
@@ -345,7 +345,7 @@ bool BLEHidAdafruit::mouseReport(uint16_t conn_hdl, uint8_t buttons, int8_t x, i
       .x       = x,
       .y       = y,
       .wheel   = wheel,
-      .pan     = pan
+//      .pan     = pan
   };
 
   _mse_buttons = buttons;
@@ -386,78 +386,78 @@ bool BLEHidAdafruit::mousePan(uint16_t conn_hdl, int8_t pan)
 //------------- Keyboard -------------//
 bool BLEHidAdafruit::keyboardReport(hid_keyboard_report_t* report)
 {
-  return keyboardReport(BLE_GATT_HANDLE_INVALID, report);
+  return keyboardReport(BLE_CONN_HANDLE_INVALID, report);
 }
 
 bool BLEHidAdafruit::keyboardReport(uint8_t modifier, uint8_t keycode[6])
 {
-  return keyboardReport(BLE_GATT_HANDLE_INVALID, modifier, keycode);
+  return keyboardReport(BLE_CONN_HANDLE_INVALID, modifier, keycode);
 }
 
 bool BLEHidAdafruit::keyPress(char ch)
 {
-  return keyPress(BLE_GATT_HANDLE_INVALID, ch);
+  return keyPress(BLE_CONN_HANDLE_INVALID, ch);
 }
 
 bool BLEHidAdafruit::keyRelease(void)
 {
-  return keyRelease(BLE_GATT_HANDLE_INVALID);
+  return keyRelease(BLE_CONN_HANDLE_INVALID);
 }
 
 bool BLEHidAdafruit::keySequence(const char* str, int interval)
 {
-  return keySequence(BLE_GATT_HANDLE_INVALID, str, interval);
+  return keySequence(BLE_CONN_HANDLE_INVALID, str, interval);
 }
 
 //------------- Consumer Media Keys -------------//
 bool BLEHidAdafruit::consumerReport(uint16_t usage_code)
 {
-  return consumerReport(BLE_GATT_HANDLE_INVALID, usage_code);
+  return consumerReport(BLE_CONN_HANDLE_INVALID, usage_code);
 }
 
 bool BLEHidAdafruit::consumerKeyPress(uint16_t usage_code)
 {
-  return consumerKeyPress(BLE_GATT_HANDLE_INVALID, usage_code);
+  return consumerKeyPress(BLE_CONN_HANDLE_INVALID, usage_code);
 }
 
 bool BLEHidAdafruit::consumerKeyRelease(void)
 {
-  return consumerKeyRelease(BLE_GATT_HANDLE_INVALID);
+  return consumerKeyRelease(BLE_CONN_HANDLE_INVALID);
 }
 
 //------------- Mouse -------------//
 bool BLEHidAdafruit::mouseReport(hid_mouse_report_t* report)
 {
-  return mouseReport(BLE_GATT_HANDLE_INVALID, report);
+  return mouseReport(BLE_CONN_HANDLE_INVALID, report);
 }
 
 bool BLEHidAdafruit::mouseReport(uint8_t buttons, int8_t x, int8_t y, int8_t wheel, int8_t pan)
 {
-  return mouseReport(BLE_GATT_HANDLE_INVALID, buttons, x, y, wheel, pan);
+  return mouseReport(BLE_CONN_HANDLE_INVALID, buttons, x, y, wheel, pan);
 }
 
 bool BLEHidAdafruit::mouseButtonPress(uint8_t buttons)
 {
-  return mouseButtonPress(BLE_GATT_HANDLE_INVALID, buttons);
+  return mouseButtonPress(BLE_CONN_HANDLE_INVALID, buttons);
 }
 
 bool BLEHidAdafruit::mouseButtonRelease(void)
 {
-  return mouseButtonRelease(BLE_GATT_HANDLE_INVALID);
+  return mouseButtonRelease(BLE_CONN_HANDLE_INVALID);
 }
 
 bool BLEHidAdafruit::mouseMove(int8_t x, int8_t y)
 {
-  return mouseMove(BLE_GATT_HANDLE_INVALID, x, y);
+  return mouseMove(BLE_CONN_HANDLE_INVALID, x, y);
 }
 
 bool BLEHidAdafruit::mouseScroll(int8_t scroll)
 {
-  return mouseScroll(BLE_GATT_HANDLE_INVALID, scroll);
+  return mouseScroll(BLE_CONN_HANDLE_INVALID, scroll);
 }
 
 bool BLEHidAdafruit::mousePan(int8_t pan)
 {
-  return mousePan(BLE_GATT_HANDLE_INVALID, pan);
+  return mousePan(BLE_CONN_HANDLE_INVALID, pan);
 }
 

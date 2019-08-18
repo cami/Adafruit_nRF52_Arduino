@@ -1,10 +1,14 @@
 # Arduino Core for CAMI qibanca Nectis series on nRF52 Boards
 
-This repository contains the Arduino BSP for Adafruit nRF52 series:
+This repository contains the Arduino BSP for Adafruit Bluefruit nRF52 series:
 
-- [Bluefruit Feather nRF52832](https://www.adafruit.com/product/3406)
-- [Bluefruit Feather nRF52840](https://www.adafruit.com/product/4062)
-- [Noric nRF52840DK PCA10056](https://www.nordicsemi.com/Software-and-Tools/Development-Kits/nRF52840-DK)
+- [Adafruit Feather nRF52832](https://www.adafruit.com/product/3406)
+- [Adafruit Feather nRF52840 Express](https://www.adafruit.com/product/4062)
+- Adafruit Metro nRF52840 Express
+
+Following boards are also included but are not officially supported:
+
+- [Nordic nRF52840DK PCA10056](https://www.nordicsemi.com/Software-and-Tools/Development-Kits/nRF52840-DK)
 
 ## BSP Installation
 
@@ -112,4 +116,3 @@ The following libraries are used:
 - [tinyusb](https://github.com/hathach/tinyusb) as usb stack
 - [nrfx](https://github.com/NordicSemiconductor/nrfx) for peripherals driver
 - [littlefs](https://github.com/ARMmbed/littlefs) for internal file system
-- [fatfs by elm-chan](http://elm-chan.org/fsw/ff/00index_e.html) for external file system

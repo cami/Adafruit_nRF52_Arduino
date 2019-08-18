@@ -1,6 +1,52 @@
 # Adafruit nRF52 Arduino Core Changelog
 
-# 0.10.1
+## Next Release
+
+## 0.12.0 - 2019.08.05
+
+- Update tinyusb core to support webUSB & vendor class
+- Added a couple delete operators to make std=gnu++14/17, PR #312 thanks to @kevinfrei
+- Fix Serial.read() return clean 8-bit, PR #308 thanks to @pyro9
+- Added availableForWrite(), PR #311 thanks to @pyro9
+
+## 0.11.1 - 2019.07.10
+
+- Update tinyusb core to support USB MIDI
+- Refactor Ada Callback, use ISCR to detect isr context. Use function instead of macro
+- Implement #240 run travis test with all example sketches
+- Fixed auto-start of advertising when central is connected, thanks to @ogatatsu PR #268
+- Added Tone()/noTone() functions
+- Travis-ci builds all sketches when commit code
+- Fixed setAppearance/getAppearance() typo, thanks to @paulmand3l PR #292
+- Fixed rssi_proximity_peripheral sketch, thanks to @dicobrazz PR #295
+- Fixed doc typo, thanks to @yvadher PR #296
+- Fixed HID usage code location comment in exmaple sketch, thanks to @stefandz PR #297
+- Fixed #277 conn LED doesn't stop when scanner is time out
+- Added connection handle to Bluefruit.connParied()
+
+## 0.11.0
+
+- Rework USB driver to support Adafruit_TinyUSB library (support HID and MSC)
+- Added Metro nRF52840 Express
+- Update bootloader binaries to 0.2.11
+- Rework Filesystem
+  - Seperate LittleFS and InternalFS into `Adafruit_LittleFS` and `InternalFileSystem`
+  - Remove ExternalFS in favor of using Adafruit_QSPI and Adafruit_SPIFlash library
+- Update nrfx to 1.6.2
+- Fixed #250 wrong values for g_ADigitalPinMap, thanks to @henrygab
+- Fixed interrupts for device with multiple I/O Port, thanks to MacGyverNL PR #261
+- Update adc_vbat.ino sketch to work with nrf52840, thanks to @pyro9
+- Extend SoftwareTimer with option to make it non-repeating, add reset function & ISR-safe functions, thanks to @MacGyverNL PR #260
+- Fixed connection handle in BLEHidAdafruit single connection api, thanks to @ogatatsu PR #267
+- Fixed spelling & Add Environmental Sensing GATT Service and UV Index GATT Characteristics UUID, thanks to @sayanee
+- Fixed #276 rename macro FILE_READ/WRITE to enum FILE_O_READ/WRITE
+- Upgrade compiler toolchain from gcc 5.2 2015q2 to gcc 7 2017q4
+- Rename hid client setProtocolMode() to setBootMode()
+- Removed `rtos_idle_callback()`, sketch define vApplicationIdleHook() if needed
+- enhance Serial.available()/write() to prevent blocking wait without yield/delay
+- Clean up compiler warnings
+
+## 0.10.1
 
 This release added multiple concurrent peripheral connections support, allow Bluefruit device to multiple central (phones/PC) simultaneously. It introduces new BLE class: BLEPeriph, BLEConnection, remove BLEGap, refactor/rename/move functions and callbacks.     
 
@@ -43,7 +89,7 @@ This release added multiple concurrent peripheral connections support, allow Blu
   - Removed keyboardReport() variant with flat keycode parameters
   - Added conn_handle parameter to keyboard led callback
 
-# 0.9.3
+## 0.9.3
 
 - Correct bootloader version text in IDE to 0.2.6
 - Fixed #173 bleuart return incorrect value when failed to send (PR #178 thanks Nenik)

@@ -38,16 +38,14 @@
 
 SchedulerRTOS Scheduler;
 
-void yield(void) {
-    taskYIELD();
-}
+static void _redirect_task(void* arg)
+{
+  SchedulerRTOS::taskfunc_t taskfunc = (SchedulerRTOS::taskfunc_t) arg;
 
-static void _redirect_task(void *arg) {
-    SchedulerRTOS::taskfunc_t taskfunc = (SchedulerRTOS::taskfunc_t) arg;
-    
-    while (1) {
-        taskfunc();
-    }
+  while(1)
+  {
+    taskfunc();
+  }
 }
 
 SchedulerRTOS::SchedulerRTOS(void) {
@@ -73,24 +71,28 @@ bool SchedulerRTOS::startLoop(taskfunc_t task, const char *name, uint32_t stack_
 
 
 //--------------------------------------------------------------------+
-// FreeRTOS Hooks
+// Hooks
 //--------------------------------------------------------------------+
 
 extern "C"
 {
 
-void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
-    LOG_LV1("RTOS", "%s Stack Overflow !!!", pcTaskName);
+void yield(void)
+{
+#ifdef USE_TINYUSB
+    tud_cdc_write_flush();
+#endif
+
+  taskYIELD();
+}
+
+void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName )
+{
+  LOG_LV1("RTOS", "%s Stack Overflow !!!", pcTaskName);
 }
 
 void vApplicationMallocFailedHook(void) {
     LOG_LV1("RTOS", "Failed to Malloc");
-}
-
-void vApplicationIdleHook(void) {
-    // Call user callback if defined
-    if (rtos_idle_callback)
-        rtos_idle_callback();
 }
 
 /* configSUPPORT_STATIC_ALLOCATION is set to 1, so the application must provide an
