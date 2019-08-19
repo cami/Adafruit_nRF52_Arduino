@@ -29,39 +29,39 @@
 
 class Adafruit_USBD_Interface
 {
-  public:
-    virtual uint16_t getDescriptor(uint8_t itfnum, uint8_t* buf, uint16_t bufsize) = 0;
+public:
+  virtual uint16_t getDescriptor(uint8_t itfnum, uint8_t* buf, uint16_t bufsize) = 0;
 };
 
 class Adafruit_USBD_Device
 {
-  private:
-    tusb_desc_device_t _desc_device;
+private:
+  tusb_desc_device_t _desc_device;
 
-    uint8_t  _desc_cfg[256];
-    uint16_t _desc_cfglen;
+  uint8_t  _desc_cfg[256];
+  uint16_t _desc_cfglen;
 
-    uint8_t  _itf_count;
+  uint8_t  _itf_count;
 
-    uint8_t  _epin_count;
-    uint8_t  _epout_count;
+  uint8_t  _epin_count;
+  uint8_t  _epout_count;
 
-  public:
-    Adafruit_USBD_Device(void);
+public:
+  Adafruit_USBD_Device(void);
 
-    bool addInterface(Adafruit_USBD_Interface& itf);
+  bool addInterface(Adafruit_USBD_Interface& itf);
 
-    void setID(uint16_t vid, uint16_t pid);
-    void setVersion(uint16_t bcd);
-    bool begin(void);
+  void setID(uint16_t vid, uint16_t pid);
+  void setVersion(uint16_t bcd);
+  bool begin(void);
 
-    bool mounted      (void) { return tud_mounted(); }
-    bool suspended    (void) { return tud_suspended(); }
-    bool ready        (void) { return tud_ready(); }
-    bool remoteWakeup (void) { return tud_remote_wakeup(); }
+  bool mounted      (void) { return tud_mounted(); }
+  bool suspended    (void) { return tud_suspended(); }
+  bool ready        (void) { return tud_ready(); }
+  bool remoteWakeup (void) { return tud_remote_wakeup(); }
 
-    friend uint8_t const * tud_descriptor_device_cb(void);
-    friend uint8_t const * tud_descriptor_configuration_cb(uint8_t index);
+  friend uint8_t const * tud_descriptor_device_cb(void);
+  friend uint8_t const * tud_descriptor_configuration_cb(uint8_t index);
 };
 
 extern Adafruit_USBD_Device USBDevice;

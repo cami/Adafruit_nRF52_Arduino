@@ -36,9 +36,15 @@ nectis.pid.1=0x0029
 nectis.vid.2=0x239A
 nectis.pid.2=0x8029
 
-# CircuitPython
+# VID/PID for bootloader with/without UF2, Arduino + Circuitpython App
+nectis.vid.0=0x239A
+nectis.pid.0=0x8029
+nectis.vid.1=0x239A
+nectis.pid.1=0x0029
 nectis.vid.2=0x239A
-nectis.pid.2=0x802A
+nectis.pid.2=0x002A
+nectis.vid.3=0x239A
+nectis.pid.3=0x802A
 
 nectis.bootloader.tool=bootburn
 
@@ -54,7 +60,12 @@ nectis.build.f_cpu=64000000
 nectis.build.board=NRF52840_NECTIS
 nectis.build.core=nRF5
 nectis.build.variant=nectis_nRF52840
-nectis.build.extra_flags=-DNRF52840_XXAA -DARDUINO_NRF52_FEATHER
+nectis.build.usb_manufacturer="CAMI and Co."
+nectis.build.usb_product="CAMI qibanca nectis series"
+nectis.build.extra_flags=-DNRF52840_XXAA -DARDUINO_NRF52_FEATHER {build.flags.usb}
+nectis.build.ldscript=nrf52840_s140_v6.ld
+nectis.build.vid=0x239A
+nectis.build.pid=0x8029
 
 # SofDevice Menu
 # Ram & ROM size varies depending on SoftDevice (check linker script)
