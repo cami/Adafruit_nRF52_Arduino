@@ -1,12 +1,3 @@
-//void wdt_init(void)
-//{
-//  NRF_WDT->CONFIG = (WDT_CONFIG_HALT_Pause << WDT_CONFIG_HALT_Pos) | ( WDT_CONFIG_SLEEP_Run << WDT_CONFIG_SLEEP_Pos);   //Configure Watchdog. a) Pause watchdog while the CPU is halted by the debugger.  b) Keep the watchdog running while the CPU is sleeping.
-//  NRF_WDT->CRV = 3*32768;             //ca 3 sek. timout
-//  NRF_WDT->RREN |= WDT_RREN_RR0_Msk;  //Enable reload register 0
-//  NRF_WDT->TASKS_START = 1;           //Start the Watchdog timer
-//}
-
-
 #include <NectisCellular.h>
 
 #define PIN_WDT GROVE_ANALOG_1_1
@@ -39,6 +30,7 @@ void setup() {
   Nectis.Bg96Begin();
   Nectis.InitLteM();
   delay(100);
+  Serial.println("### Setup complete.");
 
   Serial.println("Watchdog timer Initialize.");
   pinMode(PIN_WDT, INPUT);
@@ -62,13 +54,13 @@ void loop() {
   }
 
   if (isWatchdogFed) {
-//    NRF_WDT->RREN = WDT_RR_RR_Reload << WDT_RR_RR_Pos;
+    NRF_WDT->RR[0] = WDT_RR_RR_Reload;
     NRF_WDT->TASKS_START = 1;
 
     digitalWrite(LED_BLUE, HIGH);
     delay(100);
     digitalWrite(LED_BLUE, LOW);
     isWatchdogFed = false;
+    delay(1000/60);
   }
-//  delay(1000/60);
 }
