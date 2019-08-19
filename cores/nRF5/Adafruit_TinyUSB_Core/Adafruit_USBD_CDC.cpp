@@ -51,15 +51,15 @@ uint16_t Adafruit_USBD_CDC::getDescriptor(uint8_t itfnum, uint8_t* buf, uint16_t
 }
 
 // Baud and config is ignore in CDC
-void Adafruit_USBD_CDC::begin (uint32_t baud)
+void Adafruit_USBD_CDC::begin(uint32_t baud)
 {
-  (void) baud;
+  (void)baud;
 }
 
-void Adafruit_USBD_CDC::begin (uint32_t baud, uint8_t config)
+void Adafruit_USBD_CDC::begin(uint32_t baud, uint8_t config)
 {
-  (void) baud;
-  (void) config;
+  (void)baud;
+  (void)config;
 }
 
 void Adafruit_USBD_CDC::end(void)
@@ -92,12 +92,12 @@ int Adafruit_USBD_CDC::available(void)
 int Adafruit_USBD_CDC::peek(void)
 {
   uint8_t ch;
-  return tud_cdc_peek(0, &ch) ? (int) ch : -1;
+  return tud_cdc_peek(0, &ch) ? (int)ch : -1;
 }
 
 int Adafruit_USBD_CDC::read(void)
 {
-  return (int) tud_cdc_read_char();
+  return (int)tud_cdc_read_char();
 }
 
 void Adafruit_USBD_CDC::flush(void)
@@ -138,8 +138,8 @@ extern "C"
 // Use to reset to DFU when disconnect with 1200 bps
 void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
 {
-  (void) itf;  // interface ID, not used
-  (void) rts;
+  (void)itf;  // interface ID, not used
+  (void)rts;
 
   // DTR = false is counted as disconnected
   if ( !dtr )

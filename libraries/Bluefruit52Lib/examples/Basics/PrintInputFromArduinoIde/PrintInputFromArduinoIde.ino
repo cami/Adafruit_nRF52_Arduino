@@ -16,33 +16,37 @@ void loop() {
   unsigned int INPUT_SIZE = 0;
 
   while (Serial.available() > 0) {
+    // After Serial.read(), Serial.available() is subtracted by 1.
     int inputOneByte = Serial.read();
+//    Serial.print(inputOneByte);
+//    Serial.print(" ");
+//    Serial.println(inputOneByte, HEX);
 
-    if (Serial.available() > 0) {
-      // Please select "CR and LF" on the serial monitor of ArduinoIDE
-      // 0x0D: CR
-      if (inputOneByte == 0x0D) {
-      } else {
-        // Serial.print(inputOneByte);
-        // Serial.print(" ");
-        // Serial.println(inputOneByte, HEX);
+    input[INPUT_SIZE++] = inputOneByte;
 
-        input[INPUT_SIZE++] = inputOneByte;
-
-        if (INPUT_SIZE == INPUT_BUFFER_SIZE) {
-          input[INPUT_SIZE] == 0x00;
-          Serial.flush();
-          Serial.println(input);
-          break;
-        }
-      }
-    } else if (Serial.available() == 0) {
-      input[INPUT_SIZE] = 0x00;
-
+    if (INPUT_SIZE == INPUT_BUFFER_SIZE-1) {
+      input[INPUT_SIZE] == 0x00;
       Serial.println(input);
-      Serial.print("");
-      memset(&input[0], 0x00, SERIAL_BUFFER_SIZE);
+      delay(10);
+
+      memset(&input[0], 0x00, sizeof(input));
+      INPUT_SIZE = 0;
+    }
+
+    // Please select "CR and LF" on the serial monitor of ArduinoIDE
+    // if (Serial.available() == 1) then Serial.read() = CR
+    // if (Serial.available() == 0) then Serial.read() = LF
+    if (Serial.available() == 2) {
+      input[INPUT_SIZE] == 0x00;
+      Serial.println(input);
+      delay(10);
+      memset(&input[0], 0x00, sizeof(input));
+
+      Serial.read();
+      Serial.read();
+
       Serial.println("Please input number");
     }
+    delay(1);
   }
 }
