@@ -149,4 +149,9 @@ public:
     void PostDataViaHttp(char *post_data);
     void PostDataViaUdp(char *post_data);
     void PostDataViaUdp(char *post_data, int data_length);
+
+    void GetBg96UfsStorageSize();
+    void ListBg96UfsFileInfo();
+    bool UploadFilesToBg96(const char* filename, unsigned int filesize);
+//    void DeleteBg96UfsFiles();
 };

@@ -4,6 +4,7 @@
 
 #include "WioCellular.h"
 #include "Internal/Debug.h"
+#include "Internal/StringBuilder.h"
 #include "Internal/ArgumentParser.h"
 
 #define APN                             "soracom.io"
@@ -645,3 +646,29 @@ err_close:
 err:
     delay(INTERVAL);
 }
+
+void NectisCellular::GetBg96UfsStorageSize() {
+  // +QFLDS: 12883392,14483456
+  // The freesize is 12883392 byte, the total_size is 14483456 byte.
+  _AtSerial.WriteCommandAndReadResponse("AT+QFLDS=\"UFS\"", "^OK$", 500, NULL);
+  _AtSerial.WriteCommandAndReadResponse("AT+QFUPL=?", "^OK$", 500, NULL);
+}
+
+void NectisCellular::ListBg96UfsFileInfo() {
+  _AtSerial.WriteCommandAndReadResponse("AT+QFLST", "^OK$", 500, NULL);
+}
+
+bool NectisCellular::UploadFilesToBg96(const char* filename, unsigned int filesize) {
+  StringBuilder str;
+
+  Serial.println(filename);
+  if (!str.WriteFormat("AT+QFUPL=\"%s\",%u,60000,1", filename, filesize))
+    return RET_ERR(false, E_UNKNOWN);
+  _AtSerial.WriteCommand(str.GetString());
+  if (!_AtSerial.ReadResponse("CONNECT", 60000, NULL))
+    return RET_ERR(false, E_UNKNOWN);
+}
+
+//void NectisCellular::DeleteBg96UfsFiles() {
+//  _AtSerial.WriteCommandAndReadResponse("AT+QFDEL=\"*\"", "^OK$", 500, NULL);
+//}
