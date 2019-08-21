@@ -308,6 +308,8 @@ int NectisCellular::GetReceivedSignalStrengthIndicator() {
         rssi_count++;
         delay(1000);
     }
+
+    return rssi;
 }
 
 bool NectisCellular::IsTimeGot(struct tm *tim) {
