@@ -50,15 +50,7 @@ extern "C"
 #define PIN_A6                      (30)
 #define PIN_A7                      (31)
 
-static const uint8_t A0 = PIN_A0;
-static const uint8_t A1 = PIN_A1;
-static const uint8_t A2 = PIN_A2;
-static const uint8_t A3 = PIN_A3;
-static const uint8_t A4 = PIN_A4;
-static const uint8_t A5 = PIN_A5;
-static const uint8_t A6 = PIN_A6;
-static const uint8_t A7 = PIN_A7;
-//#define ADC_RESOLUTION            (14)
+#define ADC_RESOLUTION            (10)
 
 // Other pins
 #define PIN_AREF                    (2)
@@ -66,8 +58,6 @@ static const uint8_t A7 = PIN_A7;
 
 #define PIN_NFC1                    (9)     // NFC電源側
 #define PIN_NFC2                    (10)    // NFCグラウンド側
-
-static const uint8_t AREF = PIN_AREF;
 
 /*
  * Serial interfaces
@@ -87,11 +77,6 @@ static const uint8_t AREF = PIN_AREF;
 #define PIN_SPI_MOSI              (20)
 #define PIN_SPI_SCK               (19)
 #define PIN_SPI_CS                (24)
-
-static const uint8_t SS = PIN_SPI_CS;
-static const uint8_t MOSI = PIN_SPI_MOSI;
-static const uint8_t MISO = PIN_SPI_MISO;
-static const uint8_t SCK = PIN_SPI_SCK;
 
 /*
  * Wire Interfaces
@@ -170,6 +155,23 @@ static const uint8_t SCK = PIN_SPI_SCK;
 //#define DEBUG_UART_CORE           (2)   // USART3
 //#define DEBUG_UART_TX_PIN         MODULE_UART_TX_PIN
 //#define DEBUG_UART_RX_PIN         MODULE_UART_RX_PIN
+
+
+static const uint8_t A0 = PIN_A0;
+static const uint8_t A1 = PIN_A1;
+static const uint8_t A2 = PIN_A2;
+static const uint8_t A3 = PIN_A3;
+static const uint8_t A4 = PIN_A4;
+static const uint8_t A5 = PIN_A5;
+static const uint8_t A6 = PIN_A6;
+static const uint8_t A7 = PIN_A7;
+
+static const uint8_t AREF = PIN_AREF;
+
+static const uint8_t SS = PIN_SPI_CS;
+static const uint8_t MOSI = PIN_SPI_MOSI;
+static const uint8_t MISO = PIN_SPI_MISO;
+static const uint8_t SCK = PIN_SPI_SCK;
 
 
 // On-board QSPI Flash
