@@ -82,12 +82,7 @@ void Uart::begin(unsigned long baudrate, uint16_t /*config*/) {
     
     nrfUart->PSELTXD = uc_pinTX;
     nrfUart->PSELRXD = uc_pinRX;
-    
-    
-    Serial.print("baudrate + config: ");
-    Serial.println(baudrate);
-    
-    
+
     if (uc_hwFlow == 1) {
         nrfUart->PSELCTS = uc_pinCTS;
         nrfUart->PSELRTS = uc_pinRTS;

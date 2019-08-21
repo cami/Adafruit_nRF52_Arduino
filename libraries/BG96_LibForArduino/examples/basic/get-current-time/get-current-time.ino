@@ -41,4 +41,6 @@ void loop() {
 
   Serial.print("JST:");
   Serial.println(currentTimeStr);
+
+  delay(5000);
 }

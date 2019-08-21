@@ -4,6 +4,7 @@
 #include "Debug.h"
 #include "slre.901d42c/slre.h"
 #include "../WioCellular.h"
+#include "../NectisCellular.h"
 #include <string.h>
 
 #define READ_BYTE_TIMEOUT    (10)
@@ -13,6 +14,8 @@
 #define CHAR_LF (0x0a)
 
 AtSerial::AtSerial(SerialAPI *serial, WioCellular *wio) : _Serial(serial), _Wio(wio), _EchoOn(true) {
+}
+AtSerial::AtSerial(SerialAPI *serial, NectisCellular *nectis) : _Serial(serial), _Nectis(nectis), _EchoOn(true) {
 }
 
 void AtSerial::SetEcho(bool on) {

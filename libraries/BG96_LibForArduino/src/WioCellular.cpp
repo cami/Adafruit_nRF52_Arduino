@@ -113,8 +113,7 @@ bool WioCellular::TurnOn() {
     digitalWrite(MODULE_PWRKEY_PIN, HIGH);
     delay(600);
     digitalWrite(MODULE_PWRKEY_PIN, LOW);
-    Serial.println("TurnOn: MODULE_PWRKEY_PIN");
-    
+
     return true;
 }
 
@@ -289,19 +288,19 @@ bool WioCellular::TurnOnOrReset() {
 
 #elif defined NRF52840_XXAA
     sw.Restart();
-      while (true) {
-          int status;
-  
-          _AtSerial.WriteCommand("AT+CEREG?");
-          if (!_AtSerial.ReadResponse("^\\+CEREG: (.*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
-          parser.Parse(response.c_str());
-          if (parser.Size() < 2) return RET_ERR(false, E_UNKNOWN);
-          //resultCode = atoi(parser[0]);
-          status = atoi(parser[1]);
-          if (!_AtSerial.ReadResponse("^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
-          if (0 <= status && status <= 5 && status != 4) break;
-          if (sw.ElapsedMilliseconds() >= 10000) return RET_ERR(false, E_UNKNOWN);
-          delay(POLLING_INTERVAL);
+        while (true) {
+            int status;
+
+            _AtSerial.WriteCommand("AT+CEREG?");
+            if (!_AtSerial.ReadResponse("^\\+CEREG: (.*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
+            parser.Parse(response.c_str());
+            if (parser.Size() < 2) return RET_ERR(false, E_UNKNOWN);
+            //resultCode = atoi(parser[0]);
+            status = atoi(parser[1]);
+            if (!_AtSerial.ReadResponse("^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+            if (0 <= status && status <= 5 && status != 4) break;
+            if (sw.ElapsedMilliseconds() >= 10000) return RET_ERR(false, E_UNKNOWN);
+            delay(POLLING_INTERVAL);
       }
 #endif
     
@@ -443,50 +442,49 @@ bool WioCellular::GetTime(struct tm *tim) {
 
 #if defined ARDUINO_WIO_3G
     if (strlen(response.c_str()) != 24) return RET_ERR(false, E_UNKNOWN);
-      const char* parameter = response.c_str();
-  
-      if (parameter[0] != '"') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[3] != '/') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[6] != '/') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[9] != ',') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[12] != ':') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[15] != ':') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[21] != ',') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[23] != '"') return RET_ERR(false, E_UNKNOWN);
-  
-      int yearOffset = atoi(&parameter[1]);
-      tim->tm_year = (yearOffset >= 80 ? 1900 : 2000) + yearOffset - 1900;
-      tim->tm_mon = atoi(&parameter[4]) - 1;
-      tim->tm_mday = atoi(&parameter[7]);
-      tim->tm_hour = atoi(&parameter[10]);
-      tim->tm_min = atoi(&parameter[13]);
-      tim->tm_sec = atoi(&parameter[16]);
-      tim->tm_wday = 0;
-      tim->tm_yday = 0;
-      tim->tm_isdst = 0;
-  //  #elif defined ARDUINO_WIO_LTE_M1NB1_BG96
-#elif defined NRF52840_XXAA
+        const char* parameter = response.c_str();
+
+        if (parameter[0] != '"') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[3] != '/') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[6] != '/') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[9] != ',') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[12] != ':') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[15] != ':') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[21] != ',') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[23] != '"') return RET_ERR(false, E_UNKNOWN);
+
+        int yearOffset = atoi(&parameter[1]);
+        tim->tm_year = (yearOffset >= 80 ? 1900 : 2000) + yearOffset - 1900;
+        tim->tm_mon = atoi(&parameter[4]) - 1;
+        tim->tm_mday = atoi(&parameter[7]);
+        tim->tm_hour = atoi(&parameter[10]);
+        tim->tm_min = atoi(&parameter[13]);
+        tim->tm_sec = atoi(&parameter[16]);
+        tim->tm_wday = 0;
+        tim->tm_yday = 0;
+        tim->tm_isdst = 0;
+#elif defined ARDUINO_WIO_LTE_M1NB1_BG96
     if (strlen(response.c_str()) != 26) return RET_ERR(false, E_UNKNOWN);
-      const char* parameter = response.c_str();
-  
-      if (parameter[0] != '"') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[5] != '/') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[8] != '/') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[11] != ',') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[14] != ':') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[17] != ':') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[23] != ',') return RET_ERR(false, E_UNKNOWN);
-      if (parameter[25] != '"') return RET_ERR(false, E_UNKNOWN);
-  
-      tim->tm_year = atoi(&parameter[1]) - 1900;
-      tim->tm_mon = atoi(&parameter[6]) - 1;
-      tim->tm_mday = atoi(&parameter[9]);
-      tim->tm_hour = atoi(&parameter[12]);
-      tim->tm_min = atoi(&parameter[15]);
-      tim->tm_sec = atoi(&parameter[18]);
-      tim->tm_wday = 0;
-      tim->tm_yday = 0;
-      tim->tm_isdst = 0;
+        const char* parameter = response.c_str();
+
+        if (parameter[0] != '"') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[5] != '/') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[8] != '/') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[11] != ',') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[14] != ':') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[17] != ':') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[23] != ',') return RET_ERR(false, E_UNKNOWN);
+        if (parameter[25] != '"') return RET_ERR(false, E_UNKNOWN);
+
+        tim->tm_year = atoi(&parameter[1]) - 1900;
+        tim->tm_mon = atoi(&parameter[6]) - 1;
+        tim->tm_mday = atoi(&parameter[9]);
+        tim->tm_hour = atoi(&parameter[12]);
+        tim->tm_min = atoi(&parameter[15]);
+        tim->tm_sec = atoi(&parameter[18]);
+        tim->tm_wday = 0;
+        tim->tm_yday = 0;
+        tim->tm_isdst = 0;
 #endif
     
     // Update tm_wday and tm_yday
@@ -496,8 +494,7 @@ bool WioCellular::GetTime(struct tm *tim) {
 }
 
 #if defined NRF52840_XXAA
-void WioCellular::SetAccessTechnology(AccessTechnologyType technology)
-{
+void WioCellular::SetAccessTechnology(AccessTechnologyType technology) {
     _AccessTechnology = technology;
 }
 #endif // NRF52840_XXAA
@@ -545,25 +542,24 @@ bool WioCellular::WaitForPSRegistration(long timeout) {
 
 #if defined ARDUINO_WIO_3G
     Stopwatch sw;
-      sw.Restart();
-      while (true) {
-          int status;
-  
-          _AtSerial.WriteCommand("AT+CGREG?");
-          if (!_AtSerial.ReadResponse("^\\+CGREG: (.*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
-          parser.Parse(response.c_str());
-          if (parser.Size() < 2) return RET_ERR(false, E_UNKNOWN);
-          //resultCode = atoi(parser[0]);
-          status = atoi(parser[1]);
-          if (!_AtSerial.ReadResponse("^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
-          if (status == 0) return RET_ERR(false, E_UNKNOWN);
-          if (status == 1 || status == 5) break;
-  
-          if (sw.ElapsedMilliseconds() >= (unsigned long)timeout) return RET_ERR(false, E_UNKNOWN);
-          delay(POLLING_INTERVAL);
-      }
-  //  #elif defined ARDUINO_WIO_LTE_M1NB1_BG96
-#elif defined NRF52840_XXAA
+    sw.Restart();
+    while (true) {
+        int status;
+
+        _AtSerial.WriteCommand("AT+CGREG?");
+        if (!_AtSerial.ReadResponse("^\\+CGREG: (.*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
+        parser.Parse(response.c_str());
+        if (parser.Size() < 2) return RET_ERR(false, E_UNKNOWN);
+        //resultCode = atoi(parser[0]);
+        status = atoi(parser[1]);
+        if (!_AtSerial.ReadResponse("^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+        if (status == 0) return RET_ERR(false, E_UNKNOWN);
+        if (status == 1 || status == 5) break;
+
+        if (sw.ElapsedMilliseconds() >= (unsigned long)timeout) return RET_ERR(false, E_UNKNOWN);
+        delay(POLLING_INTERVAL);
+    }
+#elif defined ARDUINO_WIO_LTE_M1NB1_BG96
     Stopwatch sw;
     sw.Restart();
     while (true) {
@@ -587,8 +583,7 @@ bool WioCellular::WaitForPSRegistration(long timeout) {
     return RET_OK(true);
 }
 
-bool WioCellular::Activate(const char *accessPointName, const char *userName, const char *password,
-                           long waitForRegistTimeout) {
+bool WioCellular::Activate(const char *accessPointName, const char *userName, const char *password, long waitForRegistTimeout) {
     std::string response;
     ArgumentParser parser;
     Stopwatch sw;
@@ -599,7 +594,9 @@ bool WioCellular::Activate(const char *accessPointName, const char *userName, co
             return RET_ERR(false, E_UNKNOWN);
         if (!_AtSerial.WriteCommandAndReadResponse(str_apn.GetString(), "^OK$", 500, NULL))
             return RET_ERR(false, E_UNKNOWN);
-    
+
+        // When you would like to start to communicate with SORACOM,
+        // it is faster to to set [IP, accessPointName] than to set [accessPointName, userName, password].
 //        StringBuilder str;
 //        if (!str.WriteFormat("AT+QICSGP=1,1,\"%s\",\"%s\",\"%s\",3", accessPointName, userName, password))
 //            return RET_ERR(false, E_UNKNOWN);
@@ -645,7 +642,7 @@ bool WioCellular::Activate(const char *accessPointName, const char *userName, co
         if (!WaitForPSRegistration(waitForRegistTimeout))
             return RET_ERR(false, E_UNKNOWN);
         
-        // for debug.
+        // For debug.
 #ifdef NECTIS_DEBUG
         char dbg[100];
         sprintf(dbg, "Elapsed time is %lu[msec.].", sw.ElapsedMilliseconds());
@@ -673,7 +670,7 @@ bool WioCellular::Activate(const char *accessPointName, const char *userName, co
         delay(POLLING_INTERVAL);
     }
     
-    // for debug.
+    // For debug.
 #ifdef NECTIS_DEBUG
     if (!_AtSerial.WriteCommandAndReadResponse("AT+QIACT?", "^OK$", 150000, NULL))
         return RET_ERR(false, E_UNKNOWN);
@@ -729,8 +726,7 @@ bool WioCellular::SetDNSAddress(const IPAddress &ip1) {
 
 bool WioCellular::SetDNSAddress(const IPAddress &ip1, const IPAddress &ip2) {
     StringBuilder str;
-    if (!str.WriteFormat("AT+QIDNSCFG=1,\"%u.%u.%u.%u\",\"%u.%u.%u.%u\"", ip1[0], ip1[1], ip1[2], ip1[3], ip2[0],
-                         ip2[1], ip2[2], ip2[3]))
+    if (!str.WriteFormat("AT+QIDNSCFG=1,\"%u.%u.%u.%u\",\"%u.%u.%u.%u\"", ip1[0], ip1[1], ip1[2], ip1[3], ip2[0], ip2[1], ip2[2], ip2[3]))
         return RET_ERR(false, E_UNKNOWN);
     if (!_AtSerial.WriteCommandAndReadResponse(str.GetString(), "^OK$", 150000, NULL))
         return RET_ERR(false, E_UNKNOWN);
@@ -913,8 +909,7 @@ int WioCellular::HttpGet(const char *url, char *data, int dataSize, const WioCel
             return RET_ERR(-1, E_UNKNOWN);
 #if defined ARDUINO_WIO_3G
         if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"ciphersuite\",1,\"0XFFFF\"", "^OK$", 500, NULL)) return RET_ERR(-1, E_UNKNOWN);
-    //  #elif defined ARDUINO_WIO_LTE_M1NB1_BG96
-#elif defined NRF52840_XXAA
+#elif defined ARDUINO_WIO_LTE_M1NB1_BG96
         if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"ciphersuite\",1,0XFFFF", "^OK$", 500, NULL)) return RET_ERR(-1, E_UNKNOWN);
 #endif
         if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"seclevel\",1,0", "^OK$", 500, NULL))
@@ -1020,8 +1015,7 @@ bool WioCellular::HttpPost(const char *url, const char *data, int *responseCode,
             return RET_ERR(false, E_UNKNOWN);
 #if defined ARDUINO_WIO_3G
         if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"ciphersuite\",1,\"0XFFFF\"", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
-    //  #elif defined ARDUINO_WIO_LTE_M1NB1_BG96
-#elif defined NRF52840_XXAA
+#elif defined ARDUINO_WIO_LTE_M1NB1_BG96
         if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"ciphersuite\",1,0XFFFF", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
 #endif
         if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"seclevel\",1,0", "^OK$", 500, NULL))
@@ -1149,8 +1143,7 @@ bool WioCellular::HttpPost2(const char *url, const char *data, int *responseCode
             return RET_ERR(false, E_UNKNOWN);
 #if defined ARDUINO_WIO_3G
         if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"ciphersuite\",1,\"0XFFFF\"", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
-    //  #elif defined ARDUINO_WIO_LTE_M1NB1_BG96
-#elif defined NRF52840_XXAA
+#elif defined ARDUINO_WIO_LTE_M1NB1_BG96
         if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"ciphersuite\",1,0XFFFF", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
 #endif
         if (!_AtSerial.WriteCommandAndReadResponse("AT+QSSLCFG=\"seclevel\",1,0", "^OK$", 500, NULL))

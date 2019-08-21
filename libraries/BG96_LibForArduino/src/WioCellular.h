@@ -13,7 +13,7 @@
 #define WIO_UDP        (WioCellular::SOCKET_UDP)
 
 class WioCellular {
-    public:
+public:
     enum ErrorCodeType {
         E_OK = 0,
         E_UNKNOWN,
@@ -37,7 +37,7 @@ class WioCellular {
         SELECT_NETWORK_MODE_MANUAL,
     };
     
-    private:
+private:
     SerialAPI _SerialAPI;
     AtSerial _AtSerial;
     WioSK6812 _Led;
@@ -46,7 +46,7 @@ class WioCellular {
     SelectNetworkModeType _SelectNetworkMode;
     std::string _SelectNetworkPLMN;
     
-    private:
+private:
     bool ReturnOk(bool value) {
         _LastErrorCode = E_OK;
         return value;
@@ -65,10 +65,10 @@ class WioCellular {
     
     bool HttpSetUrl(const char *url);
     
-    public:
+public:
     //bool ReadResponseCallback(const char* response);	// Internal use only.
     
-    public:
+public:
     WioCellular();
     ErrorCodeType GetLastError() const;
     void Init();
@@ -97,9 +97,9 @@ class WioCellular {
     bool Activate(const char *accessPointName, const char *userName, const char *password,
                   long waitForRegistTimeout = 120000);
     bool Deactivate();
-    
+
     //bool GetLocation(double* longitude, double* latitude);
-    
+
     bool GetDNSAddress(IPAddress *ip1, IPAddress *ip2);
     bool SetDNSAddress(const IPAddress &ip1);
     bool SetDNSAddress(const IPAddress &ip1, const IPAddress &ip2);

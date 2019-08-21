@@ -1,11 +1,14 @@
 #pragma once
 
-#include "WioCellLibforArduino.h"
+#include "NectisCellularConfig.h"
+
 #include <IPAddress.h>
 #include <string>
 
 #include "Internal/AtSerial.h"
-#include "Internal/WioSK6812.h"
+
+#include <WioCellular.h>
+#include "WioCellLibforArduino.h"
 #include "WioCellularHttpHeader.h"
 
 #define NECTIS_TCP        (NectisCellular::SOCKET_TCP)
@@ -40,11 +43,10 @@ private:
     WioCellular _Wio;
     SerialAPI _SerialAPI;
     AtSerial _AtSerial;
-    // WioSK6812 _Led;  //TODO
     ErrorCodeType _LastErrorCode;
-//    AccessTechnologyType _AccessTechnology;   //TODO
-//    SelectNetworkModeType _SelectNetworkMode;     //TODO
-//    std::string _SelectNetworkPLMN;   //TODO
+    AccessTechnologyType _AccessTechnology;
+    SelectNetworkModeType _SelectNetworkMode;
+    std::string _SelectNetworkPLMN;
 
 private:
     bool ReturnOk(bool value) {
@@ -58,12 +60,12 @@ private:
     bool ReturnError(int lineNumber, bool value, ErrorCodeType errorCode);
     int ReturnError(int lineNumber, int value, ErrorCodeType errorCode);
 
-//    bool IsBusy() const;  //TODO
-//    bool IsRespond();     //TODO
-//    bool Reset();     //TODO
-//    bool TurnOn();        //TODO
-//
-//    bool HttpSetUrl(const char *url);     //TODO
+    bool IsBusy() const;
+    bool IsRespond();
+    bool Reset();
+    bool TurnOn();
+
+    bool HttpSetUrl(const char *url);
 
 public:
     NectisCellular();
@@ -71,31 +73,30 @@ public:
     void Init();
     void PowerSupplyCellular(bool on);
     void PowerSupplyGrove(bool on);
-    // void LedSetRGB(uint8_t red, uint8_t green, uint8_t blue);   // TODO
-    // bool TurnOnOrReset();   // TODO
-    // bool TurnOff(); //TODO
+    bool TurnOnOrReset();
+    bool TurnOff();
 
     int GetIMEI(char *imei, int imeiSize);
     int GetIMSI(char *imsi, int imsiSize);
     int GetICCID(char *iccid, int iccidSize);
     int GetPhoneNumber(char *number, int numberSize);
-    // bool GetTime(struct tm *tim);    // TODO
+    int GetReceivedSignalStrength();
+    bool GetTime(struct tm *tim);
 
-//#if defined NRF52840_XXAA     //TODO
-//    void SetAccessTechnology(AccessTechnologyType technology);
-//#endif // NRF52840_XXAA
-//    void SetSelectNetwork(SelectNetworkModeType mode, const char *plmn = NULL);   //TODO
+#if defined NRF52840_XXAA
+    void SetAccessTechnology(AccessTechnologyType technology);
+#endif // NRF52840_XXAA
+    void SetSelectNetwork(SelectNetworkModeType mode, const char *plmn = NULL);
+    bool WaitForCSRegistration(long timeout = 120000);
+    bool WaitForPSRegistration(long timeout = 120000);
+    bool Activate(const char *accessPointName, const char *userName, const char *password, long waitForRegistTimeout = 120000);
+    bool Deactivate();
 
-//    bool WaitForCSRegistration(long timeout = 120000);
-//    bool WaitForPSRegistration(long timeout = 120000);
-    // bool Activate(const char *accessPointName, const char *userName, const char *password, long waitForRegistTimeout = 120000);   //TODO
-    // bool Deactivate();   //TODO
+    bool GetLocation(double* longitude, double* latitude);
 
-    //bool GetLocation(double* longitude, double* latitude);
-
-//    bool GetDNSAddress(IPAddress *ip1, IPAddress *ip2);
-//    bool SetDNSAddress(const IPAddress &ip1);
-//    bool SetDNSAddress(const IPAddress &ip1, const IPAddress &ip2);
+    bool GetDNSAddress(IPAddress *ip1, IPAddress *ip2);
+    bool SetDNSAddress(const IPAddress &ip1);
+    bool SetDNSAddress(const IPAddress &ip1, const IPAddress &ip2);
 
     int SocketOpen(const char *host, int port, SocketType type);
     bool SocketSend(int connectId, const byte *data, int dataSize);
@@ -111,8 +112,10 @@ public:
     bool HttpPost(const char *url, const char *data, int *responseCode);
     bool HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header);
 
-    // bool SendUSSD(const char *in, char *out, int outSize);   //TODO
+    bool SendUSSD(const char *in, char *out, int outSize);
 
+    bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize);
+    bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const WioCellularHttpHeader &header);
 
     void Bg96Begin();
     void Bg96End();
@@ -120,11 +123,6 @@ public:
     void InitLteM();
     void SoftReset();
 
-    bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize);
-    bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const WioCellularHttpHeader &header);
-
-
-    int GetReceivedSignalStrength();
     int GetReceivedSignalStrengthIndicator();
     bool IsTimeGot(struct tm *tim);
     void GetCurrentTime(struct tm *tim);

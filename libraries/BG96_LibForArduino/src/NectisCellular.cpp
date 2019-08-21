@@ -1,20 +1,31 @@
 #include "NectisCellular.h"
 
-#include <limits.h>
-
-#include "WioCellular.h"
 #include "Internal/Debug.h"
 #include "Internal/StringBuilder.h"
 #include "Internal/ArgumentParser.h"
+
+#include "NectisCellularConfig.h"
+
+#include "WioCellular.h"
+#include "WioCellularHardware.h"
+
+#include <string.h>
+#include <limits.h>
+
+#include <nrf.h>
+#include <Uart.h>
+
+
+#define INTERVAL                        (10000)
+#define RECEIVE_TIMEOUT                 (10000)
+#define CONNECT_ID_NUM                  (12)
+#define POLLING_INTERVAL                (100)
 
 #define APN                             "soracom.io"
 #define USERNAME                        "sora"
 #define PASSWORD                        "sora"
 
 #define ENDPOINT_URL                    "http://unified.soracom.io"
-
-#define INTERVAL                        (10000)
-#define RECEIVE_TIMEOUT                 (10000)
 
 #if defined BINARY_PARSER_ENABLED
     #define HTTP_CONTENT_TYPE               "application/octet-stream"
@@ -23,6 +34,7 @@
 #endif
 
 #define HTTP_USER_AGENT                 "QUECTEL_MODULE"
+#define HTTP_CONTENT_TYPE               "application/json"
 
 #define RET_OK(val)                     (ReturnOk(val))
 #define RET_ERR(val, err)               (ReturnError(__LINE__, val, err))
@@ -31,33 +43,122 @@
 char hexConvertedFromDecimal[16];
 
 
-NectisCellular::NectisCellular() : _SerialAPI(&SerialUART), _AtSerial(&_SerialAPI, &_Wio) {
+NectisCellular::NectisCellular() : _SerialAPI(&SerialUART), _AtSerial(&_SerialAPI, this) {
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Helper functions
+
+//static bool SplitUrl(const char *url, const char **host, int *hostLength, const char **uri, int *uriLength) {
+//    if (strncmp(url, "http://", 7) == 0) {
+//    *host = &url[7];
+//    } else if (strncmp(url, "https://", 8) == 0) {
+//    *host = &url[8];
+//    } else {
+//    return false;
+//    }
+//
+//    const char *ptr;
+//    for (ptr = *host; *ptr != '\0'; ptr++) {
+//    if (*ptr == '/')
+//        break;
+//    }
+//    *hostLength = ptr - *host;
+//    *uri = ptr;
+//    *uriLength = strlen(ptr);
+//
+//    return true;
+//}
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+// The same as WioCellular
+
+bool NectisCellular::ReturnError(int lineNumber, bool value, NectisCellular::ErrorCodeType errorCode) {
+    _LastErrorCode = errorCode;
+
+    char str[100];
+    sprintf(str, "%d", lineNumber);
+    DEBUG_PRINT("ERROR! ");
+    DEBUG_PRINTLN(str);
+
+    return value;
+}
+
+int NectisCellular::ReturnError(int lineNumber, int value, NectisCellular::ErrorCodeType errorCode) {
+    _LastErrorCode = errorCode;
+
+    char str[100];
+    sprintf(str, "%d", lineNumber);
+    DEBUG_PRINT("ERROR! ");
+    DEBUG_PRINTLN(str);
+
+    return value;
+}
+
+bool NectisCellular::IsBusy() const {
+    return digitalRead(MODULE_STATUS_PIN) ? false : true;
+}
+
+bool NectisCellular::IsRespond() {
+#ifndef ARDUINO_ARCH_STM32
+    auto writeTimeout = SerialUART.getWriteTimeout();
+    SerialUART.setWriteTimeout(10);
+#endif // ARDUINO_ARCH_STM32
+
+    Stopwatch sw;
+    sw.Restart();
+    while (!_AtSerial.WriteCommandAndReadResponse("AT", "^OK$", 500, NULL)) {
+        if (sw.ElapsedMilliseconds() >= 2000) {
+#ifndef ARDUINO_ARCH_STM32
+            SerialUART.setWriteTimeout(writeTimeout);
+#endif // ARDUINO_ARCH_STM32
+            return false;
+        }
+    }
+
+#ifndef ARDUINO_ARCH_STM32
+    SerialUART.setWriteTimeout(writeTimeout);
+#endif // ARDUINO_ARCH_STM32
+    return true;
+}
+
+bool NectisCellular::Reset() {
+    digitalWrite(MODULE_RESET_PIN, HIGH);
+    delay(200);
+    digitalWrite(MODULE_RESET_PIN, LOW);
+    delay(300);
+
+    return true;
+}
+
+bool NectisCellular::TurnOn() {
+    delay(100);
+    digitalWrite(MODULE_PWRKEY_PIN, HIGH);
+    delay(600);
+    digitalWrite(MODULE_PWRKEY_PIN, LOW);
+
+    return true;
+}
+
+bool NectisCellular::HttpSetUrl(const char *url) {
+    StringBuilder str;
+    if (!str.WriteFormat("AT+QHTTPURL=%d", strlen(url)))
+        return false;
+    _AtSerial.WriteCommand(str.GetString());
+    if (!_AtSerial.ReadResponse("^CONNECT$", 500, NULL))
+        return false;
+
+    _AtSerial.WriteBinary((const byte *) url, strlen(url));
+    if (!_AtSerial.ReadResponse("^OK$", 500, NULL))
+        return false;
+
+    return true;
 }
 
 NectisCellular::ErrorCodeType NectisCellular::GetLastError() const {
     return _LastErrorCode;
-}
-
-bool NectisCellular::ReturnError(int lineNumber, bool value, NectisCellular::ErrorCodeType errorCode) {
-  _LastErrorCode = errorCode;
-
-  char str[100];
-  sprintf(str, "%d", lineNumber);
-  DEBUG_PRINT("ERROR! ");
-  DEBUG_PRINTLN(str);
-
-  return value;
-}
-
-int NectisCellular::ReturnError(int lineNumber, int value, NectisCellular::ErrorCodeType errorCode) {
-  _LastErrorCode = errorCode;
-
-  char str[100];
-  sprintf(str, "%d", lineNumber);
-  DEBUG_PRINT("ERROR! ");
-  DEBUG_PRINTLN(str);
-
-  return value;
 }
 
 void NectisCellular::Init() {
@@ -101,186 +202,153 @@ void NectisCellular::PowerSupplyGrove(bool on) {
     digitalWrite(GROVE_VCCB_PIN, on ? HIGH : LOW);
 }
 
-// TODO
-// void NectisCellular::LedSetRGB(uint8_t red, uint8_t green, uint8_t blue) {
-//
-//}
+bool NectisCellular::TurnOnOrReset() {
+    std::string response;
+    ArgumentParser parser;
 
-// TODO
-//bool NectisCellular::TurnOnOrReset() {
-//
-//}
+    if (IsRespond()) {
+        DEBUG_PRINTLN("Reset()");
+        if (!Reset())
+            return RET_ERR(false, E_UNKNOWN);
+    } else {
+        DEBUG_PRINTLN("TurnOn()");
+        if (!TurnOn())
+            return RET_ERR(false, E_UNKNOWN);
+    }
 
-// TODO
-// bool NectisCellular::TurnOff() {
-//
-//}
+    Stopwatch sw;
+    sw.Restart();
+    while (!_AtSerial.WriteCommandAndReadResponse("AT", "^OK$", 500, NULL)) {
+        DEBUG_PRINT(".");
+        DEBUG_PRINTLN("TurnOnOrReset: WriteCommandAndReadResponse");
+
+        delay(100);
+
+        if (sw.ElapsedMilliseconds() >= 10000) {
+            DEBUG_PRINTLN("ElapsedMilliseconds");
+            return RET_ERR(false, E_UNKNOWN);
+        }
+    }
+    DEBUG_PRINTLN("");
+
+    if (!_AtSerial.WriteCommandAndReadResponse("ATE0", "^OK$", 500, NULL))
+        return RET_ERR(false, E_UNKNOWN);
+    _AtSerial.SetEcho(false);
+
+//#ifndef ARDUINO_ARCH_STM32
+//    if (!_AtSerial.WriteCommandAndReadResponse("AT+IFC=2,2", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+//#endif // ARDUINO_ARCH_STM32
+
+#if defined NRF52840_XXAA
+    switch (_AccessTechnology) {
+        case ACCESS_TECHNOLOGY_NONE:
+            break;
+        case ACCESS_TECHNOLOGY_LTE_M1:
+            if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"nwscanseq\",02,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+            if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"nwscanmode\",3,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+            if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"iotopmode\",0,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+            if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"band\",F,20000,0,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+            break;
+        case ACCESS_TECHNOLOGY_LTE_NB1:
+            if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"nwscanseq\",03,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+            if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"nwscanmode\",3,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+            if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"iotopmode\",1,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+            // ToDO: Set the right band for NB-IoT
+            // if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"nb1/bandprior\",12", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+            break;
+        default:
+            return RET_ERR(false, E_UNKNOWN);
+    }
+#endif // NRF52840_XXAA
+
+#if defined NECTIS_DEBUG
+    sw.Restart();
+    bool cpinReady;
+
+    while (true) {
+        _AtSerial.WriteCommand("AT+CPIN?");
+        cpinReady = false;
+
+        while (true) {
+            if (!_AtSerial.ReadResponse("^(OK|\\+CPIN: READY|\\+CME ERROR: .*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
+            if (response == "+CPIN: READY") {
+            cpinReady = true;
+            continue;
+            }
+            break;
+        }
+        if (response == "OK" && cpinReady) break;
+
+        if (sw.ElapsedMilliseconds() >= 10000) return RET_ERR(false, E_UNKNOWN);
+        delay(POLLING_INTERVAL);
+    }
+#endif
+
+#if defined NRF52840_XXAA
+    sw.Restart();
+    while (true) {
+        int status;
+
+        _AtSerial.WriteCommand("AT+CEREG?");
+        if (!_AtSerial.ReadResponse("^\\+CEREG: (.*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
+        parser.Parse(response.c_str());
+
+        if (parser.Size() < 2) return RET_ERR(false, E_UNKNOWN);
+        //resultCode = atoi(parser[0]);
+        status = atoi(parser[1]);
+
+        if (!_AtSerial.ReadResponse("^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+        if (0 <= status && status <= 5 && status != 4) break;
+        if (sw.ElapsedMilliseconds() >= 10000) return RET_ERR(false, E_UNKNOWN);
+
+        delay(POLLING_INTERVAL);
+    }
+#endif
+
+    return RET_OK(true);
+}
+
+bool NectisCellular::TurnOff() {
+    return _Wio.TurnOff();
+}
 
 int NectisCellular::GetIMEI(char *imei, int imeiSize){
-  return _Wio.GetIMEI(imei,imeiSize);
+    return _Wio.GetIMEI(imei, imeiSize);
 }
 
 int NectisCellular::GetIMSI(char *imsi, int imsiSize){
-  return _Wio.GetIMSI(imsi,imsiSize);
+    return _Wio.GetIMSI(imsi, imsiSize);
 }
 
 int NectisCellular::GetICCID(char *iccid, int iccidSize){
-  return _Wio.GetICCID(iccid, iccidSize);
+    return _Wio.GetICCID(iccid, iccidSize);
 }
 
 int NectisCellular::GetPhoneNumber(char *number, int numberSize){
-  return _Wio.GetPhoneNumber(number,numberSize);
+    return _Wio.GetPhoneNumber(number, numberSize);
 }
-
-// TODO
-// bool NectisCellular::GetTime(struct tm *tim) {
-//
-//}
-
-//TODO
-//#if defined NRF52840_XXAA
-//    void SetAccessTechnology(AccessTechnologyType technology);
-//#endif // NRF52840_XXAA
-//    void SetSelectNetwork(SelectNetworkModeType mode, const char *plmn = NULL);
-
-//    bool WaitForCSRegistration(long timeout = 120000);
-//    bool WaitForPSRegistration(long timeout = 120000);
-// bool Activate(const char *accessPointName, const char *userName, const char *password, long waitForRegistTimeout = 120000);
-// bool Deactivate();
-
-//bool GetLocation(double* longitude, double* latitude);
-
-//    bool GetDNSAddress(IPAddress *ip1, IPAddress *ip2);
-//    bool SetDNSAddress(const IPAddress &ip1);
-//    bool SetDNSAddress(const IPAddress &ip1, const IPAddress &ip2);
-
-int NectisCellular::SocketOpen(const char *host, int port, SocketType type){
-  return _Wio.SocketOpen(host, port, (WioCellular::SocketType)type);
-}
-
-bool NectisCellular::SocketSend(int connectId, const byte *data, int dataSize){
-  return _Wio.SocketSend(connectId, data, dataSize);
-}
-
-bool NectisCellular::SocketSend(int connectId, const char *data){
-  return _Wio.SocketSend(connectId, data);
-}
-
-int NectisCellular::SocketReceive(int connectId, byte *data, int dataSize){
-  return _Wio.SocketReceive(connectId, data, dataSize);
-}
-
-int NectisCellular::SocketReceive(int connectId, byte *data, int dataSize, long timeout){
-  return _Wio.SocketReceive(connectId, data, dataSize, timeout);
-}
-
-int NectisCellular::SocketReceive(int connectId, char *data, int dataSize){
-  return _Wio.SocketReceive(connectId, data, dataSize);
-}
-
-int NectisCellular::SocketReceive(int connectId, char *data, int dataSize, long timeout){
-  return _Wio.SocketReceive(connectId, data, dataSize,timeout);
-}
-
-bool NectisCellular::SocketClose(int connectId){
-  return _Wio.SocketClose(connectId);
-}
-
-int NectisCellular::HttpGet(const char *url, char *data, int dataSize) {
-  return _Wio.HttpGet(url, data, dataSize);
-}
-
-int NectisCellular::HttpGet(const char *url, char *data, int dataSize, const WioCellularHttpHeader &header) {
-  return _Wio.HttpGet(url,data,dataSize, header);
-}
-
-bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode) {
-  return _Wio.HttpPost(url, data, responseCode);
-}
-
-bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header) {
-  return _Wio.HttpPost(url, data, responseCode, header);
-}
-
-//TODO
-// bool SendUSSD(const char *in, char *out, int outSize);
-
-
-void NectisCellular::Bg96Begin() {
-  //  Initialize Uart between BL654 and BG96.
-  Serial1.setPins(MODULE_UART_RX_PIN, MODULE_UART_TX_PIN, MODULE_RTS_PIN, MODULE_CTS_PIN);
-  Serial1.begin(115200);
-
-  delay(200);
-}
-
-void NectisCellular::Bg96End() {
-  Serial1.end();
-}
-
-bool NectisCellular::Bg96TurnOff() {
-  if (!_AtSerial.WriteCommandAndReadResponse("AT+QPOWD", "^OK$", 500, NULL))
-    return RET_ERR(false, E_UNKNOWN);
-  if (!_AtSerial.ReadResponse("^POWERED DOWN$", 60000, NULL))
-    return RET_ERR(false, E_UNKNOWN);
-
-  return RET_OK(true);
-}
-
-void NectisCellular::InitLteM() {
-#ifdef NRF52840_XXAA
-  _Wio.SetAccessTechnology(WioCellular::ACCESS_TECHNOLOGY_LTE_M1);
-    _Wio.SetSelectNetwork(WioCellular::SELECT_NETWORK_MODE_MANUAL_IMSI);
-#endif
-
-  Serial.println("### Turn on or reset.");
-  if (!_Wio.TurnOnOrReset()) {
-    Serial.println("### ERROR!; TurnOnOrReset ###");
-    return;
-  }
-
-  delay(100);
-  Serial.println("### Connecting to \"" APN "\".");
-  if (!_Wio.Activate(APN, USERNAME, PASSWORD)) {
-    Serial.println("### ERROR!; Activate ###");
-    return;
-  }
-}
-
-void NectisCellular::SoftReset() {
-  NVIC_SystemReset();
-}
-
-bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode , char *recv_data, int recv_dataSize) {
-  return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize);
-}
-
-bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const WioCellularHttpHeader &header) {
-  return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize, header);
-}
-
 
 int NectisCellular::GetReceivedSignalStrength() {
     std::string response;
     ArgumentParser parser;
-    
+
     _AtSerial.WriteCommand("AT+CSQ");
     if (!_AtSerial.ReadResponse("^\\+CSQ: (.*)$", 500, &response))
         return RET_ERR(INT_MIN, E_UNKNOWN);
-    
+
     parser.Parse(response.c_str());
     if (parser.Size() != 2)
         return RET_ERR(INT_MIN, E_UNKNOWN);
     int rssi = atoi(parser[0]);
-    
+
     if (!_AtSerial.ReadResponse("^OK$", 500, NULL))
         return RET_ERR(INT_MIN, E_UNKNOWN);
-    
+
     if (rssi == INT_MIN) {
         Serial.println("### ERROR! ###");
         delay(5000);
     }
-    
+
     if (rssi == 0)
         return RET_OK(-113);
     else if (rssi == 1)
@@ -291,8 +359,246 @@ int NectisCellular::GetReceivedSignalStrength() {
         return RET_OK(-51);
     else if (rssi == 99)
         return RET_OK(-999);
-    
+
     return RET_OK(-999);
+}
+
+bool NectisCellular::GetTime(struct tm *tim) {
+    return _Wio.GetTime(tim);
+}
+
+#if defined NRF52840_XXAA
+void NectisCellular::SetAccessTechnology(AccessTechnologyType technology) {
+    _AccessTechnology = technology;
+}
+#endif // NRF52840_XXAA
+
+void NectisCellular::SetSelectNetwork(SelectNetworkModeType mode, const char *plmn) {
+    _SelectNetworkMode = mode;
+    _SelectNetworkPLMN = plmn;
+}
+
+bool NectisCellular::WaitForCSRegistration(long timeout) {
+    return _Wio.WaitForCSRegistration(timeout);
+}
+
+bool NectisCellular::WaitForPSRegistration(long timeout) {
+    return _Wio.WaitForPSRegistration(timeout);
+}
+
+bool NectisCellular::Activate(const char *accessPointName, const char *userName, const char *password, long waitForRegistTimeout) {
+    std::string response;
+    ArgumentParser parser;
+    Stopwatch sw;
+
+    if (!WaitForPSRegistration(0)) {
+        StringBuilder str_apn;
+        if (!str_apn.WriteFormat("AT+CGDCONT=1, \"IP\", \"%s\"", accessPointName))
+            return RET_ERR(false, E_UNKNOWN);
+        if (!_AtSerial.WriteCommandAndReadResponse(str_apn.GetString(), "^OK$", 500, NULL))
+            return RET_ERR(false, E_UNKNOWN);
+
+        // When you would like to start to communicate with SORACOM,
+        // it is faster to to set [IP, accessPointName] than to set [accessPointName, userName, password].
+//        StringBuilder str;
+//        if (!str.WriteFormat("AT+QICSGP=1,1,\"%s\",\"%s\",\"%s\",3", accessPointName, userName, password))
+//            return RET_ERR(false, E_UNKNOWN);
+//        if (!_AtSerial.WriteCommandAndReadResponse(str.GetString(), "^OK$", 500, NULL))
+//            return RET_ERR(false, E_UNKNOWN);
+
+        sw.Restart();
+
+        switch (_SelectNetworkMode) {
+            case SELECT_NETWORK_MODE_NONE:
+                break;
+            case SELECT_NETWORK_MODE_AUTOMATIC:
+                if (!_AtSerial.WriteCommandAndReadResponse("AT+COPS=0", "^OK$", waitForRegistTimeout, NULL))
+                    return RET_ERR(false, E_UNKNOWN);
+                break;
+            case SELECT_NETWORK_MODE_MANUAL_IMSI: {
+                char imsi[15 + 1];
+                if (GetIMSI(imsi, sizeof(imsi)) < 0)
+                    return RET_ERR(false, E_UNKNOWN);
+                if (strlen(imsi) < 4)
+                    return RET_ERR(false, E_UNKNOWN);
+                StringBuilder str;
+                if (!str.WriteFormat("AT+COPS=1,2,\"%.5s\"", imsi))
+                    return RET_ERR(false, E_UNKNOWN);
+                if (!_AtSerial.WriteCommandAndReadResponse(str.GetString(), "^OK$", waitForRegistTimeout, NULL))
+                    return RET_ERR(false, E_UNKNOWN);
+                break;
+            }
+            case SELECT_NETWORK_MODE_MANUAL: {
+                if (_SelectNetworkPLMN.size() <= 0)
+                    return RET_ERR(false, E_UNKNOWN);
+                StringBuilder str;
+                if (!str.WriteFormat("AT+COPS=1,2,\"%s\"", _SelectNetworkPLMN.c_str()))
+                    return RET_ERR(false, E_UNKNOWN);
+                if (!_AtSerial.WriteCommandAndReadResponse(str.GetString(), "^OK$", waitForRegistTimeout, NULL))
+                    return RET_ERR(false, E_UNKNOWN);
+                break;
+            }
+            default:
+                return RET_ERR(false, E_UNKNOWN);
+        }
+
+        if (!WaitForPSRegistration(waitForRegistTimeout))
+            return RET_ERR(false, E_UNKNOWN);
+
+        // For debug.
+#ifdef NECTIS_DEBUG
+        char dbg[100];
+        sprintf(dbg, "Elapsed time is %lu[msec.].", sw.ElapsedMilliseconds());
+        DEBUG_PRINTLN(dbg);
+
+        _AtSerial.WriteCommandAndReadResponse("AT+CREG?", "^OK$", 500, NULL);
+        _AtSerial.WriteCommandAndReadResponse("AT+CGREG?", "^OK$", 500, NULL);
+#if defined NRF52840_XXAA
+        _AtSerial.WriteCommandAndReadResponse("AT+CEREG?", "^OK$", 500, NULL);
+#endif // NRF52840_XXAA
+#endif // NECTIS_DEBUG
+    }
+
+    sw.Restart();
+    while (true) {
+        _AtSerial.WriteCommand("AT+QIACT=1");
+        if (!_AtSerial.ReadResponse("^(OK|ERROR)$", 150000, &response))
+            return RET_ERR(false, E_UNKNOWN);
+        if (response == "OK")
+            break;
+        if (!_AtSerial.WriteCommandAndReadResponse("AT+QIGETERROR", "^OK$", 500, NULL))
+            return RET_ERR(false, E_UNKNOWN);
+        if (sw.ElapsedMilliseconds() >= 150000)
+            return RET_ERR(false, E_UNKNOWN);
+        delay(POLLING_INTERVAL);
+    }
+
+    // For debug.
+#ifdef NECTIS_DEBUG
+    if (!_AtSerial.WriteCommandAndReadResponse("AT+QIACT?", "^OK$", 150000, NULL))
+        return RET_ERR(false, E_UNKNOWN);
+#endif // NECTIS_DEBUG
+
+    return RET_OK(true);
+}
+
+bool NectisCellular::Deactivate() {
+    return _Wio.Deactivate();
+}
+
+bool NectisCellular::GetDNSAddress(IPAddress *ip1, IPAddress *ip2) {
+    return _Wio.GetDNSAddress(ip1, ip2);
+}
+
+bool NectisCellular::SetDNSAddress(const IPAddress &ip1) {
+    return _Wio.SetDNSAddress(ip1);
+}
+
+bool NectisCellular::SetDNSAddress(const IPAddress &ip1, const IPAddress &ip2) {
+    return _Wio.SetDNSAddress(ip1, ip2);
+}
+
+int NectisCellular::SocketOpen(const char *host, int port, SocketType type){
+    return _Wio.SocketOpen(host, port, (WioCellular::SocketType)type);
+}
+
+bool NectisCellular::SocketSend(int connectId, const byte *data, int dataSize){
+    return _Wio.SocketSend(connectId, data, dataSize);
+}
+
+bool NectisCellular::SocketSend(int connectId, const char *data){
+    return _Wio.SocketSend(connectId, data);
+}
+
+int NectisCellular::SocketReceive(int connectId, byte *data, int dataSize){
+    return _Wio.SocketReceive(connectId, data, dataSize);
+}
+
+int NectisCellular::SocketReceive(int connectId, byte *data, int dataSize, long timeout){
+    return _Wio.SocketReceive(connectId, data, dataSize, timeout);
+}
+
+int NectisCellular::SocketReceive(int connectId, char *data, int dataSize){
+    return _Wio.SocketReceive(connectId, data, dataSize);
+}
+
+int NectisCellular::SocketReceive(int connectId, char *data, int dataSize, long timeout){
+    return _Wio.SocketReceive(connectId, data, dataSize,timeout);
+}
+
+bool NectisCellular::SocketClose(int connectId){
+    return _Wio.SocketClose(connectId);
+}
+
+int NectisCellular::HttpGet(const char *url, char *data, int dataSize) {
+    return _Wio.HttpGet(url, data, dataSize);
+}
+
+int NectisCellular::HttpGet(const char *url, char *data, int dataSize, const WioCellularHttpHeader &header) {
+    return _Wio.HttpGet(url,data,dataSize, header);
+}
+
+bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode) {
+    return _Wio.HttpPost(url, data, responseCode);
+}
+
+bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header) {
+    return _Wio.HttpPost(url, data, responseCode, header);
+}
+
+//TODO
+// bool SendUSSD(const char *in, char *out, int outSize);
+
+bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode , char *recv_data, int recv_dataSize) {
+    return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize);
+}
+
+bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const WioCellularHttpHeader &header) {
+    return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize, header);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+// NetisCellular
+
+void NectisCellular::Bg96Begin() {
+    // Initialize Uart between BL654 and BG96.
+    Serial1.setPins(MODULE_UART_RX_PIN, MODULE_UART_TX_PIN, MODULE_RTS_PIN, MODULE_CTS_PIN);
+    Serial1.begin(115200);
+
+    delay(200);
+}
+
+void NectisCellular::Bg96End() {
+    Serial1.end();
+}
+
+bool NectisCellular::Bg96TurnOff() {
+    return TurnOff();
+}
+
+void NectisCellular::InitLteM() {
+#ifdef ARDUINO_WIO_LTE_M1NB1_BG96
+    SetAccessTechnology(ACCESS_TECHNOLOGY_LTE_M1);
+    SetSelectNetwork(SELECT_NETWORK_MODE_MANUAL_IMSI);
+#endif
+
+    Serial.println("### Turn on or reset.");
+    if (!TurnOnOrReset()) {
+        Serial.println("### ERROR!; TurnOnOrReset ###");
+        return;
+    }
+
+    delay(100);
+    Serial.println("### Connecting to \"" APN "\".");
+    if (!Activate(APN, USERNAME, PASSWORD)) {
+        Serial.println("### ERROR!; Activate ###");
+        return;
+    }
+}
+
+void NectisCellular::SoftReset() {
+    NVIC_SystemReset();
 }
 
 int NectisCellular::GetReceivedSignalStrengthIndicator() {
@@ -411,8 +717,8 @@ float NectisCellular::ReadVbat(void) {
 float NectisCellular::mvToPercent(float mvolts) {
     float battery_level;
     
-    //    When mvolts drops to (3200mA * 102%), the power supply from the battery shut down.
-    //    Therefore, 0% of the battery level is set to 3250mA.
+    // When mvolts drops to (3200mA * 102%), the power supply from the battery shut down.
+    // Therefore, 0% of the battery level is set to 3250mA.
     if (mvolts >= 4150) {
         battery_level = 100;
     } else if (mvolts > 3750) {
@@ -545,7 +851,7 @@ void NectisCellular::PostDataViaHttp(char *post_data) {
     header["Content-Type"] = HTTP_CONTENT_TYPE;
     
     int status;
-    if (!_Wio.HttpPost(ENDPOINT_URL, post_data, &status, header)) {
+    if (!HttpPost(ENDPOINT_URL, post_data, &status, header)) {
         Serial.println("### ERROR! ###");
         goto err;
     }
@@ -560,7 +866,7 @@ err:
 void NectisCellular::PostDataViaUdp(char *post_data) {
     Serial.println("### Open.");
     int connectId;
-    connectId = _Wio.SocketOpen("uni.soracom.io", 23080, WIO_UDP);
+    connectId = SocketOpen("uni.soracom.io", 23080, NECTIS_UDP);
     if (connectId < 0) {
         Serial.println("### ERROR! ###");
         goto err;
@@ -570,14 +876,14 @@ void NectisCellular::PostDataViaUdp(char *post_data) {
     Serial.print("Send:");
     Serial.print(post_data);
     Serial.println("");
-    if (!_Wio.SocketSend(connectId, post_data)) {
+    if (!SocketSend(connectId, post_data)) {
         Serial.println("### ERROR! ###");
         goto err_close;
     }
     
     Serial.println("### Receive.");
     int length;
-    length = _Wio.SocketReceive(connectId, post_data, sizeof(post_data), RECEIVE_TIMEOUT);
+    length = SocketReceive(connectId, post_data, sizeof(post_data), RECEIVE_TIMEOUT);
     if (length < 0) {
         Serial.println("### ERROR! ###");
         Serial.println(length);
@@ -593,7 +899,7 @@ void NectisCellular::PostDataViaUdp(char *post_data) {
 
 err_close:
     Serial.println("### Close.");
-    if (!_Wio.SocketClose(connectId)) {
+    if (!SocketClose(connectId)) {
         Serial.println("### ERROR! ###");
         goto err;
     }
@@ -605,7 +911,7 @@ err:
 void NectisCellular::PostDataViaUdp(char *post_data, int data_length) {
     Serial.println("### Open.");
     int connectId;
-    connectId = _Wio.SocketOpen("uni.soracom.io", 23080, WIO_UDP);
+    connectId = SocketOpen("uni.soracom.io", 23080, NECTIS_UDP);
     if (connectId < 0) {
         Serial.println("### ERROR! ###");
         goto err;
@@ -615,14 +921,14 @@ void NectisCellular::PostDataViaUdp(char *post_data, int data_length) {
     Serial.print("Send:");
     Serial.print(post_data);
     Serial.println("");
-    if (!_Wio.SocketSend(connectId, (const byte *)post_data, data_length)) {
+    if (!SocketSend(connectId, (const byte *)post_data, data_length)) {
         Serial.println("### ERROR! ###");
         goto err_close;
     }
     
     Serial.println("### Receive.");
     int length;
-    length = _Wio.SocketReceive(connectId, post_data, data_length, RECEIVE_TIMEOUT);
+    length = SocketReceive(connectId, post_data, data_length, RECEIVE_TIMEOUT);
     if (length < 0) {
         Serial.println("### ERROR! ###");
         Serial.println(length);
@@ -638,7 +944,7 @@ void NectisCellular::PostDataViaUdp(char *post_data, int data_length) {
 
 err_close:
     Serial.println("### Close.");
-    if (!_Wio.SocketClose(connectId)) {
+    if (!SocketClose(connectId)) {
         Serial.println("### ERROR! ###");
         goto err;
     }
@@ -648,27 +954,29 @@ err:
 }
 
 void NectisCellular::GetBg96UfsStorageSize() {
-  // +QFLDS: 12883392,14483456
-  // The freesize is 12883392 byte, the total_size is 14483456 byte.
-  _AtSerial.WriteCommandAndReadResponse("AT+QFLDS=\"UFS\"", "^OK$", 500, NULL);
-  _AtSerial.WriteCommandAndReadResponse("AT+QFUPL=?", "^OK$", 500, NULL);
+    // +QFLDS: 12883392,14483456
+    // The freesize is 12883392 byte, the total_size is 14483456 byte.
+    _AtSerial.WriteCommandAndReadResponse("AT+QFLDS=\"UFS\"", "^OK$", 500, NULL);
+    _AtSerial.WriteCommandAndReadResponse("AT+QFUPL=?", "^OK$", 500, NULL);
 }
 
 void NectisCellular::ListBg96UfsFileInfo() {
-  _AtSerial.WriteCommandAndReadResponse("AT+QFLST", "^OK$", 500, NULL);
+    _AtSerial.WriteCommandAndReadResponse("AT+QFLST", "^OK$", 500, NULL);
 }
 
 bool NectisCellular::UploadFilesToBg96(const char* filename, unsigned int filesize) {
-  StringBuilder str;
+    StringBuilder str;
 
-  Serial.println(filename);
-  if (!str.WriteFormat("AT+QFUPL=\"%s\",%u,60000,1", filename, filesize))
-    return RET_ERR(false, E_UNKNOWN);
-  _AtSerial.WriteCommand(str.GetString());
-  if (!_AtSerial.ReadResponse("CONNECT", 60000, NULL))
-    return RET_ERR(false, E_UNKNOWN);
+    Serial.println(filename);
+    if (!str.WriteFormat("AT+QFUPL=\"%s\",%u,60000,1", filename, filesize))
+        return RET_ERR(false, E_UNKNOWN);
+    _AtSerial.WriteCommand(str.GetString());
+    if (!_AtSerial.ReadResponse("CONNECT", 60000, NULL))
+        return RET_ERR(false, E_UNKNOWN);
+
+    return true;
 }
 
 //void NectisCellular::DeleteBg96UfsFiles() {
-//  _AtSerial.WriteCommandAndReadResponse("AT+QFDEL=\"*\"", "^OK$", 500, NULL);
+//    _AtSerial.WriteCommandAndReadResponse("AT+QFDEL=\"*\"", "^OK$", 500, NULL);
 //}
