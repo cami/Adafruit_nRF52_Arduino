@@ -226,7 +226,7 @@ bool WioCellular::TurnOnOrReset() {
     sw.Restart();
     while (!_AtSerial.WriteCommandAndReadResponse("AT", "^OK$", 500, NULL)) {
         DEBUG_PRINT(".");
-        Serial.println("TurnOnOrReset: WriteCommandAndReadResponse");
+        DEBUG_PRINTLN("TurnOnOrReset: WriteCommandAndReadResponse");
         
         delay(100);
         
