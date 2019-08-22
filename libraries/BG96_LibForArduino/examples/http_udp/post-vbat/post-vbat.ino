@@ -3,10 +3,12 @@
  */
 
 #include <NectisCellular.h>
+#include <NectisMcu.h>
 
 #define GROVE_LED_PIN                 (GROVE_ANALOG_1_1)
 
 NectisCellular Nectis;
+NectisMcu Mcu;
 
 // Uncomment following line to use Http
 //#define HTTP
@@ -44,15 +46,15 @@ void setup() {
 
 void loop() {
   // Battery Level
-  float LipoVoltageLevelMv = Nectis.ReadVbat();
-  float LipoVoltageLevelPercentageFloat = Nectis.mvToPercent(LipoVoltageLevelMv);
+  float LipoVoltageLevelMv = Mcu.ReadVbat();
+  float LipoVoltageLevelPercentageFloat = Mcu.mvToPercent(LipoVoltageLevelMv);
   uint8_t LipoVoltageLevelPercentageInt = (unsigned int)(LipoVoltageLevelPercentageFloat + 0.5F);
   Serial.printf("Lipo battery: %u[%%}\n", LipoVoltageLevelPercentageInt);
 
-  unsigned int sizeOfPostDataBatteryLevel = Nectis.GetDataDigits(LipoVoltageLevelPercentageInt);
+  unsigned int sizeOfPostDataBatteryLevel = Mcu.GetDataDigits(LipoVoltageLevelPercentageInt);
   char *postDataBatteryLevel;
   char tmpPostDataBatteryLevel[sizeOfPostDataBatteryLevel];
-  postDataBatteryLevel = Nectis.ConvertIntoBinary(tmpPostDataBatteryLevel, LipoVoltageLevelPercentageInt,
+  postDataBatteryLevel = Mcu.ConvertIntoBinary(tmpPostDataBatteryLevel, LipoVoltageLevelPercentageInt,
                                                   sizeOfPostDataBatteryLevel);
 
   // Create post data in binary.
@@ -64,7 +66,7 @@ void loop() {
 #endif  // HTTP
 
 #ifdef UDP
-  Nectis.PwmActivate(GROVE_LED_PIN, PWM_PRESCALER_PRESCALER_DIV_128);
+  Mcu.PwmActivate(GROVE_LED_PIN, PWM_PRESCALER_PRESCALER_DIV_128);
   Nectis.PostDataViaUdp(postData);
 #endif  // UDP
 

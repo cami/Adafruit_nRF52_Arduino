@@ -5,10 +5,9 @@
 #include <IPAddress.h>
 #include <string>
 
-#include "Internal/AtSerial.h"
-
 #include <WioCellular.h>
 #include "WioCellLibforArduino.h"
+#include "Internal/AtSerial.h"
 #include "WioCellularHttpHeader.h"
 
 #define NECTIS_TCP        (NectisCellular::SOCKET_TCP)
@@ -117,33 +116,16 @@ public:
     bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize);
     bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const WioCellularHttpHeader &header);
 
+    void SoftReset();
     void Bg96Begin();
     void Bg96End();
     bool Bg96TurnOff();
     void InitLteM();
-    void SoftReset();
 
     int GetReceivedSignalStrengthIndicator();
     bool IsTimeGot(struct tm *tim);
     void GetCurrentTime(struct tm *tim);
     
-    float ReadVusb();
-    float ReadVbat(void);
-    float mvToPercent(float mvolts);
-    
-    void PwmSetup(int pin, uint8_t flash_interval);
-    void PwmBegin();
-    void PwmWritePin(int pin);
-    void PwmStop();
-    void PwmActivate(int pin, uint8_t flash_interval);
-    
-    char* ConvertDecimalToHex(unsigned long int const decimal, int byte_size);
-    unsigned int GetDataDigits(unsigned int data);
-    char* ConvertIntoBinary(char* PostDataBinary, uint8_t data, unsigned int data_length);
-    char* ConvertIntoBinary(char* PostDataBinary, uint16_t data, unsigned int data_length);
-    char* ConvertIntoBinary(char* PostDataBinary, uint32_t data, unsigned int data_length);
-    char* ConvertIntoBinary(char* PostDataBinary, int data, unsigned int data_length);
-
     void PostDataViaHttp(char *post_data);
     void PostDataViaUdp(char *post_data);
     void PostDataViaUdp(char *post_data, int data_length);

@@ -3,8 +3,10 @@
  */
 
 #include <NectisCellular.h>
+#include <NectisMcu.h>
 
 NectisCellular Nectis;
+NectisMcu Mcu;
 
 char postData[2];
 
@@ -35,15 +37,15 @@ void setup() {
 
 void loop() {
   // Battery Level
-  float lipoVoltageLevelMv = Nectis.ReadVbat();
-  float lipoVoltageLevelPercentageFloat = Nectis.mvToPercent(lipoVoltageLevelMv);
+  float lipoVoltageLevelMv = Mcu.ReadVbat();
+  float lipoVoltageLevelPercentageFloat = Mcu.mvToPercent(lipoVoltageLevelMv);
   uint8_t lipoVoltageLevelPercentageInt = (unsigned int)(lipoVoltageLevelPercentageFloat + 0.5F);
   Serial.printf("Lipo battery: %u[%%}\n", lipoVoltageLevelPercentageInt);
 
-  unsigned int sizeOfPostDataBatteryLevel = Nectis.GetDataDigits(lipoVoltageLevelPercentageInt);
+  unsigned int sizeOfPostDataBatteryLevel = Mcu.GetDataDigits(lipoVoltageLevelPercentageInt);
   char *postDataBatteryLevel;
   char tmpPostDataBatteryLevel[sizeOfPostDataBatteryLevel];
-  postDataBatteryLevel = Nectis.ConvertIntoBinary(tmpPostDataBatteryLevel, lipoVoltageLevelPercentageInt,
+  postDataBatteryLevel = Mcu.ConvertIntoBinary(tmpPostDataBatteryLevel, lipoVoltageLevelPercentageInt,
                                                   sizeOfPostDataBatteryLevel);
 
   // Create post data in binary.
