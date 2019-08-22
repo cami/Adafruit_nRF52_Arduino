@@ -256,10 +256,11 @@ bool WioCellular::TurnOnOrReset() {
           if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"band\",F,20000,0,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
           break;
       case ACCESS_TECHNOLOGY_LTE_NB1:
+          // Softbank
           if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"nwscanseq\",03,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
           if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"nwscanmode\",3,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
           if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"iotopmode\",1,1", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
-//          if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"nb1/bandprior\",12", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+          if (!_AtSerial.WriteCommandAndReadResponse("AT+QCFG=\"nb1/bandprior\",12", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
           break;
       default:
           return RET_ERR(false, E_UNKNOWN);

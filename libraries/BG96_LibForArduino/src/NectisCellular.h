@@ -121,6 +121,7 @@ public:
     void Bg96End();
     bool Bg96TurnOff();
     void InitLteM();
+    void InitNbIoT();
 
     int GetReceivedSignalStrengthIndicator();
     bool IsTimeGot(struct tm *tim);

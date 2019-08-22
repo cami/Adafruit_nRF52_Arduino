@@ -5,7 +5,7 @@
 NectisCellular Nectis;
 
 void setup() {
-  char data[3000];  // レスポンスを格納できるだけの容量が必要！
+  char data[1024];
   int status;
 
   delay(4000);

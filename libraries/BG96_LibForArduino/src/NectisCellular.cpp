@@ -390,19 +390,17 @@ bool NectisCellular::Activate(const char *accessPointName, const char *userName,
     Stopwatch sw;
 
     if (!WaitForPSRegistration(0)) {
-        StringBuilder str_apn;
-        if (!str_apn.WriteFormat("AT+CGDCONT=1, \"IP\", \"%s\"", accessPointName))
-            return RET_ERR(false, E_UNKNOWN);
-        if (!_AtSerial.WriteCommandAndReadResponse(str_apn.GetString(), "^OK$", 500, NULL))
-            return RET_ERR(false, E_UNKNOWN);
+//        StringBuilder str_apn;
+//        if (!str_apn.WriteFormat("AT+CGDCONT=1, \"IP\", \"%s\"", accessPointName))
+//            return RET_ERR(false, E_UNKNOWN);
+//        if (!_AtSerial.WriteCommandAndReadResponse(str_apn.GetString(), "^OK$", 500, NULL))
+//            return RET_ERR(false, E_UNKNOWN);
 
-        // When you would like to start to communicate with SORACOM,
-        // it is faster to to set [IP, accessPointName] than to set [accessPointName, userName, password].
-//        StringBuilder str;
-//        if (!str.WriteFormat("AT+QICSGP=1,1,\"%s\",\"%s\",\"%s\",3", accessPointName, userName, password))
-//            return RET_ERR(false, E_UNKNOWN);
-//        if (!_AtSerial.WriteCommandAndReadResponse(str.GetString(), "^OK$", 500, NULL))
-//            return RET_ERR(false, E_UNKNOWN);
+        StringBuilder str;
+        if (!str.WriteFormat("AT+QICSGP=1,1,\"%s\",\"%s\",\"%s\",3", accessPointName, userName, password))
+            return RET_ERR(false, E_UNKNOWN);
+        if (!_AtSerial.WriteCommandAndReadResponse(str.GetString(), "^OK$", 500, NULL))
+            return RET_ERR(false, E_UNKNOWN);
 
         sw.Restart();
 
@@ -594,6 +592,24 @@ void NectisCellular::InitLteM() {
     delay(100);
     Serial.println("### Connecting to \"" APN "\".");
     if (!Activate(APN, USERNAME, PASSWORD)) {
+        Serial.println("### ERROR!; Activate ###");
+        return;
+    }
+}
+
+void NectisCellular::InitNbIoT() {
+    SetAccessTechnology(ACCESS_TECHNOLOGY_LTE_NB1);
+    SetSelectNetwork(SELECT_NETWORK_MODE_MANUAL_IMSI);
+
+    Serial.println("### Turn on or reset.");
+    if (!TurnOnOrReset()) {
+        Serial.println("### ERROR!; TurnOnOrReset ###");
+        return;
+    }
+
+    delay(100);
+    Serial.println("### Connecting to \"" APN "\".");
+    if (!Activate("mtc.gen", "mtc", "mtc")) {
         Serial.println("### ERROR!; Activate ###");
         return;
     }
