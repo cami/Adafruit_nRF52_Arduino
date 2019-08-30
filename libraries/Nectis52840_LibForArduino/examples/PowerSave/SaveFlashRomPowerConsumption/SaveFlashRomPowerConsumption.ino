@@ -33,6 +33,8 @@ void setup() {
   
   Serial.println("Put the external flash ROM into deep sleep mode.");
   Mcu.PutFlashRomIntoDeepSleepMode();
+
+  SPI.end();
 }
 
 void loop() {

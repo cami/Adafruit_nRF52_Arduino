@@ -91,11 +91,15 @@ extern "C"
  */
 #define PIN_QSPI_SCK                (19)    // Quad SPIクロック, equals to PIN_QSPI_SCLK
 #define PIN_QSPI_CS                 (24)    // Quad SPIチップセレクト
-#define PIN_QSPI_DATA0              (20)    // Quad SPIデータ入出力
-#define PIN_QSPI_DATA1              (21)    // Quad SPIデータ入出力
-#define PIN_QSPI_DATA2              (22)    // Quad SPIデータ入出力
-#define PIN_QSPI_DATA3              (23)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO0                (20)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO1                (21)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO2                (22)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO3                (23)    // Quad SPIデータ入出力
 
+#define PIN_QSPI_DATA0              PIN_QSPI_IO0
+#define PIN_QSPI_DATA1              PIN_QSPI_IO1
+#define PIN_QSPI_DATA2              PIN_QSPI_IO2
+#define PIN_QSPI_DATA3              PIN_QSPI_IO3
 
 // Number of pins defined in PinDescription array
 #define PINS_COUNT                  (48)

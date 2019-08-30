@@ -7,7 +7,7 @@
 #include "Internal/WioSK6812.h"
 #include <time.h>
 #include <string>
-#include "WioCellularHttpHeader.h"
+#include "NectisCellularHttpHeader.h"
 
 #define WIO_TCP        (WioCellular::SOCKET_TCP)
 #define WIO_UDP        (WioCellular::SOCKET_UDP)
@@ -114,13 +114,13 @@ public:
     bool SocketClose(int connectId);
     
     int HttpGet(const char *url, char *data, int dataSize);
-    int HttpGet(const char *url, char *data, int dataSize, const WioCellularHttpHeader &header);
+    int HttpGet(const char *url, char *data, int dataSize, const NectisCellularHttpHeader &header);
     bool HttpPost(const char *url, const char *data, int *responseCode);
-    bool HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header);
+    bool HttpPost(const char *url, const char *data, int *responseCode, const NectisCellularHttpHeader &header);
     
     bool SendUSSD(const char *in, char *out, int outSize);
     
     // ToDo: Pull Request
     bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize);
-    bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize, const WioCellularHttpHeader &header);
+    bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize, const NectisCellularHttpHeader &header);
 };

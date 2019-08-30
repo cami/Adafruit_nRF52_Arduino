@@ -891,7 +891,7 @@ bool WioCellular::SocketClose(int connectId) {
 }
 
 int WioCellular::HttpGet(const char *url, char *data, int dataSize) {
-    WioCellularHttpHeader header;
+    NectisCellularHttpHeader header;
     header["Accept"] = "*/*";
     header["User-Agent"] = HTTP_USER_AGENT;
     header["Connection"] = "Keep-Alive";
@@ -899,7 +899,7 @@ int WioCellular::HttpGet(const char *url, char *data, int dataSize) {
     return HttpGet(url, data, dataSize, header);
 }
 
-int WioCellular::HttpGet(const char *url, char *data, int dataSize, const WioCellularHttpHeader &header) {
+int WioCellular::HttpGet(const char *url, char *data, int dataSize, const NectisCellularHttpHeader &header) {
     std::string response;
     ArgumentParser parser;
     
@@ -976,8 +976,8 @@ int WioCellular::HttpGet(const char *url, char *data, int dataSize, const WioCel
     if (!_AtSerial.ReadResponse("^CONNECT$", 1000, NULL))
         return RET_ERR(-1, E_UNKNOWN);
     if (contentLength >= 0) {
-        if (contentLength + 1 > dataSize)
-            return RET_ERR(-1, E_UNKNOWN);
+//        if (contentLength + 1 > dataSize)
+//            return RET_ERR(-1, E_UNKNOWN);
         if (!_AtSerial.ReadBinary((byte *) data, contentLength, 60000))
             return RET_ERR(-1, E_UNKNOWN);
         data[contentLength] = '\0';
@@ -996,7 +996,7 @@ int WioCellular::HttpGet(const char *url, char *data, int dataSize, const WioCel
 }
 
 bool WioCellular::HttpPost(const char *url, const char *data, int *responseCode) {
-    WioCellularHttpHeader header;
+    NectisCellularHttpHeader header;
     header["Accept"] = "*/*";
     header["User-Agent"] = HTTP_USER_AGENT;
     header["Connection"] = "Keep-Alive";
@@ -1005,7 +1005,7 @@ bool WioCellular::HttpPost(const char *url, const char *data, int *responseCode)
     return HttpPost(url, data, responseCode, header);
 }
 
-bool WioCellular::HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header) {
+bool WioCellular::HttpPost(const char *url, const char *data, int *responseCode, const NectisCellularHttpHeader &header) {
     std::string response;
     ArgumentParser parser;
     
@@ -1124,7 +1124,7 @@ bool WioCellular::SendUSSD(const char *in, char *out, int outSize) {
 }
 
 bool WioCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize) {
-    WioCellularHttpHeader header;
+    NectisCellularHttpHeader header;
     header["Accept"] = "*/*";
     header["User-Agent"] = HTTP_USER_AGENT;
     header["Connection"] = "Keep-Alive";
@@ -1133,7 +1133,7 @@ bool WioCellular::HttpPost2(const char *url, const char *data, int *responseCode
     return HttpPost2(url, data, responseCode, recv_data , recv_dataSize , header);
 }
 
-bool WioCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize,const WioCellularHttpHeader &header) {
+bool WioCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize,const NectisCellularHttpHeader &header) {
     std::string response;
     ArgumentParser parser;
     
@@ -1214,11 +1214,11 @@ bool WioCellular::HttpPost2(const char *url, const char *data, int *responseCode
     
     if(parser.Size() == 3) {
         int contentLength = atoi(parser[2]);
-        
+
         Serial.print("contentLength=");
         Serial.print(contentLength);
         Serial.println("");
-        
+
         if(contentLength > 0)
         {
             if((contentLength + 1) < recv_dataSize) {
@@ -1228,7 +1228,7 @@ bool WioCellular::HttpPost2(const char *url, const char *data, int *responseCode
                 if (!_AtSerial.ReadBinary((byte *) recv_data, contentLength, 60000))
                     return RET_ERR(-1, E_UNKNOWN);
                 recv_data[contentLength] = '\0';
-                
+
                 if (!_AtSerial.ReadResponse("^OK$", 1000, NULL))
                     return RET_ERR(-1, E_UNKNOWN);
             }

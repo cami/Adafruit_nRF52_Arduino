@@ -8,7 +8,7 @@
 #include <WioCellular.h>
 #include "WioCellLibforArduino.h"
 #include "Internal/AtSerial.h"
-#include "WioCellularHttpHeader.h"
+#include "NectisCellularHttpHeader.h"
 
 #define NECTIS_TCP        (NectisCellular::SOCKET_TCP)
 #define NECTIS_UDP        (NectisCellular::SOCKET_UDP)
@@ -107,14 +107,14 @@ public:
     bool SocketClose(int connectId);
 
     int HttpGet(const char *url, char *data, int dataSize);
-    int HttpGet(const char *url, char *data, int dataSize, const WioCellularHttpHeader &header);
+    int HttpGet(const char *url, char *data, int dataSize, const NectisCellularHttpHeader &header);
     bool HttpPost(const char *url, const char *data, int *responseCode);
-    bool HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header);
+    bool HttpPost(const char *url, const char *data, int *responseCode, const NectisCellularHttpHeader &header);
 
     bool SendUSSD(const char *in, char *out, int outSize);
 
     bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize);
-    bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const WioCellularHttpHeader &header);
+    bool HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const NectisCellularHttpHeader &header);
 
     void SoftReset();
     void Bg96Begin();

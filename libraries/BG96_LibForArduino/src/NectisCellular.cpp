@@ -530,7 +530,7 @@ int NectisCellular::HttpGet(const char *url, char *data, int dataSize) {
     return _Wio.HttpGet(url, data, dataSize);
 }
 
-int NectisCellular::HttpGet(const char *url, char *data, int dataSize, const WioCellularHttpHeader &header) {
+int NectisCellular::HttpGet(const char *url, char *data, int dataSize, const NectisCellularHttpHeader &header) {
     return _Wio.HttpGet(url,data,dataSize, header);
 }
 
@@ -538,7 +538,7 @@ bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCo
     return _Wio.HttpPost(url, data, responseCode);
 }
 
-bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode, const WioCellularHttpHeader &header) {
+bool NectisCellular::HttpPost(const char *url, const char *data, int *responseCode, const NectisCellularHttpHeader &header) {
     return _Wio.HttpPost(url, data, responseCode, header);
 }
 
@@ -549,7 +549,7 @@ bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseC
     return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize);
 }
 
-bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const WioCellularHttpHeader &header) {
+bool NectisCellular::HttpPost2(const char *url, const char *data, int *responseCode, char *recv_data, int recv_dataSize , const NectisCellularHttpHeader &header) {
     return _Wio.HttpPost2(url, data, responseCode, recv_data, recv_dataSize, header);
 }
 
@@ -683,7 +683,7 @@ void NectisCellular::PostDataViaHttp(char *post_data) {
     Serial.print(post_data);
     Serial.println("");
     
-    WioCellularHttpHeader header;
+    NectisCellularHttpHeader header;
     header["Accept"] = "*/*";
     header["User-Agent"] = HTTP_USER_AGENT;
     header["Connection"] = "Keep-Alive";
