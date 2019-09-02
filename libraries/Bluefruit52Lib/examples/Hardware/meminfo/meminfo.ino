@@ -17,8 +17,8 @@
 
 void setup() 
 {
-  delay(4000);
   Serial.begin(115200);
+  delay(4000);
   
   Serial.println("Bluefruit52 Memory Info Example");
   Serial.println("-------------------------------\n");

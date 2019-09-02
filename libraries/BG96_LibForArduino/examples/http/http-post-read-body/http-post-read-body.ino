@@ -10,9 +10,8 @@ void setup() {
   int res_size = sizeof(res_data);
   int status;
 
-  delay(4000);
-
   Serial.begin(115200);
+  delay(4000);
   Serial.println("");
   Serial.println("--- START ---------------------------------------------------");
 

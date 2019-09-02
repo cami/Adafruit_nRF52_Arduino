@@ -13,9 +13,8 @@ NectisMcu Mcu;
 
 
 void setup() {
-  delay(4000);
-  
   Serial.begin(115200);
+  delay(4000);
   Serial.println("");
   Serial.println("--- START ---------------------------------------------------");
   
