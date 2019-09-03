@@ -1,14 +1,14 @@
 #**********************************************
-# Jlink with nrfjprog for CAMI qibanca nectis series
+# Jlink with nrfjprog for CAMI qibanca nectis LTE-M DFU
 #**********************************************
-nrfjprog.name=J-Link for qibanca nectis series on nRF52
+nrfjprog.name=LTE-M DFU J-Link for qibanca nectis on nRF52
 nrfjprog.program.tool=bootburn
 nrfjprog.program.cmd=nrfjprog
 nrfjprog.program.cmd.macosx=/usr/local/bin/nrfjprog
 nrfjprog.program.cmd.windows=nrfjprog.exe
 
 # Burn bootloader pattern
-nrfjprog.program.bootfile={runtime.platform.path}/bootloader/{build.variant}/{build.variant}_bootloader-0.4.0_{build.sd_name}_{build.sd_version}.hex
+nrfjprog.program.bootfile={runtime.platform.path}/bootloader/{build.variant}/{build.variant}_bootloader-0.4.1_{build.sd_name}_{build.sd_version}.hex
 nrfjprog.program.burn_pattern="{program.cmd}" --program "{program.bootfile}" -f nrf52 --chiperase --reset
 
 # Jlink to upload sketch
@@ -21,22 +21,22 @@ nrfjprog.program.pattern="{program.cmd}" --reset --program "{build.path}/{build.
 
 
 #**********************************************
-# Jlink with nrfjprog for CAMI qibanca nectis provisioning
+# Jlink with nrfjprog for CAMI qibanca nectis stable bootloader
 #**********************************************
-nrfjprog_provisioning.name=provisioning bootloader for Nectis
-nrfjprog_provisioning.program.tool=bootburn
-nrfjprog_provisioning.program.cmd=nrfjprog
-nrfjprog_provisioning.program.cmd.macosx=/usr/local/bin/nrfjprog
-nrfjprog_provisioning.program.cmd.windows=nrfjprog.exe
+nrfjprog_stable.name=STABLE J-Link for qibanca nectis on nRF52
+nrfjprog_stable.program.tool=bootburn
+nrfjprog_stable.program.cmd=nrfjprog
+nrfjprog_stable.program.cmd.macosx=/usr/local/bin/nrfjprog
+nrfjprog_stable.program.cmd.windows=nrfjprog.exe
 
 # Burn bootloader pattern
-nrfjprog_provisioning.program.bootfile={runtime.platform.path}/bootloader/{build.variant}/{build.variant}_provisioning_bootloader.hex
-nrfjprog_provisioning.program.burn_pattern="{program.cmd}" --program "{program.bootfile}" -f nrf52 --chiperase --reset
+nrfjprog_stable.program.bootfile={runtime.platform.path}/bootloader/{build.variant}/{build.variant}_bootloader-0.4.0_{build.sd_name}_{build.sd_version}.hex
+nrfjprog_stable.program.burn_pattern="{program.cmd}" --program "{program.bootfile}" -f nrf52 --chiperase --reset
 
 # Jlink to upload sketch
-nrfjprog_provisioning.program.params.quiet=
-nrfjprog_provisioning.program.params.verbose=
-nrfjprog_provisioning.program.pattern="{program.cmd}" --reset --program "{build.path}/{build.project_name}.hex" --sectorerase -f nrf52
+nrfjprog_stable.program.params.quiet=
+nrfjprog_stable.program.params.verbose=
+nrfjprog_stable.program.pattern="{program.cmd}" --reset --program "{build.path}/{build.project_name}.hex" --sectorerase -f nrf52
 
 # && nrfjprog_provisioning --erasepage {upload.BOOT_SETTING_ADDR} -f nrf52 && nrfjprog --memwr {upload.BOOT_SETTING_ADDR} --val 0x00000001 -f nrf52 && nrfjprog --reset -f nrf52
 # tools.nrfutil.upload.BOOT_SETTING_ADDR=0xFF000
