@@ -83,10 +83,10 @@ static const uint8_t AREF = PIN_AREF;
  */
 #define SPI_INTERFACES_COUNT      (1)
 
-#define PIN_SPI_MISO              (GROVE_GPIO_6_1)
-#define PIN_SPI_MOSI              (GROVE_GPIO_6_2)
-#define PIN_SPI_SCK               (GROVE_ANALOG_1_2)
-#define PIN_SPI_CS                (GROVE_ANALOG_1_1)
+#define PIN_SPI_MISO              (15)
+#define PIN_SPI_MOSI              (16)
+#define PIN_SPI_SCK               (41)
+#define PIN_SPI_CS                (47)
 
 // static const uint8_t SS = PIN_SPI_CS;
 // static const uint8_t MOSI = PIN_SPI_MOSI;
