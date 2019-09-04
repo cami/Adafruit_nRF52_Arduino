@@ -70,7 +70,7 @@ nectis.build.pid=0x8029
 # SofDevice Menu
 # Ram & ROM size varies depending on SoftDevice (check linker script)
 
-nectis.menu.softdevice.s140v6=0.2.9 (s140 6.1.1)
+nectis.menu.softdevice.s140v6=0.4.0 (s140 6.1.1)
 nectis.menu.softdevice.s140v6.build.sd_flags=-DS140
 nectis.menu.softdevice.s140v6.build.sd_name=s140
 nectis.menu.softdevice.s140v6.build.sd_version=6.1.1
