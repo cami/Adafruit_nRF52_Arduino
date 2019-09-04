@@ -50,14 +50,6 @@ extern "C"
 #define PIN_A6                      (30)
 #define PIN_A7                      (31)
 
-static const uint8_t A0 = PIN_A0;
-static const uint8_t A1 = PIN_A1;
-static const uint8_t A2 = PIN_A2;
-static const uint8_t A3 = PIN_A3;
-static const uint8_t A4 = PIN_A4;
-static const uint8_t A5 = PIN_A5;
-static const uint8_t A6 = PIN_A6;
-static const uint8_t A7 = PIN_A7;
 //#define ADC_RESOLUTION            (14)
 
 // Other pins
@@ -66,8 +58,6 @@ static const uint8_t A7 = PIN_A7;
 
 #define PIN_NFC1                    (9)     // NFC電源側
 #define PIN_NFC2                    (10)    // NFCグラウンド側
-
-static const uint8_t AREF = PIN_AREF;
 
 /*
  * Serial interfaces
@@ -106,11 +96,15 @@ static const uint8_t AREF = PIN_AREF;
  */
 #define PIN_QSPI_SCK                (19)    // Quad SPIクロック, equals to PIN_QSPI_SCLK
 #define PIN_QSPI_CS                 (24)    // Quad SPIチップセレクト
-#define PIN_QSPI_DATA0              (20)    // Quad SPIデータ入出力
-#define PIN_QSPI_DATA1              (21)    // Quad SPIデータ入出力
-#define PIN_QSPI_DATA2              (22)    // Quad SPIデータ入出力
-#define PIN_QSPI_DATA3              (23)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO0                (20)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO1                (21)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO2                (22)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO3                (23)    // Quad SPIデータ入出力
 
+#define PIN_QSPI_DATA0              PIN_QSPI_IO0
+#define PIN_QSPI_DATA1              PIN_QSPI_IO1
+#define PIN_QSPI_DATA2              PIN_QSPI_IO2
+#define PIN_QSPI_DATA3              PIN_QSPI_IO3
 
 // Number of pins defined in PinDescription array
 #define PINS_COUNT                  (48)
@@ -171,6 +165,21 @@ static const uint8_t AREF = PIN_AREF;
 //#define DEBUG_UART_TX_PIN         MODULE_UART_TX_PIN
 //#define DEBUG_UART_RX_PIN         MODULE_UART_RX_PIN
 
+static const uint8_t A0 = PIN_A0;
+static const uint8_t A1 = PIN_A1;
+static const uint8_t A2 = PIN_A2;
+static const uint8_t A3 = PIN_A3;
+static const uint8_t A4 = PIN_A4;
+static const uint8_t A5 = PIN_A5;
+static const uint8_t A6 = PIN_A6;
+static const uint8_t A7 = PIN_A7;
+
+static const uint8_t AREF = PIN_AREF;
+
+static const uint8_t SS = PIN_SPI_CS;
+static const uint8_t MOSI = PIN_SPI_MOSI;
+static const uint8_t MISO = PIN_SPI_MISO;
+static const uint8_t SCK = PIN_SPI_SCK;
 
 // On-board QSPI Flash
 // If EXTERNAL_FLASH_DEVICES is not defined, all supported devices will be used
