@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 name=CAMI qibanca nectis series nRF52840 Boards
-version=0.4.2
+version=0.4.3
 
 # Compile variables
 # -----------------
