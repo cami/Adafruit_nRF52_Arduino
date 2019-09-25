@@ -11,9 +11,15 @@ There are two methods that you can use to install this BSP.
  1. [Download and install the Arduino IDE](https://www.arduino.cc/en/Main/Software) (At least v1.6.12)
  2. Start the Arduino IDE
  3. Go into Preferences
+ 
+ <img src="./docs/preferences.png" alt="preferences" title="preferences">
+ 
  4. Add `https://raw.githubusercontent.com/cami/cami.github.io/master/package_nectis_index.json` as an `Additional Board Manager URL`
  5. Restart the Arduino IDE
  6. Open the Boards Manager from the Tools -> Board menu and install `Nectis nRF52 by CAMI&Co.`
+
+ <img src="./docs/additional_board_manager.png" alt="additional_board_manager" title="additional_board_manager">
+ 
  7. Once the BSP is installed, select `CAMI qibanca nectis series on nRF52840` from the Tools -> Board menu, which will update your system config to use the right compiler and settings for the nRF52.
 
 ### Optional (Core Development): via git
