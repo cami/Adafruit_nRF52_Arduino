@@ -36,13 +36,13 @@ There are two methods that you can use to install this BSP.
 
  1. Install BSP via Board Manager as above to install `compiler & tools`.
  2. Delete the core folder `nrf52` installed by Board Manager in Adruino15, depending on your OS. It could be
-  * macOS  : `~/Library/Arduino15/packages/adafruit/hardware/nrf52`
-  * Linux  : `~/.arduino15/packages/adafruit/hardware/nrf52`
-  * Windows: `%APPDATA%\Local\Arduino15\packages\adafruit\hardware\nrf52`
+  * macOS  : `~/Library/Arduino15/packages/Nectis/hardware/nrf52`
+  * Linux  : `~/.arduino15/packages/Nectis/hardware/nrf52`
+  * Windows: `%APPDATA%\Local\Arduino15\packages\Nectis\hardware\nrf52`
  3. `cd <SKETCHBOOK>`, where `<SKETCHBOOK>` is your Arduino Sketch folder:
   * macOS  : `~/Documents/Arduino`
   * Linux  : `~/Arduino`
-  * Windows: `~/Documents/Arduino`
+  * Windows: `Documents/Arduino`
  4. Create a folder named `hardware/Nectis`, if it does not exist, and change directories to it
  5. Clone this repo: `git clone https://github.com/cami/ArduinoCore-nRF52.git`
  6. Restart the Arduino IDE
