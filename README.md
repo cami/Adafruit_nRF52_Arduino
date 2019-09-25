@@ -1,33 +1,24 @@
-# Arduino Core for CAMI qibanca Nectis series on nRF52 Boards
+# Arduino Core for CAMI sIoTamago on nRF52 Boards
 
-This repository contains the Arduino BSP for Adafruit Bluefruit nRF52 series:
-
-- [Adafruit Feather nRF52832](https://www.adafruit.com/product/3406)
-- [Adafruit Feather nRF52840 Express](https://www.adafruit.com/product/4062)
-- [Adafruit Circuit Playground Bluefruit](https://www.adafruit.com/product/4333)
-- Adafruit Metro nRF52840 Express
-
-Following boards are also included but are not officially supported:
-
-- [Nordic nRF52840DK PCA10056](https://www.nordicsemi.com/Software-and-Tools/Development-Kits/nRF52840-DK)
+This repository contains the Arduino BSP for nRF52840 series.
 
 ## BSP Installation
 
-There are two methods that you can use to install this BSP. We highly recommend the first option unless you wish to participate in active development of this codebase via Github.
+There are two methods that you can use to install this BSP.
 
-### Recommended: Adafruit nRF52 BSP via the Arduino Board Manager
+### Recommended: via Arduino Board Manager
 
  1. [Download and install the Arduino IDE](https://www.arduino.cc/en/Main/Software) (At least v1.6.12)
  2. Start the Arduino IDE
  3. Go into Preferences
- 4. Add https://www.adafruit.com/package_adafruit_index.json as an 'Additional Board Manager URL'
+ 4. Add `https://raw.githubusercontent.com/cami/cami.github.io/master/package_nectis_index.json` as an `Additional Board Manager URL`
  5. Restart the Arduino IDE
- 6. Open the Boards Manager from the Tools -> Board menu and install 'Adafruit nRF52 by Adafruit'
- 7. Once the BSP is installed, select 'Adafruit Bluefruit nRF52 Feather' from the Tools -> Board menu, which will update your system config to use the right compiler and settings for the nRF52.
+ 6. Open the Boards Manager from the Tools -> Board menu and install `Nectis nRF52 by CAMI&Co.`
+ 7. Once the BSP is installed, select `CAMI qibanca nectis series on nRF52840` from the Tools -> Board menu, which will update your system config to use the right compiler and settings for the nRF52.
 
-### Optional (Core Development): Adafruit nRF52 BSP via git
+### Optional (Core Development): via git
 
- 1. Install BSP via Board Manager as above to install compiler & tools.
+ 1. Install BSP via Board Manager as above to install `compiler & tools`.
  2. Delete the core folder `nrf52` installed by Board Manager in Adruino15, depending on your OS. It could be
   * macOS  : `~/Library/Arduino15/packages/adafruit/hardware/nrf52`
   * Linux  : `~/.arduino15/packages/adafruit/hardware/nrf52`
@@ -36,10 +27,10 @@ There are two methods that you can use to install this BSP. We highly recommend 
   * macOS  : `~/Documents/Arduino`
   * Linux  : `~/Arduino`
   * Windows: `~/Documents/Arduino`
- 4. Create a folder named `hardware/Adafruit`, if it does not exist, and change directories to it
- 5. Clone this repo: `git clone https://github.com/adafruit/Adafruit_nRF52_Arduino.git`
+ 4. Create a folder named `hardware/Nectis`, if it does not exist, and change directories to it
+ 5. Clone this repo: `git clone https://github.com/cami/ArduinoCore-nRF52.git`
  6. Restart the Arduino IDE
- 7. Once the BSP is installed, select 'Adafruit Bluefruit nRF52 Feather' from the Tools -> Board menu, which will update your system config to use the right compiler and settings for the nRF52.
+ 7. Once the BSP is installed, select `CAMI qibanca nectis series on nRF52840` from the Tools -> Board menu, which will update your system config to use the right compiler and settings for the nRF52.
 
 ### Adafruit's nrfutil tools
 
@@ -48,9 +39,9 @@ There are two methods that you can use to install this BSP. We highly recommend 
 - For Windows and macOS, pre-built executable binaries are included in the BSP at `tools/adafruit-nrfutil/`. It should work out of the box.
 - Linux user need to run follow command to install it from PyPi
 
-    ```
+```
     $ pip3 install adafruit-nrfutil --user
-	```
+```
 
 ### Drivers
 
@@ -62,8 +53,8 @@ There are two methods that you can use to install this BSP. We highly recommend 
 
 Bluefruit's Bootloader is self-upgradable, you could upgrade to the latest Bootloader + Softdevice using the serial port within Arduino IDE.
 
-- Select `Tools > Board > Adafruit Bluefruit Feather52`
-- Select `Tools > Programmer > Bootloader DFU for Bluefruit nRF52`
+- Select `Tools > Board > CAMI qibanca nectis series on nRF52840`
+- Select `Tools > Programmer > STABLE J-Link for qibanca nectis on nRF52`
 - Select `Tools > Burn Bootloader`
 - **WAIT** until the process complete ~30 seconds
 
@@ -99,9 +90,8 @@ If you wish to modify bootloader to your own need, check out its repo here [Adaf
 The bootloader hex file can be found at `bin/bootloader` run the command as follows:
 
 ```
-$ nrfjprog -e -f nrf52
-$ nrfjprog --program nectis_nrf52840_bootloader-0.2.9_s140_6.1.1.hex -f nrf52
-$ nrfjprog --reset -f nrf52
+$ nrfjprog --eraseall
+$ nrfjprog --chiperase --program nectis_nrf52840_bootloader-6.2.0_s140_6.1.1.hex -f NRF52 -r
 ```
 
 ## Credits
