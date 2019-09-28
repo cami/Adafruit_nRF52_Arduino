@@ -88,3 +88,74 @@ nectis.menu.debug.l2=Level 2 (Full Debug)
 nectis.menu.debug.l2.build.debug_flags=-DCFG_DEBUG=2 -Os
 nectis.menu.debug.l3=Level 3 (Segger SystemView)
 nectis.menu.debug.l3.build.debug_flags=-DCFG_DEBUG=3 -Os
+
+
+#**********************************************
+# CAMI qibanca nectis series on nRF52840 for Inspection Parent board
+#**********************************************
+nectis_parent.name=*PARENT BOARD* CAMI qibanca nectis series on nRF52840
+
+# DFU Mode with CDC only
+nectis_parent.vid.0=0x239A
+nectis_parent.pid.0=0x002A
+
+# DFU Mode with CDC + MSC (UF2)
+nectis_parent.vid.1=0x239A
+nectis_parent.pid.1=0x0029
+
+# Arduino Application with CDC + MSC
+nectis_parent.vid.2=0x239A
+nectis_parent.pid.2=0x8029
+
+# VID/PID for bootloader with/without UF2, Arduino + Circuitpython App
+nectis_parent.vid.0=0x239A
+nectis_parent.pid.0=0x8029
+nectis_parent.vid.1=0x239A
+nectis_parent.pid.1=0x0029
+nectis_parent.vid.2=0x239A
+nectis_parent.pid.2=0x002A
+nectis_parent.vid.3=0x239A
+nectis_parent.pid.3=0x802A
+
+nectis_parent.bootloader.tool=bootburn
+
+# Upload
+nectis_parent.upload.tool=nrfutil
+nectis_parent.upload.protocol=nrfutil
+nectis_parent.upload.use_1200bps_touch=true
+nectis_parent.upload.wait_for_upload_port=true
+
+# Build
+nectis_parent.build.mcu=cortex-m4
+nectis_parent.build.f_cpu=64000000
+nectis_parent.build.board=NRF52840_NECTIS
+nectis_parent.build.core=nRF5
+nectis_parent.build.variant=nectis_nRF52840
+nectis_parent.build.usb_manufacturer="CAMI and Co."
+nectis_parent.build.usb_product="*PARENT BOARD* CAMI qibanca nectis series"
+nectis_parent.build.extra_flags=-DNRF52840_XXAA -DARDUINO_WIO_LTE_M1NB1_BG96 -DARDUINO_NRF52_FEATHER {build.flags.usb}
+nectis_parent.build.ldscript=nrf52840_s140_v6.ld
+nectis_parent.build.vid=0x239A
+nectis_parent.build.pid=0x8029
+
+# SofDevice Menu
+# Ram & ROM size varies depending on SoftDevice (check linker script)
+
+nectis_parent.menu.softdevice.s140v6=0.4.0 (s140 6.1.1)
+nectis_parent.menu.softdevice.s140v6.build.sd_flags=-DS140
+nectis_parent.menu.softdevice.s140v6.build.sd_name=s140
+nectis_parent.menu.softdevice.s140v6.build.sd_version=6.1.1
+nectis_parent.menu.softdevice.s140v6.build.sd_fwid=0x00B6
+nectis_parent.menu.softdevice.s140v6.build.ldscript=nrf52840_s140_v6.ld
+nectis_parent.menu.softdevice.s140v6.upload.maximum_size=815104
+nectis_parent.menu.softdevice.s140v6.upload.maximum_data_size=248832
+
+# Debug Menu
+nectis_parent.menu.debug.l0=Level 0 (Release)
+nectis_parent.menu.debug.l0.build.debug_flags=-DCFG_DEBUG=0 -Os
+nectis_parent.menu.debug.l1=Level 1 (Error Message)
+nectis_parent.menu.debug.l1.build.debug_flags=-DCFG_DEBUG=1 -Os
+nectis_parent.menu.debug.l2=Level 2 (Full Debug)
+nectis_parent.menu.debug.l2.build.debug_flags=-DCFG_DEBUG=2 -Os
+nectis_parent.menu.debug.l3=Level 3 (Segger SystemView)
+nectis_parent.menu.debug.l3.build.debug_flags=-DCFG_DEBUG=3 -Os
