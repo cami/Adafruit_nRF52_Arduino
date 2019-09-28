@@ -11,28 +11,22 @@ There are two methods that you can use to install this BSP.
  1. [Download and install the Arduino IDE](https://www.arduino.cc/en/Main/Software) (At least v1.6.12)
  2. Start the Arduino IDE
  3. Go into Preferences
- 
- <img src="./docs/preferences.png" alt="preferences" title="preferences">
- 
  4. Add `https://raw.githubusercontent.com/cami/cami.github.io/master/package_nectis_index.json` as an `Additional Board Manager URL`
  5. Restart the Arduino IDE
  6. Open the Boards Manager from the Tools -> Board menu and install `Nectis nRF52 by CAMI&Co.`
-
- <img src="./docs/additional_board_manager.png" alt="additional_board_manager" title="additional_board_manager">
- 
  7. Once the BSP is installed, select `CAMI qibanca nectis series on nRF52840` from the Tools -> Board menu, which will update your system config to use the right compiler and settings for the nRF52.
 
 ### Optional (Core Development): via git
 
  1. Install BSP via Board Manager as above to install `compiler & tools`.
  2. Delete the core folder `nrf52` installed by Board Manager in Adruino15, depending on your OS. It could be
-  * macOS  : `~/Library/Arduino15/packages/Nectis/hardware/nrf52`
-  * Linux  : `~/.arduino15/packages/Nectis/hardware/nrf52`
-  * Windows: `%APPDATA%\Local\Arduino15\packages\Nectis\hardware\nrf52`
+  * macOS  : `~/Library/Arduino15/packages/adafruit/hardware/nrf52`
+  * Linux  : `~/.arduino15/packages/adafruit/hardware/nrf52`
+  * Windows: `%APPDATA%\Local\Arduino15\packages\adafruit\hardware\nrf52`
  3. `cd <SKETCHBOOK>`, where `<SKETCHBOOK>` is your Arduino Sketch folder:
   * macOS  : `~/Documents/Arduino`
   * Linux  : `~/Arduino`
-  * Windows: `Documents/Arduino`
+  * Windows: `~/Documents/Arduino`
  4. Create a folder named `hardware/Nectis`, if it does not exist, and change directories to it
  5. Clone this repo: `git clone https://github.com/cami/ArduinoCore-nRF52.git`
  6. Restart the Arduino IDE
