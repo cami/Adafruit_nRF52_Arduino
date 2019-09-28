@@ -194,6 +194,16 @@ void NectisMcu::PutFlashRomIntoDeepSleepMode() {
     digitalWrite(PIN_SPI_CS, HIGH);
 }
 
+void NectisMcu::ReleaseFlashRomFromDeepSleepMode() {
+  // SLAVE_SELECT_PIN == PIN_SPI_CS
+  // set the slaveSelectPin as an output:
+  pinMode(PIN_SPI_CS, OUTPUT);
+
+  digitalWrite(PIN_SPI_CS, LOW);
+  SPI.transfer(0xAB);
+  digitalWrite(PIN_SPI_CS, HIGH);
+}
+
 void NectisMcu::SoftReset() {
     NVIC_SystemReset();
 }
