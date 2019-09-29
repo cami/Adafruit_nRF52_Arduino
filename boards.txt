@@ -93,7 +93,7 @@ nectis.menu.debug.l3.build.debug_flags=-DCFG_DEBUG=3 -Os
 #**********************************************
 # CAMI qibanca nectis series on nRF52840 for Inspection Parent board
 #**********************************************
-nectis_parent.name=*PARENT BOARD* CAMI qibanca nectis series on nRF52840
+nectis_parent.name=PARENT BOARD CAMI qibanca nectis
 
 # DFU Mode with CDC only
 nectis_parent.vid.0=0x239A
