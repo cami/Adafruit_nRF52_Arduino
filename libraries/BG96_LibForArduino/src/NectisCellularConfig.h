@@ -1,11 +1,4 @@
-//
-// Created by NaotoFujihiro on 2019-08-08.
-//
-
-#ifndef NRF52840_LIBFORBG96_NECTISCELLULARCONFIG_H
-#define NRF52840_LIBFORBG96_NECTISCELLULARCONFIG_H
-
-#endif //NRF52840_LIBFORBG96_NECTISCELLULARCONFIG_H
+#pragma once
 
 #include <Arduino.h>
 

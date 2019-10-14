@@ -35,6 +35,7 @@ void setup() {
 
 void loop() {
   char postData[64];
+  memset(&postData, 0x00, sizeof(postData));
 
   sprintf(postData, "{\"uptime\":%lu}", millis() / 1000);
   Serial.println(postData);

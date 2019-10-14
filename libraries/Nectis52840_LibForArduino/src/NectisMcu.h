@@ -26,6 +26,7 @@ public:
     char *ConvertIntoBinary(char *PostDataBinary, int data, unsigned int data_length);
 
     void PutFlashRomIntoDeepSleepMode();
+    void ReleaseFlashRomFromDeepSleepMode();
     void SoftReset();
     void DisableAllPeripherals();
     void EnterSystemOffDeepSleepMode();
