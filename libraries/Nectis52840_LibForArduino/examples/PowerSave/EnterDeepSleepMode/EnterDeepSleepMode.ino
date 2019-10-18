@@ -3,8 +3,6 @@
 #include <NectisCellular.h>
 #include <NectisMcu.h>
 
-#define SLAVE_SELECT_PIN      PIN_SPI_CS
-
 NectisCellular Nectis;
 NectisMcu Mcu;
 
@@ -31,7 +29,7 @@ void setup() {
   Nectis.PowerSupplyGrove(true);
   
   // Use SPI between flash ROM in order to put it into deep sleep mode.
-  pinMode(SLAVE_SELECT_PIN, OUTPUT);
+  pinMode(PIN_SPI_CS, OUTPUT);
   SPI.begin();
   
   Nectis.Bg96Begin();
@@ -89,6 +87,9 @@ void setup() {
   
   delay(1000);
   
+// ToDO: EnterSystemOffDeepSleepMode(), EnterCpuWfiWfeSleep() どちらを先に実行するべきか確認。
+// ToDO: RTC_INTRB が LOWになった時に、DeepSleepモードから目覚めるようにする。
+// ToDO: GPIO_PIN_CNF_SENSE_Low
   // Enter System-Off deep sleep mode.
   Mcu.EnterSystemOffDeepSleepMode();
   
