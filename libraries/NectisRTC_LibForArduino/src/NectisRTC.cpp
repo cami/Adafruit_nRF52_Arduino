@@ -3,12 +3,12 @@
 //INTERNAL_ADDRESS = INTERNAL_ADDRESS_SECOND_COUNTER_POS = 0b0000
 // Write
 // ROLE    : | SLAVE_ADDRESS | R/W | INTERNAL_ADDRESS | TRANSFER_FORMAT |            DATA              |
-// SDA LINE: | 0 1 1 0 0 1 0 |  0  |     0 0 0 0      |     0 0 0 0     | — S40 S20 S10 S8  S4  S2  S1 |
+// SDA BIT : | 0 1 1 0 0 1 0 |  0  |     0 0 0 0      |     0 0 0 0     | — S40 S20 S10 S8  S4  S2  S1 |
 // SDA LINE: | 7 6 5 4 3 2 1 |  0  |     7 6 5 4      |     3 2 1 0     | 7 6   5   4   3   2   1   0  |
 
 // Read
 // ROLE    : | SLAVE_ADDRESS | R/W | INTERNAL_ADDRESS | TRANSFER_FORMAT | SLAVE_ADDRESS | R/W |            DATA              |
-// SDA LINE: | 0 1 1 0 0 1 0 |  0  |     0 0 0 0      |     0 0 0 0     | 0 1 1 0 0 1 0 |  1  | — S40 S20 S10 S8  S4  S2  S1 |
+// SDA BIT : | 0 1 1 0 0 1 0 |  0  |     0 0 0 0      |     0 0 0 0     | 0 1 1 0 0 1 0 |  1  | — S40 S20 S10 S8  S4  S2  S1 |
 // SDA LINE: | 7 6 5 4 3 2 1 |  0  |     7 6 5 4      |     3 2 1 0     | 7 6 5 4 3 2 1 |  1  | 7 6   5   4   3   2   1   0  |
 
 
@@ -76,13 +76,18 @@ void NectisRTC::InitRtc() {
 }
 
 void NectisRTC::ReadCalender() {
-  uint8_t internalAddress = INTERNAL_ADDRESS_SECOND_COUNTER_POS;
-  uint8_t* data;
+  uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
+  uint8_t slaveRegister = INTERNAL_ADDRESS_YEAR_COUNTER_POS | TRANSFER_FORMAT;
+  uint8_t writeData = 0b00001110;
 
-  WriteToRtcReg8(internalAddress, 0b00001111);
+  WriteReg8(slaveAddress, slaveRegister, writeData);
 
-  ReadFromRtcReg8(internalAddress, data);
-  Serial.printf("%x: %u", internalAddress, data);
+  uint8_t readData;
+  int year = ReadReg8(slaveAddress, slaveRegister, &readData);
+
+  Serial.println(slaveAddress);
+  Serial.println(slaveRegister);
+  Serial.println(year);
 }
 
 //void NectisRTC::SetRtcTimerTime(unsigned int second, unsigned int minute, unsigned int hour) {
@@ -141,63 +146,37 @@ void NectisRTC::ReadCalender() {
 //  Serial.printf("The set constant interrupt is: %u", data);
 //}
 
-
-void NectisRTC::WriteToRtcReg8(uint8_t internalAddress, uint8_t data) {
-  uint8_t writeData[2];
-  writeData[0] = internalAddress | TRANSFER_FORMAT;
-  writeData[1] = data;
-
-  WriteToRtc(writeData, sizeof(writeData));
-}
-
-void NectisRTC::ReadFromRtcReg8(uint8_t internalAddress, uint8_t* data) {
-  ReadFromRtc(internalAddress, data, 1);
-}
-
-void NectisRTC::WriteToRtc(uint8_t* data, int dataSize) {
-  uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
-
-  Serial.printf("%u\n", data[0]);
-  Serial.printf("%u\n", data[1]);
-
+void NectisRTC::Write(uint8_t slaveAddress, const uint8_t* data, int dataSize) {
   _RtcWire.beginTransmission(slaveAddress);
-
-  while (dataSize--) {
+  while (dataSize--)
+  {
     _RtcWire.write(*data++);
   }
-
   _RtcWire.endTransmission();
 }
 
-void NectisRTC::ReadFromRtc(uint8_t internalAddress, uint8_t* data, int dataSize) {
-  uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
-  uint8_t writeData[2];
-  writeData[0] = slaveAddress;
-  writeData[1] = internalAddress | TRANSFER_FORMAT;
-  WriteToRtc(writeData, sizeof(writeData));
-  Serial.printf("%u, %u\n", writeData[0], writeData[1]);
-
-  uint8_t internalRegister = SLAVE_ADDRESS | DATA_TRANSFER_BIT_HIGH;
-  writeData[1];
-  writeData[0] = internalRegister;
-  WriteToRtc(writeData, sizeof(writeData));
-  Serial.printf("%u\n", writeData[0]);
-
-  Serial.println(dataSize);
-
-  while (dataSize--) {
+int NectisRTC::Read(uint8_t slaveAddress, uint8_t* data, int dataSize) {
+  auto readSize = _RtcWire.requestFrom(slaveAddress, dataSize);
+  dataSize = readSize;
+  while (dataSize--)
+  {
     *data++ = _RtcWire.read();
+    Serial.printf("%u", &data);
   }
 
-  Serial.printf("%u\n", data);
-
+  return readSize;
 }
 
+void NectisRTC::WriteReg8(uint8_t slaveAddress, uint8_t reg, uint8_t data) {
+  uint8_t writeData[2];
+  writeData[0] = reg;
+  writeData[1] = data;
 
-//Wire.requestFrom(2, 6);    // request 6 bytes from slave device #2
-//
-//while(Wire.available())    // slave may send less than requested
-//{
-//char c = Wire.read(); // receive a byte as character
-//Serial.print(c);         // print the character
-//}
+  Write(slaveAddress, writeData, sizeof(writeData));
+}
+
+int NectisRTC::ReadReg8(uint8_t slaveAddress, uint8_t reg, uint8_t* data) {
+  Write(slaveAddress, &reg, 1);
+
+  return Read(slaveAddress, data, 1);
+}

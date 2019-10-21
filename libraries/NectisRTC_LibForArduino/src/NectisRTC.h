@@ -17,9 +17,10 @@ public:
 //  void EnableRtcTimer();
 //  void EnableRtcAlarm();
 //  void ReadSetTimer();
-  void WriteToRtcReg8(uint8_t internalAddress, uint8_t data);
-  void ReadFromRtcReg8(uint8_t internalAddress, uint8_t* data);
-  void WriteToRtc(uint8_t* data, int dataSize);
-  void ReadFromRtc(uint8_t internalAddress, uint8_t* data, int dataSize);
+  void Write(uint8_t slaveAddress, const uint8_t* data, int dataSize);
+  int Read(uint8_t slaveAddress, uint8_t* data, int dataSize);
+
+  void WriteReg8(uint8_t slaveAddress, uint8_t reg, uint8_t data);
+  int ReadReg8(uint8_t slaveAddress, uint8_t reg, uint8_t* data);
 };
 
