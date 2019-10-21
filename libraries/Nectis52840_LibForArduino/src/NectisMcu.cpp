@@ -1,3 +1,4 @@
+#include "SPI.h"
 #include "NectisMcu.h"
 
 char hexConvertedFromDecimal[16];
@@ -185,6 +186,8 @@ char *NectisMcu::ConvertIntoBinary(char *PostDataBinary, int data, unsigned int 
 }
 
 void NectisMcu::PutFlashRomIntoDeepSleepMode() {
+  SPI.begin();
+
   // SLAVE_SELECT_PIN == PIN_SPI_CS
   // set the slaveSelectPin as an output:
   pinMode(PIN_SPI_CS, OUTPUT);
@@ -192,9 +195,13 @@ void NectisMcu::PutFlashRomIntoDeepSleepMode() {
   digitalWrite(PIN_SPI_CS, LOW);
   SPI.transfer(0xB9);
   digitalWrite(PIN_SPI_CS, HIGH);
+
+  SPI.end();
 }
 
 void NectisMcu::WakeUpFlashRomFromDeepSleepMode() {
+  SPI.begin();
+
   // SLAVE_SELECT_PIN == PIN_SPI_CS
   // set the slaveSelectPin as an output:
   pinMode(PIN_SPI_CS, OUTPUT);
@@ -202,6 +209,8 @@ void NectisMcu::WakeUpFlashRomFromDeepSleepMode() {
   digitalWrite(PIN_SPI_CS, LOW);
   SPI.transfer(0xAB);
   digitalWrite(PIN_SPI_CS, HIGH);
+
+  SPI.end();
 }
 
 void NectisMcu::SoftReset() {
@@ -263,7 +272,11 @@ void NectisMcu::EnterSystemOffDeepSleepMode() {
 }
 
 void NectisMcu::EnterCpuWfiWfeSleep() {
-  NRF_POWER->EVENTS_SLEEPENTER = 0x1UL << POWER_EVENTS_SLEEPENTER_EVENTS_SLEEPENTER_Pos;
+  NRF_POWER->EVENTS_SLEEPENTER = POWER_EVENTS_SLEEPENTER_EVENTS_SLEEPENTER_Generated << POWER_EVENTS_SLEEPENTER_EVENTS_SLEEPENTER_Pos;
+}
+
+void NectisMcu::ExitCpuWfiWfeSleep() {
+  NRF_POWER->EVENTS_SLEEPEXIT = POWER_EVENTS_SLEEPEXIT_EVENTS_SLEEPEXIT_Generated << POWER_EVENTS_SLEEPEXIT_EVENTS_SLEEPEXIT_Pos;
 }
 
 void NectisMcu::WatchdogTimerInit(const int wdtTimeoutSec) {

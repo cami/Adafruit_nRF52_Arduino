@@ -8,10 +8,15 @@ private:
   TwoWire _RtcWire;
 public:
   NectisRTC();
-  void SetRtcTimer(unsigned int second);
+  void SetRtcTimerTime(unsigned int second, unsigned int minute, unsigned int hour);
+  void SetRtcTimerDayofweek(unsigned int dayofweek);
+  void SetRtcTimerDay(unsigned int day);
   void EnableRtcTimer();
+  void EnableRtcAlarm();
+  void ReadSetTimer();
   void WriteToRtcReg8(uint8_t internalAddress, uint8_t data);
+  void ReadFromRtcReg8(uint8_t internalAddress, uint8_t data);
   void WriteToRtc(uint8_t* data, int dataSize);
-
+  void ReadFromRtc(uint8_t* data, int dataSize);
 };
 

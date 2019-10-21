@@ -27,10 +27,7 @@ void setup() {
   Serial.println("### Power supply ON.");
   // Make sure that the MODULE_PWR_PIN is set to HIGH.
   Nectis.PowerSupplyGrove(true);
-  
-  // Use SPI between flash ROM in order to put it into deep sleep mode.
-  pinMode(PIN_SPI_CS, OUTPUT);
-  SPI.begin();
+  delay(100);
   
   Nectis.Bg96Begin();
   Nectis.InitLteM();

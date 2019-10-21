@@ -35,6 +35,7 @@ public:
   void EnableAllPeripherals();
   void EnterSystemOffDeepSleepMode();
   void EnterCpuWfiWfeSleep();
+  void ExitCpuWfiWfeSleep();
   void WatchdogTimerInit(const int wdtTimeoutSec);
   void WatchdogTimerDelay(int delayMilliSeconds);
   void ReloadWatchdogTimer();

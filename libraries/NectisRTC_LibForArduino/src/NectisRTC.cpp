@@ -57,20 +57,45 @@
 #define DATA_REGISTER2_DISABLE_32KHZ_CLOCK_OUTPUT   (0b00001000)
 
 
-NectisRTC::NectisRTC() : &_RtcWire(NRF_TWIM0, NRF_TWIS0, SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn, RTC_I2C_SDA_PIN, RTC_I2C_SCL_PIN) {
+NectisRTC::NectisRTC() : _RtcWire(NRF_TWIM0, NRF_TWIS0, SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn, RTC_I2C_SDA_PIN, RTC_I2C_SCL_PIN) {
 
 }
 
-void NectisRTC::SetRtcTimer(unsigned int second) {
+void NectisRTC::SetRtcTimerTime(unsigned int second, unsigned int minute, unsigned int hour) {
 //  アラーム割り込み出力はINTRB端子から出力されます。割り込み出力時はINTRB=Lowです。
 // ToDO: internalAddress, dataをRTCのタイマーに合わせて計算。
   uint8_t internalAddress = 0x00;
-  uint8_t data = second;
+  uint8_t data = 0x00;
+
+  WriteToRtcReg8(internalAddress, data);
+}
+
+void NectisRTC::SetRtcTimerDayofweek(unsigned int dayofweek) {
+//  アラーム割り込み出力はINTRB端子から出力されます。割り込み出力時はINTRB=Lowです。
+// ToDO: internalAddress, dataをRTCのタイマーに合わせて計算。
+  uint8_t internalAddress = 0x00;
+  uint8_t data = 0x00;
+
+  WriteToRtcReg8(internalAddress, data);
+}
+
+void NectisRTC::SetRtcTimerDay(unsigned int day) {
+//  アラーム割り込み出力はINTRB端子から出力されます。割り込み出力時はINTRB=Lowです。
+// ToDO: internalAddress, dataをRTCのタイマーに合わせて計算。
+  uint8_t internalAddress = 0x00;
+  uint8_t data = 0x00;
 
   WriteToRtcReg8(internalAddress, data);
 }
 
 void NectisRTC::EnableRtcTimer() {
+  uint8_t internalAddress = INTERNAL_ADDRESS_CONTROL_REGISTER1_POS;
+  uint8_t data = DATA_ENABLE_INTERRUPT_OR_ALARM;
+
+  WriteToRtcReg8(internalAddress, data);
+}
+
+void NectisRTC::EnableRtcAlarm() {
   uint8_t internalAddress = INTERNAL_ADDRESS_CONTROL_REGISTER1_POS;
   uint8_t data = DATA_ENABLE_INTERRUPT_OR_ALARM;
 
@@ -85,8 +110,8 @@ void NectisRTC::ReadSetTimer() {
   ReadFromRtcReg8(internalAddress, data);
   Serial.printf("The set alarm is: %u", data);
 
-  uint8_t internalAddress = 0x00;
-  uint8_t data = 0x00;
+  internalAddress = 0x00;
+  data = 0x00;
 
   ReadFromRtcReg8(internalAddress, data);
   Serial.printf("The set constant interrupt is: %u", data);
@@ -112,31 +137,31 @@ void NectisRTC::ReadFromRtcReg8(uint8_t internalAddress, uint8_t data) {
 }
 
 void NectisRTC::WriteToRtc(uint8_t* data, int dataSize) {
-  uint8_t slaveAddress = SLAVE_ADDRESS | DATA_WRITE_BIT
+  uint8_t slaveAddress = SLAVE_ADDRESS | DATA_WRITE_BIT;
 
-  _RtcWire->beginTransmission(slaveAddress);
+  _RtcWire.beginTransmission(slaveAddress);
 
   while (dataSize--) {
-    _RtcWire->write(*data++);
+    _RtcWire.write(*data++);
   }
 
-  _RtcWire->endTransmission();
+  _RtcWire.endTransmission();
 }
 
 void NectisRTC::ReadFromRtc(uint8_t* data, int dataSize) {
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_READ_BIT;
-  uint8_t readSize = _RtcWire->requestFrom(slaveAddress, dataSize);
+  uint8_t readSize = _RtcWire.requestFrom(slaveAddress, dataSize);
 
   dataSize = int(readSize);
 
-  _RtcWire->beginTransmission(slaveAddress);
+  _RtcWire.beginTransmission(slaveAddress);
 
   while (dataSize--)
   {
-    *data++ = _RtcWire->read();
+    *data++ = _RtcWire.read();
   }
 
-  _RtcWire->endTransmission();
+  _RtcWire.endTransmission();
 }
 
 
