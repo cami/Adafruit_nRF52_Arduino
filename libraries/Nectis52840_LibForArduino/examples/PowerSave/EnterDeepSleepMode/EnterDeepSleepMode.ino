@@ -28,7 +28,11 @@ void setup() {
   // Make sure that the MODULE_PWR_PIN is set to HIGH.
   Nectis.PowerSupplyGrove(true);
   delay(100);
-  
+
+  Serial.println("### Wake up the external flash ROM from deep sleep mode.");
+  Mcu.WakeUpFlashRomFromDeepSleepMode();
+  delay(100);
+
   Nectis.Bg96Begin();
   Nectis.InitLteM();
   delay(100);

@@ -184,6 +184,10 @@ void NectisCellular::Init() {
     
     // Grove
     pinMode(GROVE_VCCB_PIN, OUTPUT);            digitalWrite(GROVE_VCCB_PIN, LOW);
+
+    // RTC
+    pinMode(RTC_INTRB, INPUT_PULLUP);
+    pinMode(RTC_I2C_SDA_PIN, OUTPUT);           digitalWrite(RTC_I2C_SDA_PIN, HIGH);
 }
 
 void NectisCellular::PowerSupplyCellular(bool on) {
