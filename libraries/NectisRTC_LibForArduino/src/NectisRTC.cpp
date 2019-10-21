@@ -78,16 +78,19 @@ void NectisRTC::InitRtc() {
 void NectisRTC::ReadCalender() {
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
   uint8_t slaveRegister = INTERNAL_ADDRESS_YEAR_COUNTER_POS | TRANSFER_FORMAT;
-  uint8_t writeData = 0b00001110;
+  uint8_t writeData = 0b00000000;
 
   WriteReg8(slaveAddress, slaveRegister, writeData);
+
+  EnableRtcTimer(slaveAddress);
 
   uint8_t readData;
   int year = ReadReg8(slaveAddress, slaveRegister, &readData);
 
-  Serial.println(slaveAddress);
-  Serial.println(slaveRegister);
-  Serial.println(year);
+  Serial.printf("%x\n", readData);
+  Serial.printf("%x\n", slaveAddress);
+  Serial.printf("%x\n", slaveRegister);
+  Serial.printf("%x\n", year);
 }
 
 //void NectisRTC::SetRtcTimerTime(unsigned int second, unsigned int minute, unsigned int hour) {
@@ -117,19 +120,19 @@ void NectisRTC::ReadCalender() {
 //  WriteToRtcReg8(internalAddress, data);
 //}
 //
-//void NectisRTC::EnableRtcTimer() {
-//  uint8_t internalAddress = INTERNAL_ADDRESS_CONTROL_REGISTER1_POS;
-//  uint8_t data = DATA_ENABLE_INTERRUPT_OR_ALARM;
-//
-//  WriteToRtcReg8(internalAddress, data);
-//}
-//
-//void NectisRTC::EnableRtcAlarm() {
-//  uint8_t internalAddress = INTERNAL_ADDRESS_CONTROL_REGISTER1_POS;
-//  uint8_t data = DATA_ENABLE_INTERRUPT_OR_ALARM;
-//
-//  WriteToRtcReg8(internalAddress, data);
-//}
+void NectisRTC::EnableRtcTimer(uint8_t slaveAddress) {
+  uint8_t slaveRegister = INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT;
+  uint8_t data = DATA_ENABLE_INTERRUPT_OR_ALARM;
+
+  WriteReg8(slaveAddress, slaveRegister, data);
+}
+
+void NectisRTC::EnableRtcAlarm(uint8_t slaveAddress) {
+  uint8_t slaveRegister = INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT;
+  uint8_t data = DATA_ENABLE_INTERRUPT_OR_ALARM;
+
+  WriteReg8(slaveAddress, slaveRegister, data);
+}
 //
 //void NectisRTC::ReadSetTimer() {
 //  // ToDO: internalAddress, dataをRTCのタイマーに合わせて計算。
@@ -147,21 +150,28 @@ void NectisRTC::ReadCalender() {
 //}
 
 void NectisRTC::Write(uint8_t slaveAddress, const uint8_t* data, int dataSize) {
+  Serial.println(dataSize);
+
   _RtcWire.beginTransmission(slaveAddress);
   while (dataSize--)
   {
+    Serial.println(dataSize);
     _RtcWire.write(*data++);
   }
   _RtcWire.endTransmission();
 }
 
 int NectisRTC::Read(uint8_t slaveAddress, uint8_t* data, int dataSize) {
+  Serial.println(dataSize);
+
   auto readSize = _RtcWire.requestFrom(slaveAddress, dataSize);
   dataSize = readSize;
+
+  Serial.println(dataSize);
   while (dataSize--)
   {
+    Serial.println(dataSize);
     *data++ = _RtcWire.read();
-    Serial.printf("%u", &data);
   }
 
   return readSize;

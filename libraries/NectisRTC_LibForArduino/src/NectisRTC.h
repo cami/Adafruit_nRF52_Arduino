@@ -14,8 +14,8 @@ public:
 //  void SetRtcTimerTime(unsigned int second, unsigned int minute, unsigned int hour);
 //  void SetRtcTimerDayofweek(unsigned int dayofweek);
 //  void SetRtcTimerDay(unsigned int day);
-//  void EnableRtcTimer();
-//  void EnableRtcAlarm();
+  void EnableRtcTimer(uint8_t slaveAddress);
+  void EnableRtcAlarm(uint8_t slaveAddress);
 //  void ReadSetTimer();
   void Write(uint8_t slaveAddress, const uint8_t* data, int dataSize);
   int Read(uint8_t slaveAddress, uint8_t* data, int dataSize);
