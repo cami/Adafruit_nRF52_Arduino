@@ -634,12 +634,16 @@ int NectisCellular::GetReceivedSignalStrengthIndicator() {
     return rssi;
 }
 
-bool NectisCellular::IsTimeGot(struct tm *tim) {
+bool NectisCellular::IsTimeGot(struct tm *tim, bool jst) {
     std::string response;
-    
+
     // AT+QLTS=1 -> Acquire UTC
     // AT+QLTS=2 -> Acquire JST
-    _AtSerial.WriteCommand("AT+QLTS=2");
+    if (jst) {
+      _AtSerial.WriteCommand("AT+QLTS=2");
+    } else {
+      _AtSerial.WriteCommand("AT+QLTS=1");
+    }
     
     if (!_AtSerial.ReadResponse("^\\+QLTS: (.*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
     if (!_AtSerial.ReadResponse("^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
@@ -647,7 +651,7 @@ bool NectisCellular::IsTimeGot(struct tm *tim) {
     if (strlen(response.c_str()) != 26) return RET_ERR(false, E_UNKNOWN);
     
     const char* parameter = response.c_str();
-    
+
     if (parameter[0] != '"') return RET_ERR(false, E_UNKNOWN);
     if (parameter[5] != '/') return RET_ERR(false, E_UNKNOWN);
     if (parameter[8] != '/') return RET_ERR(false, E_UNKNOWN);
@@ -673,9 +677,9 @@ bool NectisCellular::IsTimeGot(struct tm *tim) {
     return RET_OK(true);
 }
 
-void NectisCellular::GetCurrentTime(struct tm *tim) {
+void NectisCellular::GetCurrentTime(struct tm *tim, bool jst) {
     // Get time in JST.
-    while (!IsTimeGot(tim)) {
+    while (!IsTimeGot(tim, jst)) {
         Serial.println("### ERROR! ###");
         delay(5000);
     }
