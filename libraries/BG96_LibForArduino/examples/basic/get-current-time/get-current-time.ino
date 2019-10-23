@@ -35,7 +35,7 @@ void loop() {
   struct tm currentTime;
   char currentTimeStr[64];
 
-  Nectis.GetCurrentTime(&currentTime);
+  Nectis.GetCurrentTime(&currentTime, true);
   strftime(currentTimeStr, sizeof(currentTimeStr), "%Y/%m/%d %H:%M:%S", &currentTime);
 
   Serial.print("JST:");
