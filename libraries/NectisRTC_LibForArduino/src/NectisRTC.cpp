@@ -1,5 +1,4 @@
 #include "NectisRTC.h"
-#include "NectisRtcAlarmTable.h"
 
 //INTERNAL_ADDRESS = INTERNAL_ADDRESS_SECOND_COUNTER_POS = 0b0000
 // Write
@@ -209,13 +208,13 @@ void NectisRTC::ReadCalender() {
   Serial.flush();
 }
 
-void NectisRTC::SetAlarm() {
+void NectisRTC::SetAlarm(const char* table[], uint16_t tableSize) {
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
 
   // TODO: 現在、書き込んでいるRtcAlarmTablesの次のAlarmをセットできるようにする。
-  for (int i = 0; i < (sizeof(RtcAlarmTable) / sizeof(char*)); i++) {
-    uint16_t alarmHour = uint16_t(((RtcAlarmTable[i])[0] - 0x30) * 10 + ((RtcAlarmTable[i])[1] - 0x30));
-    uint16_t alarmMinute = uint16_t(((RtcAlarmTable[i])[3] - 0x30) * 10 + ((RtcAlarmTable[i])[4] - 0x30));
+  for (int i = 0; i < tableSize; i++) {
+    uint16_t alarmHour = uint16_t(((table[i])[0] - 0x30) * 10 + ((table[i])[1] - 0x30));
+    uint16_t alarmMinute = uint16_t(((table[i])[3] - 0x30) * 10 + ((table[i])[4] - 0x30));
 
     WriteReg8(slaveAddress, INTERNAL_ADDRESS_HOUR_ALARM_POS | TRANSFER_FORMAT, ConvertDecimalToBcd(alarmHour));
     WriteReg8(slaveAddress, INTERNAL_ADDRESS_MINUTE_ALARM_POS | TRANSFER_FORMAT, ConvertDecimalToBcd(alarmMinute));

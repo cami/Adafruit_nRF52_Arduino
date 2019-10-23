@@ -25,7 +25,7 @@ public:
 
   void SetCurrentTimeToRtc();
   void ReadCalender();
-  void SetAlarm();
+  void SetAlarm(const char* table[], uint16_t tableSize);
 
   void EnableRtcTimer(uint8_t slaveAddress);
   void EnableRtcAlarm(uint8_t slaveAddress);
