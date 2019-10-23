@@ -36,6 +36,8 @@ void setup() {
 
   Rtc.BeginRtc();
   Rtc.Init();
+
+  Rtc.SetAlarm();
 }
 
 void loop() {
@@ -44,4 +46,5 @@ void loop() {
 //  Rtc.EndRtc();
 
   delay(10000);
+
 }
