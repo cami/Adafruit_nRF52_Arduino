@@ -39,8 +39,6 @@ void InitSketch() {
 void setup() {
   InitSketch();
 
-  Rtc.BeginRtc();
-
   Rtc.Init();
 
   Rtc.SetAlarm(RtcAlarmTable, (sizeof(RtcAlarmTable) / sizeof(char*)));

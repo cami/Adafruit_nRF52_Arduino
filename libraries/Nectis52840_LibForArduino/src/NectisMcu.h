@@ -27,15 +27,15 @@ public:
 
   void PutFlashRomIntoDeepSleepMode();
   void WakeUpFlashRomFromDeepSleepMode();
+
   void SoftReset();
-  void SetRtcTimer(unsigned int second);
-  void WriteToRtcReg8(uint8_t slaveAddress, uint8_t format, uint8_t data);
-  void WriteToRtc(uint8_t slaveAddress, uint8_t* data, int dataSize);
+
+  void ConfigForWakingUpFromDeepSleep();
   void DisableAllPeripherals();
-  void EnableAllPeripherals();
   void EnterSystemOffDeepSleepMode();
   void EnterCpuWfiWfeSleep();
   void ExitCpuWfiWfeSleep();
+
   void WatchdogTimerInit(const int wdtTimeoutSec);
   void WatchdogTimerDelay(int delayMilliSeconds);
   void ReloadWatchdogTimer();

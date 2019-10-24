@@ -217,6 +217,20 @@ void NectisMcu::SoftReset() {
   NVIC_SystemReset();
 }
 
+// In nRF52832, P0 is GPIO PORT 0, which implements pin 0-31.
+// nRF52840 also implements P1, for the additional GPIO pins (P1.00 - P1.15).
+// https://devzone.nordicsemi.com/f/nordic-q-a/19198/what-is-nrf_p0-in-the-sdk_path-components-drivers_nrf-hal-nrf_gpio-h/74367#74367
+// RTC_INTRB pin is SIO09, which is also P0.09. Therefore we use RTC_INTRB pin as NRF_P0.
+void NectisMcu::ConfigForWakingUpFromDeepSleep() {
+//  NRF_GPIO_Type* rtcPort = RTC_INTRB;
+  NRF_P0->PIN_CNF[RTC_INTRB] =
+    (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos) |
+    (GPIO_DETECTMODE_DETECTMODE_Default << GPIO_DETECTMODE_DETECTMODE_Pos) |
+    (GPIO_PIN_CNF_PULL_Pullup << GPIO_PIN_CNF_PULL_Pos) |
+    (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) |
+    (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
+}
+
 void NectisMcu::DisableAllPeripherals() {
   // Disable the peripherals.
   NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
@@ -242,36 +256,13 @@ void NectisMcu::DisableAllPeripherals() {
   NRF_RADIO->TASKS_DISABLE = 0x1UL << RADIO_TASKS_DISABLE_TASKS_DISABLE_Pos;
 }
 
-void NectisMcu::EnableAllPeripherals() {
-  // Disable the peripherals.
-  NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
-  NRF_UARTE0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
-  NRF_UARTE1->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
-
-  NRF_SAADC->ENABLE = SAADC_ENABLE_ENABLE_Enabled << SAADC_ENABLE_ENABLE_Pos;
-
-  NRF_PWM0->ENABLE = PWM_ENABLE_ENABLE_Enabled << PWM_ENABLE_ENABLE_Pos;
-  NRF_PWM1->ENABLE = PWM_ENABLE_ENABLE_Enabled << PWM_ENABLE_ENABLE_Pos;
-  NRF_PWM2->ENABLE = PWM_ENABLE_ENABLE_Enabled << PWM_ENABLE_ENABLE_Pos;
-
-  NRF_TWI0->ENABLE = TWI_ENABLE_ENABLE_Enabled << TWI_ENABLE_ENABLE_Pos;
-  NRF_TWI1->ENABLE = TWI_ENABLE_ENABLE_Enabled << TWI_ENABLE_ENABLE_Pos;
-
-  NRF_SPI0->ENABLE = SPI_ENABLE_ENABLE_Enabled << SPI_ENABLE_ENABLE_Pos;
-  NRF_SPI1->ENABLE = SPI_ENABLE_ENABLE_Enabled << SPI_ENABLE_ENABLE_Pos;
-  NRF_SPI2->ENABLE = SPI_ENABLE_ENABLE_Enabled << SPI_ENABLE_ENABLE_Pos;
-
-  NRF_QSPI->ENABLE = QSPI_ENABLE_ENABLE_Enabled << QSPI_ENABLE_ENABLE_Pos;
-
-//  NRF_NFCT->TASKS_DISABLE = 0x1UL << NFCT_TASKS_DISABLE_TASKS_DISABLE_Pos;
-//  NRF_RADIO->TASKS_DISABLE = 0x1UL << RADIO_TASKS_DISABLE_TASKS_DISABLE_Pos;
-}
-
 void NectisMcu::EnterSystemOffDeepSleepMode() {
   NRF_POWER->SYSTEMOFF = POWER_SYSTEMOFF_SYSTEMOFF_Enter << POWER_SYSTEMOFF_SYSTEMOFF_Pos;
 }
 
 void NectisMcu::EnterCpuWfiWfeSleep() {
+  // CPU enters WFI/WFE sleep.
+  // Dont call this method when you use RTC, because this prevents CPU to wake up by the RTC.
   NRF_POWER->EVENTS_SLEEPENTER = POWER_EVENTS_SLEEPENTER_EVENTS_SLEEPENTER_Generated << POWER_EVENTS_SLEEPENTER_EVENTS_SLEEPENTER_Pos;
 }
 
