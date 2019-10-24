@@ -147,14 +147,20 @@ extern "C"
 #define GROVE_ANALOG_2_2            (29)    // Analog in/out, GROVE_GPIO_2_2
 #define GROVE_ANALOG_3_1            (30)    // Analog in/out, GROVE_GPIO_3_1
 #define GROVE_ANALOG_3_2            (31)    // Analog in/out, GROVE_GPIO_3_2
-//#define GROVE_I2C_CORE		    (1)
+#define GROVE_I2C_CORE		          (1)
 #define GROVE_I2C_SCL_PIN           (12)    // I2C, GROVE_GPIO_4_1
 #define GROVE_I2C_SDA_PIN           (11)    // I2C, GROVE_GPIO_4_2
-#define GROVE_UART_CORE             (0)     // USART1
+#define GROVE_UART_CORE             (1)     // USART1
 #define GROVE_UART_RX_PIN           (13)    // UART, GROVE_GPIO_5_1
 #define GROVE_UART_TX_PIN           (14)    // UART, GROVE_GPIO_5_2
 #define GROVE_GPIO_6_1              (15)    // GPIO, GROVE_GPIO_6_1
 #define GROVE_GPIO_6_2              (16)    // GPIO, GROVE_GPIO_6_2
+
+#define RTC_I2C_CORE                (0)
+#define RTC_I2C_SCL_PIN             (8)      // I2C, For RTC
+#define RTC_I2C_SDA_PIN             (41)     // I2C, For RTC
+#define RTC_INTRB                   (9)      // IF this pin is set to LOW,
+
 
 //#define DEBUG_UART_CORE           (2)   // USART3
 //#define DEBUG_UART_TX_PIN         MODULE_UART_TX_PIN

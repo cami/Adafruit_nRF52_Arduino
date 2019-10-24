@@ -110,7 +110,7 @@ void loop() {
             memset(&currentTimeStr[0], 0x00, sizeof(currentTimeStr));
             memset(&contents[0], 0x00, sizeof(contents));
     
-            Nectis.GetCurrentTime(&currentTime);
+            Nectis.GetCurrentTime(&currentTime, true);
             strftime(currentTimeStr, sizeof(currentTimeStr), "%Y%m%d_%H%M%S", &currentTime);
             memcpy(&contents[0], currentTimeStr, strlen(currentTimeStr));
     
