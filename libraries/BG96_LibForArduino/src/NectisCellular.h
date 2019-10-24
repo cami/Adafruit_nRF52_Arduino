@@ -124,8 +124,8 @@ public:
     void InitNbIoT();
 
     int GetReceivedSignalStrengthIndicator();
-    bool IsTimeGot(struct tm *tim);
-    void GetCurrentTime(struct tm *tim);
+    bool IsTimeGot(struct tm *tim, bool jst);
+    void GetCurrentTime(struct tm *tim, bool jst);
     
     void PostDataViaHttp(char *post_data);
     void PostDataViaUdp(char *post_data);
