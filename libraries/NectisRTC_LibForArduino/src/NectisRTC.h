@@ -25,8 +25,10 @@ public:
 
   void SetCurrentTimeToRtc();
   void ReadCalender();
+  void ReadCalender(uint8_t calender[7]);
   void SetAlarm(const char* tableTime[], uint16_t tableTimeSize, const uint8_t tableDayofweek, uint16_t tableDayofweekSize);
   void SetConstantInterruptByEveryMinute();
+  void SetConstantInterruptByEveryHour();
 
   void EnableRtcTimer(uint8_t slaveAddress);
   void EnableRtcAlarm(uint8_t slaveAddress);

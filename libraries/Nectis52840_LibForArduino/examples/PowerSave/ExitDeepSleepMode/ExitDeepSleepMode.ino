@@ -1,5 +1,3 @@
-#include <SPI.h>
-#include "nrf_power.h"
 #include <NectisCellular.h>
 #include <NectisMcu.h>
 #include <NectisRTC.h>
@@ -65,10 +63,6 @@ void setup() {
   digitalWrite(LED_BLUE, HIGH);
   digitalWrite(LED_RED, HIGH);
 
-
-  Rtc.SetCurrentTimeToRtc();
-
-  Rtc.SetConstantInterruptByEveryMinute();
 
   // Put flash ROM into deep sleep mode.
   Serial.println("Put flash ROM into deep sleep mode");

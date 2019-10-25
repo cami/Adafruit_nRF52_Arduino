@@ -119,15 +119,15 @@ void NectisRTC::EndRtc() {
 }
 
 void NectisRTC::Init() {
-  isCurrentTimeSet = false;
+  uint8_t calender[7];
+  ReadCalender(calender);
 
-  ConfigRtc24HourDisplay();
-  delay(100);
+  uint8_t year = calender[0];
 
-  // ToDO: 1度だけ、SetCurrentTimeToRtc()を呼び出すようにしたい。
-  if (!isCurrentTimeSet) {
+  // year==0 の時は、RTCに時刻がセットされていないので、BG96から取得してセットする。
+  if (year == 0) {
+    ConfigRtc24HourDisplay();
     SetCurrentTimeToRtc();
-    isCurrentTimeSet = true;
   }
 }
 
@@ -198,15 +198,31 @@ void NectisRTC::ReadCalender() {
   ReadReg8(slaveAddress, INTERNAL_ADDRESS_SECOND_COUNTER_POS | TRANSFER_FORMAT, &calender[5]);
   ReadReg8(slaveAddress, INTERNAL_ADDRESS_DAYOFWEEK_COUNTER_POS | TRANSFER_FORMAT, &calender[6]);
 
-//  for (int i = 0; i < sizeof(calender) - 1; i++) {
-//    Serial.printf("%02d\n", ConvertBcdToDecimal(calender[i]));
-//  }
   Serial.printf("Set Calender: 20%02d/%02d/%02d %02d:%02d:%02d %02d\n",
-    ConvertBcdToDecimal(calender[0]), ConvertBcdToDecimal(calender[1]), ConvertBcdToDecimal(calender[2]),
-    ConvertBcdToDecimal(calender[3]), ConvertBcdToDecimal(calender[4]), ConvertBcdToDecimal(calender[5]),
-    ConvertBcdToDecimal(calender[6])
+                ConvertBcdToDecimal(calender[0]), ConvertBcdToDecimal(calender[1]), ConvertBcdToDecimal(calender[2]),
+                ConvertBcdToDecimal(calender[3]), ConvertBcdToDecimal(calender[4]), ConvertBcdToDecimal(calender[5]),
+                ConvertBcdToDecimal(calender[6])
   );
   Serial.flush();
+}
+
+void NectisRTC::ReadCalender(uint8_t calenderDecimal[7]) {
+  uint8_t calender[7];
+
+  uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
+
+  // calender = [year, month, day, hour, minute, second, dayofweek]
+  ReadReg8(slaveAddress, INTERNAL_ADDRESS_YEAR_COUNTER_POS | TRANSFER_FORMAT, &calender[0]);
+  ReadReg8(slaveAddress, INTERNAL_ADDRESS_MONTH_COUNTER_POS | TRANSFER_FORMAT, &calender[1]);
+  ReadReg8(slaveAddress, INTERNAL_ADDRESS_DAY_COUNTER_POS | TRANSFER_FORMAT, &calender[2]);
+  ReadReg8(slaveAddress, INTERNAL_ADDRESS_HOUR_COUNTER_POS | TRANSFER_FORMAT, &calender[3]);
+  ReadReg8(slaveAddress, INTERNAL_ADDRESS_MINUTE_COUNTER_POS | TRANSFER_FORMAT, &calender[4]);
+  ReadReg8(slaveAddress, INTERNAL_ADDRESS_SECOND_COUNTER_POS | TRANSFER_FORMAT, &calender[5]);
+  ReadReg8(slaveAddress, INTERNAL_ADDRESS_DAYOFWEEK_COUNTER_POS | TRANSFER_FORMAT, &calender[6]);
+
+  for (uint8_t i = 0; i < sizeof(calender); i++) {
+    calenderDecimal[i] = ConvertBcdToDecimal(calender[i]);
+  }
 }
 
 void NectisRTC::SetAlarm(const char* tableTime[], uint16_t tableTimeSize, const uint8_t tableDayofweek, uint16_t tableDayofweekSize) {
@@ -228,7 +244,7 @@ void NectisRTC::SetAlarm(const char* tableTime[], uint16_t tableTimeSize, const 
   ReadReg8(slaveAddress, INTERNAL_ADDRESS_HOUR_ALARM_POS | TRANSFER_FORMAT, &setAlarm[0]);
   ReadReg8(slaveAddress, INTERNAL_ADDRESS_MINUTE_ALARM_POS | TRANSFER_FORMAT, &setAlarm[1]);
   ReadReg8(slaveAddress, INTERNAL_ADDRESS_DAYOFWEEK_ALARM_POS | TRANSFER_FORMAT, &setAlarm[2]);
-  Serial.printf("Set alarm is: %02u:%02u %01x\n", ConvertBcdToDecimal(setAlarm[0]), ConvertBcdToDecimal(setAlarm[1]), setAlarm[2]);
+  Serial.printf("Set alarm is: %02u:%02u %01x\n", ConvertBcdToDecimal(setAlarm[0]), ConvertBcdToDecimal(setAlarm[1]), ConvertBcdToDecimal(setAlarm[2]));
 }
 
 void NectisRTC::SetConstantInterruptByEveryMinute() {
@@ -237,8 +253,14 @@ void NectisRTC::SetConstantInterruptByEveryMinute() {
   uint8_t constantInterruptByEveryMinute = DATA_REGISTER1_CONSTANT_INTERRUPT_MINUTE | DATA_REGISTER1_ENABLE_ALARM;
 
   WriteReg8(slaveAddress, INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT, constantInterruptByEveryMinute);
+}
 
-//  EnableRtcTimer(slaveAddress);
+void NectisRTC::SetConstantInterruptByEveryHour() {
+  Serial.println("Set the constant interrupt by every one hour.");
+  uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
+  uint8_t constantInterruptByEveryMinute = DATA_REGISTER1_CONSTANT_INTERRUPT_HOUR | DATA_REGISTER1_ENABLE_ALARM;
+
+  WriteReg8(slaveAddress, INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT, constantInterruptByEveryMinute);
 }
 
 void NectisRTC::EnableRtcTimer(uint8_t slaveAddress) {
