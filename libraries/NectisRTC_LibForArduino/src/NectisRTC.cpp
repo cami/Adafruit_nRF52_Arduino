@@ -57,8 +57,7 @@ const uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_MINUTE =  0b00000101;
 const uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_HOUR =    0b00000110;
 const uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_MONTH =   0b00000111;
 const uint8_t DATA_REGISTER1_ENABLE_ALARM =               0b10000000;
-
-uint8_t DATA_ENABLE_INTERRUPT_OR_ALARM =                  DATA_REGISTER1_MASK & DATA_REGISTER1_ENABLE_ALARM;
+const uint8_t DATA_REGISTER1_DISABLE_ALARM_MASK =         0b10000000;
 
 const uint8_t INTERNAL_ADDRESS_CONTROL_REGISTER2_POS =    0xF0;
 const uint8_t DATA_REGISTER2_MASK =                       0b00000000;
@@ -181,8 +180,6 @@ void NectisRTC::SetCurrentTimeToRtc() {
   // const uint8_t DATA_DAYOFWEEK_COUNTER                      (—   —   —   —    —   W4  W2  W1)
   // DATA_DAYOFWEEK_COUNTER: SUN=0, MON=1, TUE=2, WED=3, THU=4, FRI=5, SAT=6
   WriteReg8(slaveAddress, INTERNAL_ADDRESS_DAYOFWEEK_COUNTER_POS | TRANSFER_FORMAT, ConvertDecimalToBcd(currentTime.tm_wday));
-
-  EnableRtcTimer(slaveAddress);
 }
 
 void NectisRTC::ReadCalender() {
@@ -237,7 +234,7 @@ void NectisRTC::SetAlarm(const char* tableTime[], uint16_t tableTimeSize, const 
     WriteReg8(slaveAddress, INTERNAL_ADDRESS_MINUTE_ALARM_POS | TRANSFER_FORMAT, ConvertDecimalToBcd(alarmMinute));
     WriteReg8(slaveAddress, INTERNAL_ADDRESS_DAYOFWEEK_ALARM_POS | TRANSFER_FORMAT, tableDayofweek);
   }
-  EnableRtcTimer(slaveAddress);
+  EnableRtcAlarm(slaveAddress);
 
   delay(1000);
   uint8_t setAlarm[3];
@@ -250,29 +247,31 @@ void NectisRTC::SetAlarm(const char* tableTime[], uint16_t tableTimeSize, const 
 void NectisRTC::SetConstantInterruptByEveryMinute() {
   Serial.println("Set the constant interrupt by every one minute.");
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
-  uint8_t constantInterruptByEveryMinute = DATA_REGISTER1_CONSTANT_INTERRUPT_MINUTE | DATA_REGISTER1_ENABLE_ALARM;
 
+  uint8_t controlRegister1[1];
+  ReadReg8(slaveAddress, INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT, &controlRegister1[0]);
+  uint8_t controlRegister1DisableAlarm = controlRegister1[0] ^ DATA_REGISTER1_DISABLE_ALARM_MASK;
+
+  uint8_t constantInterruptByEveryMinute = DATA_REGISTER1_CONSTANT_INTERRUPT_MINUTE | controlRegister1DisableAlarm;
   WriteReg8(slaveAddress, INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT, constantInterruptByEveryMinute);
 }
 
 void NectisRTC::SetConstantInterruptByEveryHour() {
   Serial.println("Set the constant interrupt by every one hour.");
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
-  uint8_t constantInterruptByEveryMinute = DATA_REGISTER1_CONSTANT_INTERRUPT_HOUR | DATA_REGISTER1_ENABLE_ALARM;
+
+  uint8_t controlRegister1[1];
+  ReadReg8(slaveAddress, INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT, &controlRegister1[0]);
+  uint8_t controlRegister1DisableAlarm = controlRegister1[0] ^ DATA_REGISTER1_DISABLE_ALARM_MASK;
+
+  uint8_t constantInterruptByEveryMinute = DATA_REGISTER1_CONSTANT_INTERRUPT_HOUR | controlRegister1DisableAlarm;
 
   WriteReg8(slaveAddress, INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT, constantInterruptByEveryMinute);
 }
 
-void NectisRTC::EnableRtcTimer(uint8_t slaveAddress) {
-  uint8_t slaveRegister = INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT;
-  uint8_t data = DATA_ENABLE_INTERRUPT_OR_ALARM;
-
-  WriteReg8(slaveAddress, slaveRegister, data);
-}
-
 void NectisRTC::EnableRtcAlarm(uint8_t slaveAddress) {
   uint8_t slaveRegister = INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT;
-  uint8_t data = DATA_ENABLE_INTERRUPT_OR_ALARM;
+  uint8_t data = DATA_REGISTER1_ENABLE_ALARM;
 
   WriteReg8(slaveAddress, slaveRegister, data);
 }

@@ -30,7 +30,6 @@ public:
   void SetConstantInterruptByEveryMinute();
   void SetConstantInterruptByEveryHour();
 
-  void EnableRtcTimer(uint8_t slaveAddress);
   void EnableRtcAlarm(uint8_t slaveAddress);
 
   void Write(uint8_t slaveAddress, const uint8_t* data, int dataSize);
