@@ -138,9 +138,6 @@ extern "C"
 #define MODULE_STATUS_PIN           (37)    // BG96のステータス, BG96_STATUS
 #define BG96_AP_READY               (39)    // BG96のAP_READY
 
-#define CRYSTAL_XL1                 (0)
-#define CRYSTAL_XL2                 (1)
-
 #define GROVE_ANALOG_1_1            (4)     // Analog in/out, GROVE_GPIO_1_1
 #define GROVE_ANALOG_1_2            (5)     // Analog in/out, GROVE_GPIO_1_2
 #define GROVE_ANALOG_2_1            (28)    // Analog in/out, GROVE_GPIO_2_1
