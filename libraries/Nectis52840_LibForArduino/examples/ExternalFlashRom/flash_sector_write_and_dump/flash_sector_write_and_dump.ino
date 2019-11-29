@@ -17,7 +17,7 @@ void setup() {
 
   if (!flash.begin()) {
     Serial.println("Error, failed to initialize flash chip!");
-    while(1) delay(10);
+    while (1) delay(10);
   }
 
   Serial.println("Adafruit Serial Flash Sector Dump example");
@@ -26,15 +26,18 @@ void setup() {
   Serial.print("Flash size: ");
   Serial.println(flash.size());
 
-  if (!flash.eraseChip()) {
-    Serial.println("Failed to erase chip!");
-  }
+  // Need to erase chip only once.
+//  if (!flash.eraseChip()) {
+//    Serial.println("Failed to erase chip!");
+//  } else {
+//    Serial.println("Successfully erased chip!");
+//  }
+
 
   flash.waitUntilReady();
-  Serial.println("Successfully erased chip!");
 
   // Writing 1 to the given sector.
-  write_sector(3, WRITE_SIZE_ONE_TIME);
+  write_sector(1, WRITE_SIZE_ONE_TIME);
 }
 
 void write_sector(uint32_t sector, uint16_t size) {
