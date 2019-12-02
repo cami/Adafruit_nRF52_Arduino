@@ -1,8 +1,6 @@
 #include <NectisCellular.h>
 
-#define WEBHOOK_EVENTNAME ""
-#define WEBHOOK_KEY       ""
-#define WEBHOOK_URL       "https://maker.ifttt.com/trigger/" WEBHOOK_EVENTNAME "/with/key/" WEBHOOK_KEY
+#define WEBHOOK_URL       "http://unified.soracom.io"
 
 NectisCellular Nectis;
 
@@ -35,9 +33,11 @@ void setup() {
   Serial.print(data);
   Serial.println("");
 
-  if (!Nectis.HttpPost(WEBHOOK_URL, data, &status)) {
-    Serial.println("### ERROR! ###");
-  }
+//  if (!Nectis.HttpPost(WEBHOOK_URL, data, &status)) {
+//    Serial.println("### ERROR! ###");
+//  }
+
+  Nectis.PostDataViaHttp(data);
   
   Serial.print("Status:");
   Serial.println(status);
