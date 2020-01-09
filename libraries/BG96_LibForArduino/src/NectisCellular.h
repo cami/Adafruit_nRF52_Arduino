@@ -1,14 +1,14 @@
 #pragma once
 
 #include "NectisCellularConfig.h"
-
-#include <IPAddress.h>
 #include <string>
 
-#include <WioCellular.h>
+#include "WioCellular.h"
 #include "WioCellLibforArduino.h"
-#include "Internal/AtSerial.h"
+#include "IPAddress.h"
 #include "NectisCellularHttpHeader.h"
+#include "Internal/AtSerial.h"
+#include "Internal/Debug.h"
 
 #define NECTIS_TCP        (NectisCellular::SOCKET_TCP)
 #define NECTIS_UDP        (NectisCellular::SOCKET_UDP)
