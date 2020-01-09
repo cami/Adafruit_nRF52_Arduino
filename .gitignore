@@ -13,3 +13,7 @@
 .DS_Store
 *.swp
 /Output
+
+# cmake
+/cmake/
+/cmake-*/
