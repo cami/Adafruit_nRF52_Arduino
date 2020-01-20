@@ -1,5 +1,5 @@
-#include <NectisCellular.h>
-#include <NectisMcu.h>
+#include "NectisMcu.h"
+#include "NectisCellular.h"
 #include "Adafruit_SPIFlash.h"
 
 NectisCellular Nectis;
@@ -18,24 +18,14 @@ void setup() {
   Serial.println("### I/O Initialize.");
   Nectis.Init();
   delay(100);
-
   Serial.println("### Power supply cellular ON.");
   Nectis.PowerSupplyCellular(true);
   delay(100);
+  
 
-  Serial.println("### Power supply ON.");
-  // Make sure that the MODULE_PWR_PIN is set to HIGH.
-  Nectis.PowerSupplyGrove(true);
+  Serial.println("Put the external flash ROM into deep sleep mode.");
+  Mcu.PutFlashRomIntoDeepSleepMode();
 
-//  Serial.println("Wake up the external flash ROM from deep sleep mode.");
-//  Mcu.WakeUpFlashRomFromDeepSleepMode();
-//
-//  Serial.println("Success");
-//
-//  flash.begin();
-
-  Serial.println("Wake up the external flash ROM from deep sleep mode.");
-  Mcu.WakeUpFlashRomFromDeepSleepMode();
 
   if (!flash.begin()) {
     Serial.println("Error, failed to initialize flash chip!");
@@ -51,9 +41,7 @@ void setup() {
 
   flash.waitUntilReady();
   Serial.println("Successfully erased chip!");
-}
 
-void loop() {
   Serial.print("Enter the sector number to dump: ");
   while( !Serial.available() ) delay(10);
 
@@ -71,6 +59,9 @@ void loop() {
 
   Serial.println();
   delay(10); // a bit of delay
+}
+
+void loop() {
 }
 
 void dump_sector(uint32_t sector) {

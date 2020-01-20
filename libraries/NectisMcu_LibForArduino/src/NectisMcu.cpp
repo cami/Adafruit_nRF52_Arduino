@@ -1,8 +1,5 @@
-#include "SPI.h"
 #include "NectisMcu.h"
-
-char hexConvertedFromDecimal[16];
-
+#include "SPI.h"
 
 NectisMcu::NectisMcu() {
 
@@ -126,15 +123,17 @@ void NectisMcu::PwmActivate(int pin, uint8_t flash_interval) {
 }
 
 
-char *NectisMcu::ConvertDecimalToHex(unsigned long int const decimal, int byte_size) {
+char *NectisMcu::ConvertDecimalToHex(unsigned long int const decimal, int size) {
+  char hexConvertedFromDecimal[16];
+
   // The last index of post_data is filled with 0x00 for print function.
   memset(&hexConvertedFromDecimal[0], 0x00, sizeof(hexConvertedFromDecimal));
   // Serial.printf("ConvertDecimalToHex decimal: %u\n", decimal);
 
-  for (int i = 0; i < (int) byte_size; i++) {
+  for (int i = 0; i < (int) size; i++) {
     // 16進数に変換し、４ビットずつ post_data を埋めていく
-    hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
-    // Serial.printf("(decimal >> (8*((byte_size-1)-i))):%x\n", (decimal >> (8 * ((byte_size - 1) - i))));
+    hexConvertedFromDecimal[i] = (decimal >> (8 * ((size - 1) - i))) & 0xff;
+    // Serial.printf("(decimal >> (8*((size-1)-i))):%x\n", (decimal >> (8 * ((size - 1) - i))));
     // Serial.printf("hexConvertedFromDecimal[i]:%02x\n", hexConvertedFromDecimal[i]);
   }
   return hexConvertedFromDecimal;
@@ -161,32 +160,32 @@ unsigned int NectisMcu::GetDataDigits(unsigned int data) {
   return size_of_post_data;
 }
 
-char *NectisMcu::ConvertIntoBinary(char *PostDataBinary, uint8_t data, unsigned int data_length) {
-  memset(&PostDataBinary[0], 0x00, data_length);
-  memcpy(&PostDataBinary[0], ConvertDecimalToHex(data, data_length), data_length);
+char *NectisMcu::ConvertIntoBinary(char *binary, uint8_t data, unsigned int size) {
+  memset(&binary[0], 0x00, size);
+  memcpy(&binary[0], ConvertDecimalToHex(data, size), size);
 
-  return PostDataBinary;
+  return binary;
 }
 
-char *NectisMcu::ConvertIntoBinary(char *PostDataBinary, uint16_t data, unsigned int data_length) {
-  memset(&PostDataBinary[0], 0x00, data_length);
-  memcpy(&PostDataBinary[0], ConvertDecimalToHex(data, data_length), data_length);
+char *NectisMcu::ConvertIntoBinary(char *binary, uint16_t data, unsigned int size) {
+  memset(&binary[0], 0x00, size);
+  memcpy(&binary[0], ConvertDecimalToHex(data, size), size);
 
-  return PostDataBinary;
+  return binary;
 }
 
-char *NectisMcu::ConvertIntoBinary(char *PostDataBinary, uint32_t data, unsigned int data_length) {
-  memset(&PostDataBinary[0], 0x00, data_length);
-  memcpy(&PostDataBinary[0], ConvertDecimalToHex(data, data_length), data_length);
+char *NectisMcu::ConvertIntoBinary(char *binary, uint32_t data, unsigned int size) {
+  memset(&binary[0], 0x00, size);
+  memcpy(&binary[0], ConvertDecimalToHex(data, size), size);
 
-  return PostDataBinary;
+  return binary;
 }
 
-char *NectisMcu::ConvertIntoBinary(char *PostDataBinary, int data, unsigned int data_length) {
-  memset(&PostDataBinary[0], 0x00, data_length);
-  memcpy(&PostDataBinary[0], ConvertDecimalToHex(data, data_length), data_length);
+char *NectisMcu::ConvertIntoBinary(char *binary, int data, unsigned int size) {
+  memset(&binary[0], 0x00, size);
+  memcpy(&binary[0], ConvertDecimalToHex(data, size), size);
 
-  return PostDataBinary;
+  return binary;
 }
 
 void NectisMcu::PutFlashRomIntoDeepSleepMode() {

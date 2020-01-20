@@ -1,5 +1,5 @@
 #include "NectisCellular.h"
-#include <NectisMcu.h>
+#include "NectisMcu.h"
 #include "Adafruit_SPIFlash.h"
 
 NectisCellular Nectis;
@@ -14,27 +14,16 @@ void setup() {
   delay(4000);
   Serial.println("");
   Serial.println("--- START ---------------------------------------------------");
-  
+
   Serial.println("### I/O Initialize.");
   Nectis.Init();
   delay(100);
   Serial.println("### Power supply cellular ON.");
   Nectis.PowerSupplyCellular(true);
   delay(100);
-  Serial.println("### Power supply ON.");
-  // Make sure that the MODULE_PWR_PIN is set to HIGH.
-  Nectis.PowerSupplyGrove(true);
-  delay(100);
   
-//  Serial.println("Put the external flash ROM into deep sleep mode.");
-//  Mcu.PutFlashRomIntoDeepSleepMode();
-//
-//  Serial.println("Success");
-//
-//  flash.begin();
-
-  Serial.println("Put the external flash ROM into deep sleep mode.");
-  Mcu.PutFlashRomIntoDeepSleepMode();
+  Serial.println("Wake up the external flash ROM from deep sleep mode.");
+  Mcu.WakeUpFlashRomFromDeepSleepMode();
 
   if (!flash.begin()) {
     Serial.println("Error, failed to initialize flash chip!");
