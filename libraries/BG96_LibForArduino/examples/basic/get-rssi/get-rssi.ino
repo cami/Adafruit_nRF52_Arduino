@@ -32,9 +32,12 @@ void loop() {
   Serial.println("### Get RSSI.");
   int rssi = Nectis.GetReceivedSignalStrengthIndicator();
 
-  Serial.print("RSSI:");
+  Serial.print("RSSI=");
   Serial.print(rssi);
   Serial.println("");
+
+  Serial.flush();
+  delay(1);
 
   delay(INTERVAL);
 }
