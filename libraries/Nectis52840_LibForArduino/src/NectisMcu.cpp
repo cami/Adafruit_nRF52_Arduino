@@ -1,7 +1,9 @@
 #include "SPI.h"
 #include "NectisMcu.h"
 
+
 char hexConvertedFromDecimal[16];
+char hexConvertedFromFloat[sizeof(float) + 1];
 
 
 NectisMcu::NectisMcu() {
@@ -126,18 +128,77 @@ void NectisMcu::PwmActivate(int pin, uint8_t flash_interval) {
 }
 
 
-char *NectisMcu::ConvertDecimalToHex(unsigned long int const decimal, int byte_size) {
+char *NectisMcu::ConvertDecimalToHex(uint8_t decimal, int byte_size) {
   // The last index of post_data is filled with 0x00 for print function.
   memset(&hexConvertedFromDecimal[0], 0x00, sizeof(hexConvertedFromDecimal));
+
+  for (int i = 0; i < byte_size; i++) {
+    // 16進数に変換し、1バイトずつ配列を埋めていく
+    hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
+  }
+  return &hexConvertedFromDecimal[0];
+}
+
+char *NectisMcu::ConvertDecimalToHex(uint16_t decimal, int byte_size) {
+  // The last index of post_data is filled with 0x00 for print function.
+  memset(&hexConvertedFromDecimal[0], 0x00, sizeof(hexConvertedFromDecimal));
+
+  for (int i = 0; i < byte_size; i++) {
+    // 16進数に変換し、1バイトずつ配列を埋めていく
+    hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
+  }
+  return &hexConvertedFromDecimal[0];
+}
+
+char *NectisMcu::ConvertDecimalToHex(uint32_t decimal, int byte_size) {
+  // The last index of post_data is filled with 0x00 for print function.
+  memset(&hexConvertedFromDecimal[0], 0x00, sizeof(hexConvertedFromDecimal));
+
+  for (int i = 0; i < byte_size; i++) {
+    // 16進数に変換し、1バイトずつ配列を埋めていく
+    hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
+  }
+  return &hexConvertedFromDecimal[0];
+}
+
+char *NectisMcu::ConvertDecimalToHex(int decimal, int byte_size) {
+  // The last index of post_data is filled with 0x00 for print function.
+  memset(&hexConvertedFromDecimal[0], 0x00, sizeof(hexConvertedFromDecimal));
+
+  for (int i = 0; i < byte_size; i++) {
+    // 16進数に変換し、1バイトずつ配列を埋めていく
+    hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
+  }
+  return &hexConvertedFromDecimal[0];
+}
+
+char *NectisMcu::ConvertDecimalToHex(float const decimal, int byte_size) {
+  // The last index of post_data is filled with 0x00 for print function.
+  memset(&hexConvertedFromFloat[0], 0x00, sizeof(hexConvertedFromFloat));
   // Serial.printf("ConvertDecimalToHex decimal: %u\n", decimal);
 
-  for (int i = 0; i < (int) byte_size; i++) {
-    // 16進数に変換し、４ビットずつ post_data を埋めていく
-    hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
-    // Serial.printf("(decimal >> (8*((byte_size-1)-i))):%x\n", (decimal >> (8 * ((byte_size - 1) - i))));
-    // Serial.printf("hexConvertedFromDecimal[i]:%02x\n", hexConvertedFromDecimal[i]);
+  union {
+    float decimalFloat;
+    int decimalInt;
+  } bit;
+  bit.decimalFloat = decimal;
+
+  /* float型(32ビット)の内部構造（IEEE754）
+   * 符号(sign)       : 1ビット目
+   * 指数部(exponent) : 2ビット目〜9ビット目
+   * 仮数部(mantissa) : 10ビット目〜32ビット目
+   */
+  // uint8_t signSize = 1;
+  // uint8_t exponentSize = 8;
+  // uint8_t mantissaSize = 23;
+  // uint8_t floatBitSize = signSize + exponentSize + mantissaSize;
+  
+  for (uint8_t i = 0; i < sizeof(float); i++) {
+    // 16進数に変換し、1バイトずつ配列を埋めていく
+    hexConvertedFromFloat[i] = (bit.decimalInt >> (8 * ((sizeof(float) - 1) - i))) & 0xff;
   }
-  return hexConvertedFromDecimal;
+
+  return &hexConvertedFromFloat[0];
 }
 
 unsigned int NectisMcu::GetDataDigits(unsigned int data) {
@@ -183,6 +244,13 @@ char *NectisMcu::ConvertIntoBinary(char *PostDataBinary, uint32_t data, unsigned
 }
 
 char *NectisMcu::ConvertIntoBinary(char *PostDataBinary, int data, unsigned int data_length) {
+  memset(&PostDataBinary[0], 0x00, data_length);
+  memcpy(&PostDataBinary[0], ConvertDecimalToHex(data, data_length), data_length);
+
+  return PostDataBinary;
+}
+
+char *NectisMcu::ConvertIntoBinary(char *PostDataBinary, const float data, unsigned int data_length) {
   memset(&PostDataBinary[0], 0x00, data_length);
   memcpy(&PostDataBinary[0], ConvertDecimalToHex(data, data_length), data_length);
 
@@ -285,8 +353,8 @@ void NectisMcu::WatchdogTimerInit(const int wdtTimeoutSec) {
   NRF_WDT->TASKS_START = 1;
 }
 
-void NectisMcu::WatchdogTimerDelay(int delayMilliSeconds) {
-  int startTime = millis();
+void NectisMcu::WatchdogTimerDelay(uint32_t delayMilliSeconds) {
+  uint32_t startTime = millis();
   while ((millis() - startTime) <= delayMilliSeconds);
 }
 

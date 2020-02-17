@@ -18,12 +18,17 @@ public:
   void PwmStop();
   void PwmActivate(int pin, uint8_t flash_interval);
 
-  char *ConvertDecimalToHex(unsigned long int const decimal, int byte_size);
+  char *ConvertDecimalToHex(uint8_t decimal, int byte_size);
+  char *ConvertDecimalToHex(uint16_t decimal, int byte_size);
+  char *ConvertDecimalToHex(uint32_t decimal, int byte_size);
+  char *ConvertDecimalToHex(int decimal, int byte_size);
+  char *ConvertDecimalToHex(float const decimal, int byte_size);
   unsigned int GetDataDigits(unsigned int data);
   char *ConvertIntoBinary(char *PostDataBinary, uint8_t data, unsigned int data_length);
   char *ConvertIntoBinary(char *PostDataBinary, uint16_t data, unsigned int data_length);
   char *ConvertIntoBinary(char *PostDataBinary, uint32_t data, unsigned int data_length);
   char *ConvertIntoBinary(char *PostDataBinary, int data, unsigned int data_length);
+  char *ConvertIntoBinary(char *PostDataBinary, float data, unsigned int data_length);
 
   void PutFlashRomIntoDeepSleepMode();
   void WakeUpFlashRomFromDeepSleepMode();
@@ -37,6 +42,6 @@ public:
   void ExitCpuWfiWfeSleep();
 
   void WatchdogTimerInit(const int wdtTimeoutSec);
-  void WatchdogTimerDelay(int delayMilliSeconds);
+  void WatchdogTimerDelay(uint32_t delayMilliSeconds);
   void ReloadWatchdogTimer();
 };
