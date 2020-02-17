@@ -149,7 +149,7 @@ unsigned int NectisMcu::GetDataDigits(unsigned int data) {
     data_digit_hex = 1;
   }
 
-  // Calculating the digits of lat, lng in hexadecimal.
+  // Calculating the digits of data in hexadecimal.
   // 2 digits = 1 byte
   // Calculating the bytes of the post data
   while (data_to_calc_digit != 0) {
