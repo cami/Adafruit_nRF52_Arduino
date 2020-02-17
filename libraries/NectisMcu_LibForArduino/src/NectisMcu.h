@@ -18,13 +18,6 @@ public:
   void PwmStop();
   void PwmActivate(int pin, uint8_t flash_interval);
 
-<<<<<<< HEAD:libraries/NectisMcu_LibForArduino/src/NectisMcu.h
-  unsigned int GetDataDigits(unsigned int data);
-  char *ConvertIntoBinary(char *binary, uint8_t data, unsigned int size);
-  char *ConvertIntoBinary(char *binary, uint16_t data, unsigned int size);
-  char *ConvertIntoBinary(char *binary, uint32_t data, unsigned int size);
-  char *ConvertIntoBinary(char *binary, int data, unsigned int size);
-=======
   char *ConvertDecimalToHex(uint8_t decimal, int byte_size);
   char *ConvertDecimalToHex(uint16_t decimal, int byte_size);
   char *ConvertDecimalToHex(uint32_t decimal, int byte_size);
@@ -36,7 +29,6 @@ public:
   char *ConvertIntoBinary(char *PostDataBinary, uint32_t data, unsigned int data_length);
   char *ConvertIntoBinary(char *PostDataBinary, int data, unsigned int data_length);
   char *ConvertIntoBinary(char *PostDataBinary, float data, unsigned int data_length);
->>>>>>> feature/refactor-dir-devops:libraries/Nectis52840_LibForArduino/src/NectisMcu.h
 
   void PutFlashRomIntoDeepSleepMode();
   void WakeUpFlashRomFromDeepSleepMode();
