@@ -44,7 +44,4 @@ public:
   void WatchdogTimerInit(const int wdtTimeoutSec);
   void WatchdogTimerDelay(uint32_t delayMilliSeconds);
   void ReloadWatchdogTimer();
-
-private:
-  char *ConvertDecimalToHex(unsigned long int const decimal, int size);
 };
