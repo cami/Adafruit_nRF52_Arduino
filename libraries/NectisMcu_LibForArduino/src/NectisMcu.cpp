@@ -340,6 +340,8 @@ void NectisMcu::ExitCpuWfiWfeSleep() {
 }
 
 void NectisMcu::WatchdogTimerInit(const int wdtTimeoutSec) {
+  Serial.printf("### Set the watchdog timer %d seconds.\n", wdtTimeoutSec);
+
   // Configure Watchdog. a) Pause watchdog while the CPU is halted by the debugger.  b) Keep the watchdog running while the CPU is sleeping.
   NRF_WDT->CONFIG = (WDT_CONFIG_HALT_Pause << WDT_CONFIG_HALT_Pos) | (WDT_CONFIG_SLEEP_Run << WDT_CONFIG_SLEEP_Pos);
   // timeout [s] = ( CRV + 1 ) / 32768
@@ -356,6 +358,7 @@ void NectisMcu::WatchdogTimerDelay(uint32_t delayMilliSeconds) {
 }
 
 void NectisMcu::ReloadWatchdogTimer() {
+  Serial.println("### Reload the watchdog.");
   NRF_WDT->RR[0] = WDT_RR_RR_Reload;
   NRF_WDT->TASKS_START = 1;
 }
