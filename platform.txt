@@ -22,7 +22,6 @@ version=0.4.3
 
 # Compile variables
 # -----------------
-
 compiler.warning_flags=-w
 compiler.warning_flags.none=-w
 compiler.warning_flags.default=
@@ -57,8 +56,6 @@ build.debug_flags=-DCFG_DEBUG=0
 rtos.path={build.core.path}/freertos
 nordic.path={build.core.path}/nordic
 
-# ARDUINO_FEATHER52 is defined for backward compatiable with other lib only
-# should be replaced by ARDUINO_NRF52_ADAFRUIT in the future
 
 build.flags.nrf= -DSOFTDEVICE_PRESENT -DARDUINO_FEATHER52 -DARDUINO_NECTIS -DARDUINO_NRF52_ADAFRUIT -DNRF52_SERIES -DLFS_NAME_MAX=64 -Ofast {build.debug_flags} "-I{build.core.path}/cmsis/include" "-I{nordic.path}" "-I{nordic.path}/nrfx" "-I{nordic.path}/nrfx/hal" "-I{nordic.path}/nrfx/mdk" "-I{nordic.path}/nrfx/soc" "-I{nordic.path}/nrfx/drivers/include" "-I{nordic.path}/nrfx/drivers/src" "-I{nordic.path}/softdevice/{build.sd_name}_nrf52_{build.sd_version}_API/include" "-I{rtos.path}/Source/include" "-I{rtos.path}/config" "-I{rtos.path}/portable/GCC/nrf52" "-I{rtos.path}/portable/CMSIS/nrf52" "-I{build.core.path}/sysview/SEGGER" "-I{build.core.path}/sysview/Config" "-I{build.core.path}/Adafruit_TinyUSB_Core" "-I{build.core.path}/Adafruit_TinyUSB_Core/tinyusb/src"
 
@@ -146,7 +143,7 @@ tools.nrfutil.upload.pattern="{cmd}" {upload.verbose} dfu serial -pkg "{build.pa
 #***************************************************
 
 # Bootloader version
-tools.bootburn.bootloader.file={runtime.platform.path}/bootloader/{build.variant}/{build.variant}_bootloader-0.2.11_{build.sd_name}_{build.sd_version}
+tools.bootburn.bootloader.file={runtime.platform.path}/bootloader/{build.variant}/{build.variant}_bootloader-0.3.0_{build.sd_name}_{build.sd_version}
 
 tools.bootburn.bootloader.params.verbose=
 tools.bootburn.bootloader.params.quiet=

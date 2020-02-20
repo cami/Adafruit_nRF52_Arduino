@@ -9,8 +9,13 @@ void loop() {
 
   Serial.printf("%f[mV]\n", lipo_voltage_level_mv);
 
-  delay(5000);
-}
+#ifdef NRF52840_XXAA
+#define VBAT_DIVIDER      (0.5F)          // 150K + 150K voltage divider on VBAT
+#define VBAT_DIVIDER_COMP (2.0F)          // Compensation factor for the VBAT divider
+#else
+#define VBAT_DIVIDER      (0.71275837F)   // 2M + 0.806M voltage divider on VBAT = (2M / (0.806M + 2M))
+#define VBAT_DIVIDER_COMP (1.403F)        // Compensation factor for the VBAT divider
+#endif
 
 float readVbat(void) {
 #define VBAT_MV_PER_LSB   (1.171875F)       // 1.2V ADC range and 10-bit ADC resolution = 1200mV/1024
@@ -49,3 +54,22 @@ float readVbat(void) {
 
   return battery_voltage_mv;
 }
+
+void loop() {
+  // Get a raw ADC reading
+  float vbat_mv = readVBAT();
+
+  // Convert from raw mv to percentage (based on LIPO chemistry)
+  uint8_t vbat_per = mvToPercent(vbat_mv);
+
+  // Display the results
+
+  Serial.print("LIPO = ");
+  Serial.print(vbat_mv);
+  Serial.print(" mV (");
+  Serial.print(vbat_per);
+  Serial.println("%)");
+
+  delay(1000);
+}
+
