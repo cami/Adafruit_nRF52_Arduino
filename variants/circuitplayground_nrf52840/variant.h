@@ -37,8 +37,8 @@ extern "C"
 #endif // __cplusplus
 
 // Number of pins defined in PinDescription array
-#define PINS_COUNT           (35)
-#define NUM_DIGITAL_PINS     (35)
+#define PINS_COUNT           (36)
+#define NUM_DIGITAL_PINS     (36)
 #define NUM_ANALOG_INPUTS    (8)
 #define NUM_ANALOG_OUTPUTS   (0)
 
@@ -54,13 +54,16 @@ extern "C"
 #define LED_STATE_ON         1         // State when LED is litted
 
 // Buttons
-#define PIN_BUTTON1             (4)
-#define PIN_BUTTON2             (5)
+#define PIN_BUTTON1          (4)    // Button A (Left)
+#define PIN_BUTTON2          (5)    // Button B (Right)
 
 // Microphone
-#define PIN_PDM_DIN           33
-#define PIN_PDM_CLK           34
+#define PIN_PDM_DIN           24
+#define PIN_PDM_CLK           25
 #define PIN_PDM_PWR           -1  // not used
+
+// Buzzer
+#define PIN_BUZZER            12
 
 /*
  * Analog pins
@@ -91,20 +94,19 @@ static const uint8_t A9  = PIN_A9 ;
 /*
  * Serial interfaces
  */
-// Serial
-#define PIN_SERIAL_RX       (0)
-#define PIN_SERIAL_TX       (1)
+#define PIN_SERIAL1_RX       (0)
+#define PIN_SERIAL1_TX       (1)
 
 /*
  * SPI Interfaces
  */
 #define SPI_INTERFACES_COUNT 1
 
-#define PIN_SPI_MISO         (6)
-#define PIN_SPI_MOSI         (9)
-#define PIN_SPI_SCK          (10)
+#define PIN_SPI_MISO         (10)
+#define PIN_SPI_MOSI         (2)
+#define PIN_SPI_SCK          (3)
 
-static const uint8_t SS   = (5);
+static const uint8_t SS   = (0);
 static const uint8_t MOSI = PIN_SPI_MOSI ;
 static const uint8_t MISO = PIN_SPI_MISO ;
 static const uint8_t SCK  = PIN_SPI_SCK ;
@@ -112,24 +114,34 @@ static const uint8_t SCK  = PIN_SPI_SCK ;
 /*
  * Wire Interfaces
  */
-#define WIRE_INTERFACES_COUNT 1
+#define WIRE_INTERFACES_COUNT 2
 
-#define PIN_WIRE_SDA         (26)
-#define PIN_WIRE_SCL         (25)
+#define PIN_WIRE_SDA        (2)
+#define PIN_WIRE_SCL        (3)
 
-// QSPI Pins
-#define PIN_QSPI_SCK         27
-#define PIN_QSPI_CS          28
-#define PIN_QSPI_IO0         29
-#define PIN_QSPI_IO1         30
-#define PIN_QSPI_IO2         31
-#define PIN_QSPI_IO3         32
+#define PIN_WIRE1_SDA       (28)
+#define PIN_WIRE1_SCL       (26)
+
+/*
+ * QSPI Interfaces
+ */
+#define PIN_QSPI_SCK         29
+#define PIN_QSPI_CS          30
+#define PIN_QSPI_IO0         31
+#define PIN_QSPI_IO1         32
+#define PIN_QSPI_IO2         33
+#define PIN_QSPI_IO3         34
 
 // On-board QSPI Flash
 #define EXTERNAL_FLASH_DEVICES   GD25Q16C
+#define EXTERNAL_FLASH_USE_QSPI
 
-#define USB_MSC_BLOCK_SIZE    512
-#define USB_MSC_BLOCK_COUNT   ((2*1024*1024) / USB_MSC_BLOCK_SIZE)
+/*
+ * PDM Interfaces
+ */
+#define PIN_PDM_DIN         24
+#define PIN_PDM_CLK         25
+#define PIN_PDM_PWR         -1 // not used
 
 #ifdef __cplusplus
 }
