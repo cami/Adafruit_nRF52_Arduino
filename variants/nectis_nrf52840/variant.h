@@ -65,6 +65,9 @@ extern "C"
 #define PIN_SERIAL_RX               (GROVE_UART_RX_PIN)
 #define PIN_SERIAL_TX               (GROVE_UART_TX_PIN)
 
+#define PIN_SERIAL1_RX               (MODULE_UART_RX_PIN)
+#define PIN_SERIAL1_TX               (MODULE_UART_TX_PIN)
+
 //#define PIN_SERIAL2_RX      (8)
 //#define PIN_SERIAL2_TX      (6)
 
