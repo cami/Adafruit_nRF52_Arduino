@@ -21,7 +21,6 @@
 #include "HardwareSerial.h"
 #include "RingBuffer.h"
 #include "rtos.h"
-#include "variant.h"
 
 #include <cstddef>
 
