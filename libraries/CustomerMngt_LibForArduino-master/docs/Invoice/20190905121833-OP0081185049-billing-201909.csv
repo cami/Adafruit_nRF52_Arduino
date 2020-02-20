@@ -1,0 +1,6 @@
+﻿imsi,date,billItemName,unitPrice,quantity,amount,name,group:groupId,group:name
+440525060023501,20190905,dataTrafficChargeForPlanKM1,0.00048828125,26393,12.88720703125,CusntomerMngt,7300d51b-8145-44f6-b644-335ccf41834d,CustomerManagement
+440525060023501,20190905,soracomHarvestCharge,5,1,5,CusntomerMngt,7300d51b-8145-44f6-b644-335ccf41834d,CustomerManagement
+440525060023501,201909,basicMonthlyChargeForPlanKM1,100,1,100,CusntomerMngt,7300d51b-8145-44f6-b644-335ccf41834d,CustomerManagement
+,201909,soracomHarvestFreeTier,,1,-5,,,
+,201909,dataTrafficFreeTier,,,-12.88720703125,,,
