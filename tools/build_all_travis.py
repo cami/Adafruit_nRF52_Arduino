@@ -27,7 +27,8 @@ variants_dict = {
     'cplaynrf52840': 'Circuit Playground Bluefruit Express',
     'itsybitsy52840': 'ItsyBitsy nRF52840 Express',
     'cluenrf52840': 'Clue nRF52840',
-    'feather52832': 'Feather nRF52832'
+    'feather52832': 'Feather nRF52832',
+    'nectis': 'nectis nrf52840'
 }
 
 # STDERR receives output that starts with the following text, none of which should be considered a warning or error...
@@ -85,7 +86,7 @@ def build_examples(variant):
                 build_result = subprocess.run("arduino --verify {}".format(sketch), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
             # get stderr into a form where len(warningLines) indicates a true warning was output to stderr
-            warningLines = [];
+            warningLines = []
             if all_warnings and build_result.stderr:
                 tmpWarningLines = build_result.stderr.decode("utf-8").splitlines()
                 warningLines = list(filter(errorOutputFilter, (tmpWarningLines)))
