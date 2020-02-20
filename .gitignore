@@ -20,3 +20,8 @@
 # cmake
 /cmake/
 /cmake-*/
+
+# Private libraries
+CustomerMngt_LibForArduino-master/
+HardwareInspection_LibForArduino-master/
+OtaDfu_LibForArduino-master/

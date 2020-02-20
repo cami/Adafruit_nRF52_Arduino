@@ -1,17 +1,14 @@
 /*
   Copyright (c) 2015 Arduino LLC.  All right reserved.
   Copyright (c) 2016 Sandeep Mistry All right reserved.
-
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the GNU Lesser General Public License for more details.
-
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -65,6 +62,20 @@ void Uart::setPins(uint8_t pin_rx, uint8_t pin_tx)
 {
   uc_pinRX = g_ADigitalPinMap[pin_rx];
   uc_pinTX = g_ADigitalPinMap[pin_tx];
+}
+
+void Uart::setPins(uint8_t pin_rx, uint8_t pin_tx, uint8_t _pinCTS, uint8_t _pinRTS) {
+    uc_pinRX = pin_rx;
+    uc_pinTX = pin_tx;
+    uc_pinCTS = _pinCTS;
+    uc_pinRTS = _pinRTS;
+}
+
+void Uart::getPins() {
+    Serial.printf("uc_pinRX: %u\n", (long unsigned int) uc_pinRX);
+    Serial.printf("uc_pinTX: %u\n", (long unsigned int) uc_pinTX);
+    Serial.printf("uc_pinCTS: %u\n", (long unsigned int) uc_pinCTS);
+    Serial.printf("uc_pinRTS: %u\n", (long unsigned int) uc_pinRTS);
 }
 
 void Uart::begin(unsigned long baudrate)
@@ -196,38 +207,19 @@ void Uart::IrqHandler()
   }
 }
 
-void Uart::end() {
-    NVIC_DisableIRQ(IRQn);
-    
-    nrfUart->INTENCLR = UART_INTENCLR_RXDRDY_Msk;
-    
-    nrfUart->TASKS_STOPRX = 0x1UL;
-    nrfUart->TASKS_STOPTX = 0x1UL;
-    
-    nrfUart->ENABLE = UART_ENABLE_ENABLE_Disabled;
-    
-    nrfUart->PSELTXD = 0xFFFFFFFF;
-    nrfUart->PSELRXD = 0xFFFFFFFF;
-    
-    nrfUart->PSELRTS = 0xFFFFFFFF;
-    nrfUart->PSELCTS = 0xFFFFFFFF;
-    
-    rxBuffer.clear();
-    
-    vSemaphoreDelete(_mutex);
-    _mutex = NULL;
-    _begun = false;
+int Uart::available()
+{
+  return rxBuffer.available();
 }
 
-void Uart::flush() {
-    rxBuffer.clear();
+int Uart::peek()
+{
+  return rxBuffer.peek();
 }
 
-void Uart::IrqHandler() {
-    if (nrfUart->EVENTS_RXDRDY) {
-        nrfUart->EVENTS_RXDRDY = 0x0UL;
-        rxBuffer.store_char(nrfUart->RXD);
-    }
+int Uart::read()
+{
+  return rxBuffer.read_char();
 }
 
 size_t Uart::write(uint8_t data)
@@ -268,9 +260,10 @@ size_t Uart::write(const uint8_t *buffer, size_t size)
 
 extern "C"
 {
-void UARTE0_UART0_IRQHandler() {
+  void UARTE0_UART0_IRQHandler()
+  {
     SERIAL_PORT_HARDWARE.IrqHandler();
-}
+  }
 }
 
 //------------- Serial2 -------------//
@@ -285,4 +278,3 @@ extern "C"
   }
 }
 #endif
-
