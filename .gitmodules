@@ -1,3 +1,6 @@
 [submodule "cores/nRF5/TinyUSB/Adafruit_TinyUSB_ArduinoCore"]
 	path = cores/nRF5/TinyUSB/Adafruit_TinyUSB_ArduinoCore
 	url = https://github.com/adafruit/Adafruit_TinyUSB_ArduinoCore.git
+[submodule "libraries/BG96_LibForArduino"]
+	path = libraries/BG96_LibForArduino
+	url = git@github.com:cami/BG96.git
