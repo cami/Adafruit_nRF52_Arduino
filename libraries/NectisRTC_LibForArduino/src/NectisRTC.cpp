@@ -128,8 +128,6 @@ void NectisRTC::Init() {
 
   uint8_t year = calender[0];
   uint8_t hour = calender[3];
-  Serial.println(year);
-  Serial.println(hour);
 
   // year==0 の時は、RTCに時刻がセットされていないので、BG96から取得してセットする。
   if (year == 0 | 24 <= hour) {
