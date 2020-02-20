@@ -7,7 +7,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arduino-platform: ['feather52832', 'feather52840', 'feather52840sense', 'cplaynrf52840', 'itsybitsy52840', 'cluenrf52840' ]
+        # arduino-platform: ['feather52832', 'feather52840', 'feather52840sense', 'cplaynrf52840', 'itsybitsy52840', 'cluenrf52840']
+        arduino-platform: ['nectis']
 
     runs-on: ubuntu-latest
     
@@ -17,16 +18,28 @@ jobs:
       with:
         python-version: '3.x'
         
+    # - name: Checkout code
+    #   uses: actions/checkout@v2
+
+    # - name: Checkout submodules
+    #   shell: bash
+    #   run: |
+    #     auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+    #     git submodule sync --recursive
+    #     git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive      
+
     - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Checkout submodules
       shell: bash
       run: |
-        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-        git submodule sync --recursive
-        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive      
-        
+        git config --file .gitmodules --get-regexp url | while read url; do
+          git config --file=.gitmodules $(echo "$url" | sed -E "s/git@github.com:|https:\/\/github.com\//https:\/\/${{ secrets.CI_PAT }}:${{ secrets.CI_PAT }}@github.com\//")
+        done
+        git submodule sync
+        git submodule update --init --recursive
+
     - name: Install Arduino CLI and Tools
       run: |
         pip3 install adafruit-nrfutil
@@ -42,15 +55,22 @@ jobs:
       env:
         BSP_URL: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
         BSP_PATH: .arduino15/packages/adafruit/hardware/nrf52
+        BSP_CAMI_URL: https://raw.githubusercontent.com/cami/cami.github.io/master/package_nectis_index.json
+        BSP_CAMI_PATH: .arduino15/packages/Nectis/hardware/nrf52
       run: |
         arduino-cli config init
         arduino-cli core update-index
         arduino-cli core update-index --additional-urls $BSP_URL
         arduino-cli core install adafruit:nrf52 --additional-urls $BSP_URL
+        arduino-cli core update-index --additional-urls $BSP_CAMI_URL
+        arduino-cli core install Nectis:nrf52 --additional-urls $BSP_CAMI_URL
         # Repalce release BSP with our code
         BSP_VERSION=`eval ls $HOME/$BSP_PATH`
+        BSP_CAMI_VERSION=`eval ls $HOME/$BSP_CAMI_PATH`
         rm -r $HOME/$BSP_PATH/*
+        rm -r $HOME/$BSP_CAMI_PATH/*
         ln -s $GITHUB_WORKSPACE $HOME/$BSP_PATH/$BSP_VERSION
+        ln -s $GITHUB_WORKSPACE $HOME/$BSP_CAMI_PATH/$BSP_CAMI_VERSION
         # Install library dependency
         arduino-cli lib install "Adafruit GFX Library" "Adafruit SSD1306" "Adafruit ILI9341" "Adafruit HX8357 Library" "Adafruit ST7735 and ST7789 Library" "Adafruit EPD" 
         arduino-cli lib install "Adafruit Circuit Playground" "Adafruit NeoPixel" "Adafruit NeoMatrix" "MIDI Library" "Firmata"

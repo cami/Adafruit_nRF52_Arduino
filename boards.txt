@@ -580,4 +580,3 @@ mdbt50qrx.menu.debug.l2=Level 2 (Full Debug)
 mdbt50qrx.menu.debug.l2.build.debug_flags=-DCFG_DEBUG=2
 mdbt50qrx.menu.debug.l3=Level 3 (Segger SystemView)
 mdbt50qrx.menu.debug.l3.build.debug_flags=-DCFG_DEBUG=3
->>>>>>> upstream/master
