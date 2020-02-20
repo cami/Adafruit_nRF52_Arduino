@@ -28,6 +28,7 @@ variants_dict = {
     'itsybitsy52840': 'ItsyBitsy nRF52840 Express',
     'cluenrf52840': 'Clue nRF52840',
     'feather52832': 'Feather nRF52832'
+    'nectis': 'nectis nrf52840'
 }
 
 # STDERR receives output that starts with the following text, none of which should be considered a warning or error...
