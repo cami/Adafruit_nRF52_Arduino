@@ -2,16 +2,12 @@
 /*!
     @file     compiler_macro.h
     @author   hathach (tinyusb.org)
-
     @section LICENSE
-
     Software License Agreement (BSD License)
-
     Copyright (c) 2013, K. Townsend (microBuilder.eu)
     Copyright (c) 2018, Adafruit Industries (adafruit.com)
-    
-    All rights reserved.
 
+    All rights reserved.
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
     1. Redistributions of source code must retain the above copyright
@@ -22,7 +18,6 @@
     3. Neither the name of the copyright holders nor the
     names of its contributors may be used to endorse or promote products
     derived from this software without specific prior written permission.
-
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
     EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -45,4 +40,3 @@
 #define ATTR_WEAK     TU_ATTR_WEAK
 
 #endif /* _COMPILER_MACRO_H_ */
-
