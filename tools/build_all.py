@@ -14,15 +14,15 @@ build_format = '| {:20} | {:35} | {:9} '
 build_separator = '-' * 83
 
 # default_boards = [ 'feather52832', 'feather52840', 'cplaynrf52840', 'itsybitsy52840', 'cluenrf52840' ]
-default_boards = [ 'cami' ]
+default_boards = [ 'cami_arduino' ]
 
-build_boards = []
+build_boards = ['nectis']
 
 # build all variants if input not existed
-if len(sys.argv) > 1:
-    build_boards.append(sys.argv[1])
-else:
-    build_boards = default_boards
+# if len(sys.argv) > 1:
+#     build_boards.append(sys.argv[1])
+# else:
+#     build_boards = default_boards
 
 def errorOutputFilter(line):
     if len(line) == 0:
@@ -44,7 +44,7 @@ def build_examples(variant):
     print(build_separator)
     
     # fqbn = "adafruit:nrf52:{}:softdevice={},debug=l0".format(variant, 's140v6' if variant != 'feather52832' else 's132v6')
-    fqbn = "cami:nrf52:{}:softdevice={},debug=l0".format(variant, 's140v6' if variant != 'feather52832' else 's132v6')
+    fqbn = "cami_arduino:nrf52:{}:softdevice={},debug=l0".format(variant, 's140v6' if variant != 'feather52832' else 's132v6')
 
     for sketch in glob.iglob('libraries/**/*.ino', recursive=True):
         start_time = time.monotonic()
@@ -66,7 +66,7 @@ def build_examples(variant):
                 build_result = subprocess.run("arduino-cli compile --warnings default --fqbn {} {}".format(fqbn, sketch), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
             # get stderr into a form where len(warningLines) indicates a true warning was output to stderr
-            warningLines = [];
+            warningLines = []
             if all_warnings and build_result.stderr:
                 tmpWarningLines = build_result.stderr.decode("utf-8").splitlines()
                 warningLines = list(filter(errorOutputFilter, (tmpWarningLines)))
