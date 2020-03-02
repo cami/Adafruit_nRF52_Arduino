@@ -1,47 +1,33 @@
 #pragma once
+#include <stdint.h>
 
-#include "SPI.h"
-#include <NectisCellular.h>
+namespace mcu {
+  void InitPins(void);
+  void PowerSupplyCellular(bool);
+  void PowerSupplyGrove(bool);
+  void InitBoard(void);
+  void ClearSerialBuffer(void);
 
+  void TurnOnOffRedLed(bool);
+  void TurnOnOffGreenLed(bool);
 
-class NectisMcu {
-public:
-  NectisMcu();
-
-  float ReadVusb();
+  float ReadVusb(void);
   float ReadVbat(void);
-  float mvToPercent(float mvolts);
+  float mvToPercent(float);
 
-  void PwmSetup(int pin, uint8_t flash_interval);
-  void PwmBegin();
-  void PwmWritePin(int pin);
-  void PwmStop();
-  void PwmActivate(int pin, uint8_t flash_interval);
+  void PwmSetup(int, uint8_t);
+  void PwmBegin(void);
+  void PwmStop(void);
+  void PwmWritePin(int);
 
-  char *ConvertDecimalToHex(uint8_t decimal, int byte_size);
-  char *ConvertDecimalToHex(uint16_t decimal, int byte_size);
-  char *ConvertDecimalToHex(uint32_t decimal, int byte_size);
-  char *ConvertDecimalToHex(int decimal, int byte_size);
-  char *ConvertDecimalToHex(float const decimal, int byte_size);
-  unsigned int GetDataDigits(unsigned int data);
-  char *ConvertIntoBinary(char *PostDataBinary, uint8_t data, unsigned int data_length);
-  char *ConvertIntoBinary(char *PostDataBinary, uint16_t data, unsigned int data_length);
-  char *ConvertIntoBinary(char *PostDataBinary, uint32_t data, unsigned int data_length);
-  char *ConvertIntoBinary(char *PostDataBinary, int data, unsigned int data_length);
-  char *ConvertIntoBinary(char *PostDataBinary, float data, unsigned int data_length);
+  void SoftReset(void);
 
-  void PutFlashRomIntoDeepSleepMode();
-  void WakeUpFlashRomFromDeepSleepMode();
+  void DisableAllPeripherals(void);
+  void ConfigForDeepSleepWakeup(void);
+  void EnterSystemOffDeepSleep(void);
+  void EnterCpuWfiWfeSleep(void);
+  void ExitCpuWfiWfeSleep(void);
 
-  void SoftReset();
-
-  void ConfigForWakingUpFromDeepSleep();
-  void DisableAllPeripherals();
-  void EnterSystemOffDeepSleepMode();
-  void EnterCpuWfiWfeSleep();
-  void ExitCpuWfiWfeSleep();
-
-  void WatchdogTimerInit(const int wdtTimeoutSec);
-  void WatchdogTimerDelay(uint32_t delayMilliSeconds);
-  void ReloadWatchdogTimer();
-};
+  void WatchdogTimerInit(const int);
+  void ReloadWatchdogTimer(void);
+}

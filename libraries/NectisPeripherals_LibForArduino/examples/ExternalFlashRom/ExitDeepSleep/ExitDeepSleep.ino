@@ -1,27 +1,13 @@
-// The MIT License (MIT)
-// Copyright (c) 2019 Ha Thach for Adafruit Industries
-
+#include "NectisMcu.h"
+#include "NectisPeripherals.h"
+#include "NectisUtils.h"
 #include "Adafruit_SPIFlash.h"
 
 Adafruit_FlashTransport_QSPI flashTransport(PIN_QSPI_SCK, PIN_QSPI_CS, PIN_QSPI_IO0, PIN_QSPI_IO1, PIN_QSPI_IO2, PIN_QSPI_IO3);
-
 Adafruit_SPIFlash flash(&flashTransport);
 
-// the setup function runs once when you press reset or power the board
-void setup()
-{
-  Serial.begin(115200);
-  delay(4000);
 
-  flash.begin();
-  
-  Serial.println("Adafruit Serial Flash Sector Dump example");
-  Serial.print("JEDEC ID: "); Serial.println(flash.getJEDECID(), HEX);
-  Serial.print("Flash size: "); Serial.println(flash.size());
-}
-
-void dump_sector(uint32_t sector)
-{
+void DumpSector(uint32_t sector) {
   uint8_t buf[512];
   flash.readBuffer(sector*512, buf, 512);
 
@@ -46,8 +32,29 @@ void dump_sector(uint32_t sector)
   }
 }
 
-void loop()
-{
+
+void setup() {
+  mcu::InitBoard();
+
+  peripherals::WakeUpFlashRomFromDeepSleep();
+
+  if (!flash.begin()) {
+    Serial.println("Error, failed to initialize flash chip!");
+    while(1) delay(10);
+  }
+
+  Serial.print("JEDEC ID=");
+  Serial.println(flash.getJEDECID(), HEX);
+
+  if (!flash.eraseChip()) {
+    Serial.println("Failed to erase chip!");
+  }
+
+  flash.waitUntilReady();
+  Serial.println("Successfully erased chip!");
+}
+
+void loop() {
   Serial.print("Enter the sector number to dump: ");
   while( !Serial.available() ) delay(10);
 
@@ -55,9 +62,9 @@ void loop()
 
   Serial.println(sector); // echo
 
-  if ( sector < flash.size()/512 )
+  if ( sector < int(flash.size()/512) )
   {
-    dump_sector(sector);
+    DumpSector(sector);
   }else
   {
     Serial.println("Invalid sector number");
