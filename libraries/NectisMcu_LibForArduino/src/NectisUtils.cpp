@@ -2,7 +2,7 @@
 #include <Arduino.h>
 
 
-namespace utils {
+namespace nectis_utils {
 
 char hexConvertedFromDecimal[16];
 char hexConvertedFromFloat[sizeof(float) + 1];
@@ -140,4 +140,4 @@ char *ConvertIntoBinary(char *PostDataBinary, float const data, unsigned int dat
   return PostDataBinary;
 }
 
-} // namespace utils
+} // namespace nectis_utils

@@ -1,5 +1,5 @@
 #include "NectisMcu.h"
-#include "utils/Stopwatch.h"
+#include "Stopwatch.h"
 
 #define PIN_FEEDING_WDT     GROVE_ANALOG_1_1
 

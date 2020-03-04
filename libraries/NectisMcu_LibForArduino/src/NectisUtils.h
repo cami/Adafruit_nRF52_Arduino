@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-namespace utils {
+namespace nectis_utils {
   char *ConvertUint8DecimalToHex(uint8_t, int);
   char *ConvertUint16DecimalToHex(uint16_t, int);
   char *ConvertUint32DecimalToHex(uint32_t, int);
