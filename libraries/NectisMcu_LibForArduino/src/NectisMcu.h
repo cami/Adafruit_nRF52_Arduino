@@ -5,7 +5,7 @@ namespace mcu {
   void InitPins(void);
   void PowerSupplyCellular(bool);
   void PowerSupplyGrove(bool);
-  void InitBoard(void);
+  void InitMcu(void);
   void ClearSerialBuffer(void);
 
   void TurnOnOffRedLed(bool);

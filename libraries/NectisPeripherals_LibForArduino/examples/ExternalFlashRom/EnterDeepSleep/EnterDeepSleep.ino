@@ -34,7 +34,7 @@ void DumpSector(uint32_t sector) {
 
 
 void setup() {
-  mcu::InitBoard();
+  mcu::InitMcu();
 
   peripherals::PutFlashRomIntoDeepSleep();
 

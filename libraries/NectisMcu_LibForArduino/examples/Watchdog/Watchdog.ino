@@ -23,7 +23,7 @@ void setup() {
   Serial.print("");
   Serial.println("--- START ---------------------------------------------------");
 
-  mcu::InitBoard();
+  mcu::InitMcu();
   InitPins();
 
   // Initialize the watchdog timer.

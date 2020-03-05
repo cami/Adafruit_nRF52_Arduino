@@ -21,7 +21,7 @@ void setup() {
   Serial.print("");
   Serial.println("--- START ---------------------------------------------------");
 
-  mcu::InitBoard();
+  mcu::InitMcu();
 
   Rtc.Begin();
   Rtc.Init();

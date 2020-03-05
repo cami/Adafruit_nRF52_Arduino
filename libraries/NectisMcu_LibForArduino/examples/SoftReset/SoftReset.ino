@@ -12,7 +12,7 @@ void setup() {
   Serial.print("");
   Serial.println("--- START ---------------------------------------------------");
 
-  mcu::InitBoard();
+  mcu::InitMcu();
   
   Nectis.Begin();
   Nectis.InitLteM();

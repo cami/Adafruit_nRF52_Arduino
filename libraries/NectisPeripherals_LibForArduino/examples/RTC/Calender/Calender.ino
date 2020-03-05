@@ -13,7 +13,7 @@ void setup() {
   Serial.print("");
   Serial.println("--- START ---------------------------------------------------");
 
-  mcu::InitBoard();
+  mcu::InitMcu();
   peripherals::WakeUpFlashRomFromDeepSleep();
 
   Nectis.Begin();

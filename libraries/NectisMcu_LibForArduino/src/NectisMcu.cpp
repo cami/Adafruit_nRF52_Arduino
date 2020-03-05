@@ -52,7 +52,7 @@ void PowerSupplyGrove(bool on) {
   digitalWrite(GROVE_VCCB_PIN, on ? HIGH : LOW);
 }
 
-void InitBoard(void) {
+void InitMcu(void) {
   Serial.println("### I/O Initialize.");
   InitPins();
   delay(100);
