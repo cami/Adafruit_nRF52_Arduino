@@ -50,9 +50,11 @@ extern "C"
 #define PIN_A6                      (30)
 #define PIN_A7                      (31)
 
-#define ADC_RESOLUTION            (10)
+#define ADC_RESOLUTION              (10)
 
-// Other pins
+/*
+ * Other pins
+ */
 #define PIN_AREF                    (2)
 #define PIN_DFU                     (35)
 
@@ -65,29 +67,26 @@ extern "C"
 #define PIN_SERIAL_RX               (GROVE_UART_RX_PIN)
 #define PIN_SERIAL_TX               (GROVE_UART_TX_PIN)
 
-#define PIN_SERIAL1_RX               (MODULE_UART_RX_PIN)
-#define PIN_SERIAL1_TX               (MODULE_UART_TX_PIN)
-
-//#define PIN_SERIAL2_RX      (8)
-//#define PIN_SERIAL2_TX      (6)
+#define PIN_SERIAL1_RX              (MODULE_UART_RX_PIN)
+#define PIN_SERIAL1_TX              (MODULE_UART_TX_PIN)
 
 /*
  * SPI Interfaces
  */
-#define SPI_INTERFACES_COUNT      (1)
+#define SPI_INTERFACES_COUNT        (1)
 
-#define PIN_SPI_MISO              (21)
-#define PIN_SPI_MOSI              (20)
-#define PIN_SPI_SCK               (19)
-#define PIN_SPI_CS                (24)
+#define PIN_SPI_MISO                (21)
+#define PIN_SPI_MOSI                (20)
+#define PIN_SPI_SCK                 (19)
+#define PIN_SPI_CS                  (24)
 
 /*
  * Wire Interfaces
  */
 #define WIRE_INTERFACES_COUNT       (1)
 
-#define PIN_WIRE_SDA                (GROVE_I2C_SDA_PIN)
-#define PIN_WIRE_SCL                (GROVE_I2C_SCL_PIN)
+#define PIN_WIRE_SDA                (GROVE_I2C_SDA)
+#define PIN_WIRE_SCL                (GROVE_I2C_SCL)
 
 /*
  * QSPI interface for external flash
@@ -110,7 +109,9 @@ extern "C"
 #define NUM_ANALOG_INPUTS           (6)
 #define NUM_ANALOG_OUTPUTS          (0)
 
-// LEDs
+/*
+ * LEDs
+ */
 #define LED_BLUE                    (33)    // Indicator_LED1
 #define LED_RED                     (34)    // Indicator_LED2
 
@@ -122,10 +123,22 @@ extern "C"
 
 #define LED_STATE_ON                (0)     // State when LED is litted
 
-#define BATTERY_VOLTAGE_PIN         (A0)
-#define USB_VOLTAGE_PIN             (A1)
-#define BATTERY_LEVEL_ENABLE_PIN    (45)
 
+/*
+ * USB/Battery voltage
+ */
+#define PIN_BATTERY_VOLTAGE         (A0)
+#define PIN_USB_VOLTAGE             (A1)
+#define PIN_BATTERY_LEVEL_ENABLE    (45)
+
+#define BATTERY_VOLTAGE_PIN         PIN_BATTERY_VOLTAGE
+#define USB_VOLTAGE_PIN             PIN_USB_VOLTAGE
+#define BATTERY_LEVEL_ENABLE_PIN    PIN_BATTERY_LEVEL_ENABLE
+
+
+/*
+ * BG96
+ */
 #define MODULE_PWR_PIN              (36)    // Power Supply to the BG96 and Grove sensors
 #define MODULE_PWRKEY_PIN           (42)    // Turn On/Off BG96
 #define GROVE_VCCB_PIN              (25)    // GROVE_PWR
@@ -139,26 +152,35 @@ extern "C"
 #define MODULE_DTR_PIN              (44)    // BG96のデータ端末レディ, BG96_DTR
 #define MODULE_RESET_PIN            (43)    // BG96のリセット, BG96_RESET
 #define MODULE_STATUS_PIN           (37)    // BG96のステータス, BG96_STATUS
-#define BG96_AP_READY               (39)    // BG96のAP_READY
+#define MODULE_AP_READY             (39)    // BG96のAP_READY
 
+/*
+ * Grove sensors
+ * | black | red |     white      |     yellow     |
+ * |  GND  | VCC | GROVE_GPIO_6_2 | GROVE_GPIO_6_1 |
+ * 
+ */
 #define GROVE_ANALOG_1_1            (4)     // Analog in/out, GROVE_GPIO_1_1
 #define GROVE_ANALOG_1_2            (5)     // Analog in/out, GROVE_GPIO_1_2
 #define GROVE_ANALOG_2_1            (28)    // Analog in/out, GROVE_GPIO_2_1
 #define GROVE_ANALOG_2_2            (29)    // Analog in/out, GROVE_GPIO_2_2
 #define GROVE_ANALOG_3_1            (30)    // Analog in/out, GROVE_GPIO_3_1
 #define GROVE_ANALOG_3_2            (31)    // Analog in/out, GROVE_GPIO_3_2
-#define GROVE_I2C_CORE		          (1)
-#define GROVE_I2C_SCL_PIN           (12)    // I2C, GROVE_GPIO_4_1
-#define GROVE_I2C_SDA_PIN           (11)    // I2C, GROVE_GPIO_4_2
+#define GROVE_I2C_CORE		        (1)
+#define GROVE_I2C_SCL               (12)    // I2C, GROVE_GPIO_4_1
+#define GROVE_I2C_SDA               (11)    // I2C, GROVE_GPIO_4_2
 #define GROVE_UART_CORE             (1)     // USART1
-#define GROVE_UART_RX_PIN           (13)    // UART, GROVE_GPIO_5_1
-#define GROVE_UART_TX_PIN           (14)    // UART, GROVE_GPIO_5_2
+#define GROVE_UART_RX               (13)    // UART, GROVE_GPIO_5_1
+#define GROVE_UART_TX               (14)    // UART, GROVE_GPIO_5_2
 #define GROVE_GPIO_6_1              (15)    // GPIO, GROVE_GPIO_6_1
 #define GROVE_GPIO_6_2              (16)    // GPIO, GROVE_GPIO_6_2
 
+/*
+ * External RTC
+ */
 #define RTC_I2C_CORE                (0)
-#define RTC_I2C_SCL_PIN             (8)      // I2C, For RTC
-#define RTC_I2C_SDA_PIN             (41)     // I2C, For RTC
+#define RTC_I2C_SCL                 (8)      // I2C, For RTC
+#define RTC_I2C_SDA                 (41)     // I2C, For RTC
 #define RTC_INTRB                   (9)      // IF this pin is set to LOW,
 
 

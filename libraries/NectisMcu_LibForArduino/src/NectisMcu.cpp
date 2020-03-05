@@ -1,13 +1,96 @@
 #include "NectisMcu.h"
+#include <Arduino.h>
 
-char hexConvertedFromDecimal[16];
-char hexConvertedFromFloat[sizeof(float) + 1];
 
-NectisMcu::NectisMcu() {
+namespace mcu {
 
+/*
+ * GPIO pins on board
+ */
+void InitPins(void) {
+  ////////////////////
+  // Module
+  
+  // Power Supply
+  pinMode(MODULE_PWR_PIN, OUTPUT);            digitalWrite(MODULE_PWR_PIN, LOW);
+  // Turn On/Off
+  pinMode(MODULE_PWRKEY_PIN, OUTPUT);         digitalWrite(MODULE_PWRKEY_PIN, LOW);
+  pinMode(MODULE_RESET_PIN, OUTPUT);          digitalWrite(MODULE_RESET_PIN, LOW);
+  // Status Indication
+  pinMode(MODULE_STATUS_PIN, INPUT_PULLUP);
+  // Main SerialUART Interface
+  pinMode(MODULE_DTR_PIN, OUTPUT);            digitalWrite(MODULE_DTR_PIN, LOW);
+  
+  ////////////////////
+  // Led
+  pinMode(LED_RED, OUTPUT);                   digitalWrite(LED_RED, LOW);
+  pinMode(LED_BLUE, OUTPUT);                  digitalWrite(LED_BLUE, LOW);
+  ////////////////////
+  
+  // AD Converter
+  pinMode(BATTERY_LEVEL_ENABLE_PIN, OUTPUT);
+  
+  // Grove
+  pinMode(GROVE_VCCB_PIN, OUTPUT);            digitalWrite(GROVE_VCCB_PIN, LOW);
+
+  // RTC
+  pinMode(RTC_INTRB, INPUT_PULLUP);           digitalWrite(RTC_INTRB, HIGH);
+  pinMode(RTC_I2C_SDA, OUTPUT);               digitalWrite(RTC_I2C_SDA, HIGH);
 }
 
-float NectisMcu::ReadVusb() {
+void PowerSupplyCellular(bool on) {
+  digitalWrite(MODULE_PWR_PIN, on ? HIGH : LOW);
+  delay(200);
+  digitalWrite(MODULE_PWRKEY_PIN, on ? HIGH : LOW);
+  delay(600);
+  digitalWrite(MODULE_PWRKEY_PIN, LOW);
+}
+
+void PowerSupplyGrove(bool on) {
+  digitalWrite(MODULE_PWR_PIN, on ? HIGH : LOW);
+  delay(100);
+  digitalWrite(GROVE_VCCB_PIN, on ? HIGH : LOW);
+}
+
+void InitMcu(void) {
+  Serial.println("### I/O Initialize.");
+  InitPins();
+  delay(100);
+
+  Serial.println("### Power supply cellular ON.");
+  PowerSupplyCellular(true);
+  delay(100);
+
+  Serial.println("### Power supply ON.");
+  // Make sure that the MODULE_PWR_PIN is set to HIGH.
+  PowerSupplyGrove(true);
+  delay(100);
+}
+
+/*
+ * USB to UART Serial
+ */
+void ClearSerialBuffer(void) {
+  Serial.flush();
+  delay(10);
+}
+
+/*
+ * Onboard LEDs
+ */
+void TurnOnOffRedLed(bool on) {
+  digitalWrite(LED_RED, on ? HIGH : LOW);
+}
+
+void TurnOnOffGreenLed(bool on) {
+  digitalWrite(LED_BLUE, on ? HIGH : LOW);
+}
+
+
+/*
+ * AD Converter
+ */
+float ReadVusb(void) {
   float mv_per_lsb = 3600.0F / 1024.0F; // 10-bit ADC with 3.6V input range
 
   int adcvalue = 0;
@@ -20,9 +103,9 @@ float NectisMcu::ReadVusb() {
   return battery_level_mv;
 }
 
-float NectisMcu::ReadVbat(void) {
-#define VBAT_MV_PER_LSB   (1.171875F)       // 1.2V ADC range and 10-bit ADC resolution = 1200mV/1024
-#define VBAT_DIVIDER      (0.25F)           // From IC: RP124N334E
+float ReadVbat(void) {
+  constexpr float VBAT_MV_PER_LSB = 1.171875F;    // 1.2V ADC range and 10-bit ADC resolution = 1200mV/1024
+  constexpr float VBAT_DIVIDER = 0.25F;           // From IC: RP124N334E
 
   digitalWrite(BATTERY_LEVEL_ENABLE_PIN, HIGH);
 
@@ -38,12 +121,12 @@ float NectisMcu::ReadVbat(void) {
   delay(100);
 
   // Get the raw 10-bit, 0..1200mV ADC value
-  adcvalue = analogRead(BATTERY_VOLTAGE_PIN);
+  adcvalue = analogRead(PIN_BATTERY_VOLTAGE);
   while ((adcvalue < 0) || (adcvalue > 1023)) {
-    adcvalue = analogRead(BATTERY_VOLTAGE_PIN);
+    adcvalue = analogRead(PIN_BATTERY_VOLTAGE);
   }
 
-  Serial.printf("adc_value: %d\n", adcvalue);
+  Serial.printf("adc_value=%d\n", adcvalue);
 
   // Convert the raw value to compensated mv, taking the resistor-
   // divider into account (providing the actual LIPO voltage)
@@ -58,7 +141,7 @@ float NectisMcu::ReadVbat(void) {
   return battery_voltage_mv;
 }
 
-float NectisMcu::mvToPercent(float mvolts) {
+float mvToPercent(float mvolts) {
   float battery_level;
 
   // When mvolts drops to (3200mA * 102%), the power supply from the battery shut down.
@@ -79,7 +162,10 @@ float NectisMcu::mvToPercent(float mvolts) {
 }
 
 
-void NectisMcu::PwmSetup(int pin, uint8_t flash_interval) {
+/*
+ * PWM
+ */
+void PwmSetup(int pin, uint8_t flash_interval) {
   HwPWM0.addPin(pin);
 
   // Enable PWM modules with 15-bit resolutions(max) but different clock div
@@ -87,11 +173,15 @@ void NectisMcu::PwmSetup(int pin, uint8_t flash_interval) {
   HwPWM0.setClockDiv(flash_interval);
 }
 
-void NectisMcu::PwmBegin() {
+void PwmBegin(void) {
   HwPWM0.begin();
 }
 
-void NectisMcu::PwmWritePin(int pin) {
+void PwmStop(void) {
+  HwPWM0.stop();
+}
+
+void PwmWritePin(int pin) {
   const int maxValue = bit(15) - 1;
 
   // fade in from min to max
@@ -113,194 +203,19 @@ void NectisMcu::PwmWritePin(int pin) {
   }
 }
 
-void NectisMcu::PwmStop() {
-  HwPWM0.stop();
-}
 
-void NectisMcu::PwmActivate(int pin, uint8_t flash_interval) {
-  PwmSetup(pin, flash_interval);
-  NectisMcu::PwmBegin();
-  PwmWritePin(pin);
-  PwmStop();
-}
-
-
-char *NectisMcu::ConvertDecimalToHex(uint8_t decimal, int byte_size) {
-  // The last index of post_data is filled with 0x00 for print function.
-  memset(&hexConvertedFromDecimal[0], 0x00, sizeof(hexConvertedFromDecimal));
-
-  for (int i = 0; i < byte_size; i++) {
-    // 16進数に変換し、1バイトずつ配列を埋めていく
-    hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
-  }
-  return &hexConvertedFromDecimal[0];
-}
-
-char *NectisMcu::ConvertDecimalToHex(uint16_t decimal, int byte_size) {
-  // The last index of post_data is filled with 0x00 for print function.
-  memset(&hexConvertedFromDecimal[0], 0x00, sizeof(hexConvertedFromDecimal));
-
-  for (int i = 0; i < byte_size; i++) {
-    // 16進数に変換し、1バイトずつ配列を埋めていく
-    hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
-  }
-  return &hexConvertedFromDecimal[0];
-}
-
-char *NectisMcu::ConvertDecimalToHex(uint32_t decimal, int byte_size) {
-  // The last index of post_data is filled with 0x00 for print function.
-  memset(&hexConvertedFromDecimal[0], 0x00, sizeof(hexConvertedFromDecimal));
-
-  for (int i = 0; i < byte_size; i++) {
-    // 16進数に変換し、1バイトずつ配列を埋めていく
-    hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
-  }
-  return &hexConvertedFromDecimal[0];
-}
-
-char *NectisMcu::ConvertDecimalToHex(int decimal, int byte_size) {
-  // The last index of post_data is filled with 0x00 for print function.
-  memset(&hexConvertedFromDecimal[0], 0x00, sizeof(hexConvertedFromDecimal));
-
-  for (int i = 0; i < byte_size; i++) {
-    // 16進数に変換し、1バイトずつ配列を埋めていく
-    hexConvertedFromDecimal[i] = (decimal >> (8 * ((byte_size - 1) - i))) & 0xff;
-  }
-  return &hexConvertedFromDecimal[0];
-}
-
-char *NectisMcu::ConvertDecimalToHex(float const decimal, int byte_size) {
-  // The last index of post_data is filled with 0x00 for print function.
-  memset(&hexConvertedFromFloat[0], 0x00, sizeof(hexConvertedFromFloat));
-  // Serial.printf("ConvertDecimalToHex decimal: %u\n", decimal);
-
-  union {
-    float decimalFloat;
-    int decimalInt;
-  } bit;
-  bit.decimalFloat = decimal;
-
-  /* float型(32ビット)の内部構造（IEEE754）
-   * 符号(sign)       : 1ビット目
-   * 指数部(exponent) : 2ビット目〜9ビット目
-   * 仮数部(mantissa) : 10ビット目〜32ビット目
-   */
-  // uint8_t signSize = 1;
-  // uint8_t exponentSize = 8;
-  // uint8_t mantissaSize = 23;
-  // uint8_t floatBitSize = signSize + exponentSize + mantissaSize;
-  
-  for (uint8_t i = 0; i < sizeof(float); i++) {
-    // 16進数に変換し、1バイトずつ配列を埋めていく
-    hexConvertedFromFloat[i] = (bit.decimalInt >> (8 * ((sizeof(float) - 1) - i))) & 0xff;
-  }
-
-  return &hexConvertedFromFloat[0];
-}
-
-unsigned int NectisMcu::GetDataDigits(unsigned int data) {
-  // Copy the original data to calculate digits in order not to affect the original value.
-  unsigned int data_to_calc_digit = data;
-  unsigned int data_digit_hex = 0;
-
-  if (data_to_calc_digit == 0) {
-    data_digit_hex = 1;
-  }
-
-  // Calculating the digits of data in hexadecimal.
-  // 2 digits = 1 byte
-  // Calculating the bytes of the post data
-  while (data_to_calc_digit != 0) {
-    data_to_calc_digit /= 16;
-    data_digit_hex++;
-  }
-  unsigned int size_of_post_data = (int)(ceil((double) data_digit_hex / 2));
-
-  return size_of_post_data;
-}
-
-char *NectisMcu::ConvertIntoBinary(char *binary, uint8_t data, unsigned int size) {
-  memset(&binary[0], 0x00, size);
-  memcpy(&binary[0], ConvertDecimalToHex(data, size), size);
-
-  return binary;
-}
-
-char *NectisMcu::ConvertIntoBinary(char *binary, uint16_t data, unsigned int size) {
-  memset(&binary[0], 0x00, size);
-  memcpy(&binary[0], ConvertDecimalToHex(data, size), size);
-
-  return binary;
-}
-
-char *NectisMcu::ConvertIntoBinary(char *binary, uint32_t data, unsigned int size) {
-  memset(&binary[0], 0x00, size);
-  memcpy(&binary[0], ConvertDecimalToHex(data, size), size);
-
-  return binary;
-}
-
-char *NectisMcu::ConvertIntoBinary(char *binary, int data, unsigned int size) {
-  memset(&binary[0], 0x00, size);
-  memcpy(&binary[0], ConvertDecimalToHex(data, size), size);
-
-  return binary;
-}
-
-char *NectisMcu::ConvertIntoBinary(char *PostDataBinary, const float data, unsigned int data_length) {
-  memset(&PostDataBinary[0], 0x00, data_length);
-  memcpy(&PostDataBinary[0], ConvertDecimalToHex(data, data_length), data_length);
-
-  return PostDataBinary;
-}
-
-void NectisMcu::PutFlashRomIntoDeepSleepMode() {
-  SPI.begin();
-
-  // SLAVE_SELECT_PIN == PIN_SPI_CS
-  // set the slaveSelectPin as an output:
-  pinMode(PIN_SPI_CS, OUTPUT);
-
-  digitalWrite(PIN_SPI_CS, LOW);
-  SPI.transfer(0xB9);
-  digitalWrite(PIN_SPI_CS, HIGH);
-
-  SPI.end();
-}
-
-void NectisMcu::WakeUpFlashRomFromDeepSleepMode() {
-  SPI.begin();
-
-  // SLAVE_SELECT_PIN == PIN_SPI_CS
-  // set the slaveSelectPin as an output:
-  pinMode(PIN_SPI_CS, OUTPUT);
-
-  digitalWrite(PIN_SPI_CS, LOW);
-  SPI.transfer(0xAB);
-  digitalWrite(PIN_SPI_CS, HIGH);
-
-  SPI.end();
-}
-
-void NectisMcu::SoftReset() {
+/*
+ * Software register
+ */
+void SoftReset(void) {
   NVIC_SystemReset();
 }
 
-// In nRF52832, P0 is GPIO PORT 0, which implements pin 0-31.
-// nRF52840 also implements P1, for the additional GPIO pins (P1.00 - P1.15).
-// https://devzone.nordicsemi.com/f/nordic-q-a/19198/what-is-nrf_p0-in-the-sdk_path-components-drivers_nrf-hal-nrf_gpio-h/74367#74367
-// RTC_INTRB pin is SIO09, which is also P0.09. Therefore we use RTC_INTRB pin as NRF_P0.
-void NectisMcu::ConfigForWakingUpFromDeepSleep() {
-//  NRF_GPIO_Type* rtcPort = RTC_INTRB;
-  NRF_P0->PIN_CNF[RTC_INTRB] =
-    (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos) |
-    (GPIO_DETECTMODE_DETECTMODE_Default << GPIO_DETECTMODE_DETECTMODE_Pos) |
-    (GPIO_PIN_CNF_PULL_Pullup << GPIO_PIN_CNF_PULL_Pos) |
-    (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) |
-    (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
-}
 
-void NectisMcu::DisableAllPeripherals() {
+/*
+ * Deep Sleep Mode
+ */
+void DisableAllPeripherals(void) {
   // Disable the peripherals.
   NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
   NRF_UARTE0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
@@ -325,23 +240,39 @@ void NectisMcu::DisableAllPeripherals() {
   NRF_RADIO->TASKS_DISABLE = 0x1UL << RADIO_TASKS_DISABLE_TASKS_DISABLE_Pos;
 }
 
-void NectisMcu::EnterSystemOffDeepSleepMode() {
+// In nRF52832, P0 is GPIO PORT 0, which implements pin 0-31.
+// nRF52840 also implements P1, for the additional GPIO pins (P1.00 - P1.15).
+// https://devzone.nordicsemi.com/f/nordic-q-a/19198/what-is-nrf_p0-in-the-sdk_path-components-drivers_nrf-hal-nrf_gpio-h/74367#74367
+// RTC_INTRB pin is SIO09, which is also P0.09. Therefore we use RTC_INTRB pin as NRF_P0.
+void ConfigForDeepSleepWakeup(void) {
+//  NRF_GPIO_Type* rtcPort = RTC_INTRB;
+  NRF_P0->PIN_CNF[RTC_INTRB] =
+    (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos) |
+    (GPIO_DETECTMODE_DETECTMODE_Default << GPIO_DETECTMODE_DETECTMODE_Pos) |
+    (GPIO_PIN_CNF_PULL_Pullup << GPIO_PIN_CNF_PULL_Pos) |
+    (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos) |
+    (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
+}
+
+void EnterSystemOffDeepSleep(void) {
   NRF_POWER->SYSTEMOFF = POWER_SYSTEMOFF_SYSTEMOFF_Enter << POWER_SYSTEMOFF_SYSTEMOFF_Pos;
 }
 
-void NectisMcu::EnterCpuWfiWfeSleep() {
+void EnterCpuWfiWfeSleep(void) {
   // CPU enters WFI/WFE sleep.
   // Dont call this method when you use RTC, because this prevents CPU to wake up by the RTC.
   NRF_POWER->EVENTS_SLEEPENTER = POWER_EVENTS_SLEEPENTER_EVENTS_SLEEPENTER_Generated << POWER_EVENTS_SLEEPENTER_EVENTS_SLEEPENTER_Pos;
 }
 
-void NectisMcu::ExitCpuWfiWfeSleep() {
+void ExitCpuWfiWfeSleep(void) {
   NRF_POWER->EVENTS_SLEEPEXIT = POWER_EVENTS_SLEEPEXIT_EVENTS_SLEEPEXIT_Generated << POWER_EVENTS_SLEEPEXIT_EVENTS_SLEEPEXIT_Pos;
 }
 
-void NectisMcu::WatchdogTimerInit(const int wdtTimeoutSec) {
-  Serial.printf("### Set the watchdog timer %d seconds.\n", wdtTimeoutSec);
 
+/*
+ * WathcDog
+ */
+void WatchdogTimerInit(const int wdtTimeoutSec) {
   // Configure Watchdog. a) Pause watchdog while the CPU is halted by the debugger.  b) Keep the watchdog running while the CPU is sleeping.
   NRF_WDT->CONFIG = (WDT_CONFIG_HALT_Pause << WDT_CONFIG_HALT_Pos) | (WDT_CONFIG_SLEEP_Run << WDT_CONFIG_SLEEP_Pos);
   // timeout [s] = ( CRV + 1 ) / 32768
@@ -352,13 +283,9 @@ void NectisMcu::WatchdogTimerInit(const int wdtTimeoutSec) {
   NRF_WDT->TASKS_START = 1;
 }
 
-void NectisMcu::WatchdogTimerDelay(uint32_t delayMilliSeconds) {
-  uint32_t startTime = millis();
-  while ((millis() - startTime) <= delayMilliSeconds);
-}
-
-void NectisMcu::ReloadWatchdogTimer() {
-  Serial.println("### Reload the watchdog.");
+void ReloadWatchdogTimer(void) {
   NRF_WDT->RR[0] = WDT_RR_RR_Reload;
   NRF_WDT->TASKS_START = 1;
 }
+
+} // namespace mcu
