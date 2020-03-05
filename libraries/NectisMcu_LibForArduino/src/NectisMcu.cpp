@@ -126,7 +126,7 @@ float ReadVbat(void) {
     adcvalue = analogRead(PIN_BATTERY_VOLTAGE);
   }
 
-  // Serial.printf("adc_value=%d\n", adcvalue);
+  Serial.printf("adc_value=%d\n", adcvalue);
 
   // Convert the raw value to compensated mv, taking the resistor-
   // divider into account (providing the actual LIPO voltage)
