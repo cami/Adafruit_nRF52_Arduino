@@ -1,3 +1,0 @@
-[submodule "console/Adafruit_nRF52_nrfutil"]
-    path = console/Adafruit_nRF52_nrfutil
-    url = git@github.com:adafruit/Adafruit_nRF52_nrfutil.git
