@@ -19,7 +19,7 @@ void setup() {
   Nectis.Begin();
   Nectis.InitLteM();
 
-  mcu::ClearSerialBuffer();
+  delay(10);
 
   struct tm currentTime;
   char currentTimeStr[64];
@@ -28,7 +28,7 @@ void setup() {
   strftime(currentTimeStr, sizeof(currentTimeStr), "%y/%m/%d %H:%M:%S %w", &currentTime);
 
   Serial.printf("\nNow=%s\n", currentTimeStr);
-  mcu::ClearSerialBuffer();
+  delay(10);
 
   delay(100);
   Nectis.TurnOff();
