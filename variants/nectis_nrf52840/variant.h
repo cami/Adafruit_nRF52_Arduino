@@ -158,7 +158,11 @@ extern "C"
  * Grove sensors
  * | black | red |     white      |     yellow     |
  * |  GND  | VCC | GROVE_GPIO_6_2 | GROVE_GPIO_6_1 |
- * 
+ */
+/*
+ * Warning
+ * Analog1, Analog2, Analog3 はハードウェア的に、外部抵抗でプルダウンされている
+ * I2C, UART, GPIO は解放されている（不定状態）
  */
 #define GROVE_ANALOG_1_1            (4)     // Analog in/out, GROVE_GPIO_1_1
 #define GROVE_ANALOG_1_2            (5)     // Analog in/out, GROVE_GPIO_1_2
