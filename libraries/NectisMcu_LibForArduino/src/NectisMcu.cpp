@@ -1,4 +1,6 @@
 #include "NectisMcu.h"
+#include "NectisConfig.h"
+#include "NectisDebug.h"
 #include <Arduino.h>
 
 

@@ -18,8 +18,8 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef NECTIS
-#define NECTIS
+#ifndef NECTIS_H
+#define NECTIS_H
 
 /** Master clock frequency */
 #define VARIANT_MCK                 (64000000ul)
@@ -144,7 +144,6 @@ extern "C"
 #define GROVE_VCCB_PIN              (25)    // GROVE_PWR
 
 #define MODULE_UART_CORE            (0)     // USART2 => USART1
-//#define MODULE_UART_CORE          (1)     // USART2 => USART1
 #define MODULE_UART_RX_PIN          (7)     // BG96への送信データ, BG96_RXD
 #define MODULE_UART_TX_PIN          (6)     // BG96からの受信データ, BG96_TXD
 #define MODULE_RTS_PIN              (26)    // BG96への送信要求, BG96_CTS
@@ -170,7 +169,7 @@ extern "C"
 #define GROVE_ANALOG_2_2            (29)    // Analog in/out, GROVE_GPIO_2_2
 #define GROVE_ANALOG_3_1            (30)    // Analog in/out, GROVE_GPIO_3_1
 #define GROVE_ANALOG_3_2            (31)    // Analog in/out, GROVE_GPIO_3_2
-#define GROVE_I2C_CORE		        (1)
+#define GROVE_I2C_CORE		          (0)
 #define GROVE_I2C_SCL               (12)    // I2C, GROVE_GPIO_4_1
 #define GROVE_I2C_SDA               (11)    // I2C, GROVE_GPIO_4_2
 #define GROVE_UART_CORE             (1)     // USART1
@@ -182,7 +181,7 @@ extern "C"
 /*
  * External RTC
  */
-#define RTC_I2C_CORE                (0)
+#define RTC_I2C_CORE                (1)
 #define RTC_I2C_SCL                 (8)      // I2C, For RTC
 #define RTC_I2C_SDA                 (41)     // I2C, For RTC
 #define RTC_INTRB                   (9)      // IF this pin is set to LOW,
@@ -222,4 +221,4 @@ static const uint8_t SCK = PIN_SPI_SCK;
  *        Arduino objects - C++ only
  *----------------------------------------------------------------------------*/
 
-#endif
+#endif  // NECTIS_H
