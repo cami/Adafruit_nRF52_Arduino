@@ -92,7 +92,7 @@ class Uart : public HardwareSerial
   #define SERIAL_PORT_MONITOR         Serial
   #define SERIAL_PORT_HARDWARE        Serial
 
-#else
+#else // ARDUINO_NECTIS
   #define SERIAL_PORT_MONITOR         Serial
   #define SERIAL_PORT_USBVIRTUAL      Serial
 
