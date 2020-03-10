@@ -64,8 +64,8 @@ extern "C"
 /*
  * Serial interfaces
  */
-#define PIN_SERIAL_RX               (GROVE_UART_RX_PIN)
-#define PIN_SERIAL_TX               (GROVE_UART_TX_PIN)
+#define PIN_SERIAL_RX               (GROVE_UART_RX)
+#define PIN_SERIAL_TX               (GROVE_UART_TX)
 
 #define PIN_SERIAL1_RX              (MODULE_UART_RX_PIN)
 #define PIN_SERIAL1_TX              (MODULE_UART_TX_PIN)
