@@ -1,5 +1,7 @@
 #pragma once
 
+#include "NectisConfig.h"
+
 #ifdef NECTIS_DEBUG
 
 #define NECTIS_DEBUG_PRINT(str)     NectisDebug::Print(str)
@@ -8,9 +10,8 @@
 class NectisDebug
 {
 public:
-    static void Print(const char* str);
-    static void Println(const char* str);
-
+  static void Print(const char* str);
+  static void Println(const char* str);
 };
 
 #else

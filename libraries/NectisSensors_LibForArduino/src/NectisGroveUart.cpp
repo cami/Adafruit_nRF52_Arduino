@@ -14,7 +14,7 @@ constexpr uint16_t CO2_DATA_SIZE = 9;
 constexpr uint16_t RFID_DATA_SIZE = 32;
 
 
-NectisGroveUart::NectisGroveUart(Uart* groveUart) : _GroveUart(groveUart) {
+NectisGroveUart::NectisGroveUart() : _GroveUart() {
 	_GroveUart = &Serial1;
 	_gps = nullptr;
 

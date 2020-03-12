@@ -8,7 +8,7 @@ class NectisGroveSPI {
     SPIClass* _GroveSpi;
 
   public:
-    NectisGroveSPI(SPIClass* groveSpi);
+    NectisGroveSPI();
     ~NectisGroveSPI();
 
     void PowerSupplyGrove(bool on);
