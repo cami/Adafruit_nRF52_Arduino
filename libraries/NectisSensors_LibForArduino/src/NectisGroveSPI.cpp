@@ -5,7 +5,7 @@
 #include <wiring_digital.h>
 
 
-NectisGroveSPI::NectisGroveSPI(SPIClass* groveSpi) : _GroveSpi(groveSpi) {
+NectisGroveSPI::NectisGroveSPI() : _GroveSpi() {
 
 }
 

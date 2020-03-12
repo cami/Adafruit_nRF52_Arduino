@@ -2,7 +2,7 @@
 #include "NectisMcu.h"
 #include "NectisUtils.h"
 #include "NectisPeripherals.h"
-#include "NectisRtc.h"
+#include "NectisRTC.h"
 
 NectisCellular Nectis;
 NectisRtc Rtc;

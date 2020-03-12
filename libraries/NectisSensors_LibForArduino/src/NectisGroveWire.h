@@ -8,7 +8,7 @@ class NectisGroveWire {
     TwoWire* _GroveWire;
 
   public:
-    NectisGroveWire(TwoWire* groveWire);
+    NectisGroveWire();
     ~NectisGroveWire();
 
     void PowerSupplyGrove(bool on);

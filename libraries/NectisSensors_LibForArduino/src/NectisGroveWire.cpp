@@ -5,7 +5,7 @@
 #include <wiring_digital.h>
 
 
-NectisGroveWire::NectisGroveWire(TwoWire* groveWire) : _GroveWire(groveWire) {
+NectisGroveWire::NectisGroveWire() : _GroveWire {
 
 }
 

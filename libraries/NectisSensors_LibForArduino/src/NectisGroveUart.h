@@ -30,7 +30,7 @@ class NectisGroveUart {
     rfid_data_t* _rfid_data;
 
   public:
-    NectisGroveUart(Uart* groveUart);
+    NectisGroveUart();
     ~NectisGroveUart();
 
     /*

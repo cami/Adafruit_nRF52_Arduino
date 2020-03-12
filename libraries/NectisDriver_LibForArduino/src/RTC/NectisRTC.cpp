@@ -1,4 +1,6 @@
-#include "NectisRtc.h"
+#include "NectisRTC.h"
+#include "Wire.h"
+
 #include <Arduino.h>
 #include <time.h>
 
@@ -14,65 +16,67 @@
 // SDA LINE: | 7 6 5 4 3 2 1 |  0  |     7 6 5 4      |     3 2 1 0     | 7 6 5 4 3 2 1 |  1  | 7 6   5   4   3   2   1   0  |
 
 
-const uint8_t SLAVE_ADDRESS =                             0b00110010;   // 7bits
-const uint8_t DATA_TRANSFER_BIT_HIGH =                    0b00000001;   // R/W bit
-const uint8_t DATA_TRANSFER_BIT_LOW =                     0b00000000;   // R/W bit
+constexpr uint8_t SLAVE_ADDRESS =                             0b00110010;   // 7bits
+constexpr uint8_t DATA_TRANSFER_BIT_HIGH =                    0b00000001;   // R/W bit
+constexpr uint8_t DATA_TRANSFER_BIT_LOW =                     0b00000000;   // R/W bit
 
 // To write data(seconds) to INTERNAL_ADDRESS_SECOND_COUNTER, use (INTERNAL_ADDRESS_SECOND_COUNTER | WRITE_TRANSFER_FORMAT).
 // When ALARM is enabled, INTRB pin is HIGH in every set counter.
-const uint8_t TRANSFER_FORMAT =                           0x00;
+constexpr uint8_t TRANSFER_FORMAT =                           0x00;
 
-const uint8_t INTERNAL_ADDRESS_SECOND_COUNTER_POS =       0x00;
-const uint8_t INTERNAL_ADDRESS_MINUTE_COUNTER_POS =       0x10;
-const uint8_t INTERNAL_ADDRESS_HOUR_COUNTER_POS =         0x20;
-const uint8_t INTERNAL_ADDRESS_DAYOFWEEK_COUNTER_POS =    0x30;
-const uint8_t INTERNAL_ADDRESS_DAY_COUNTER_POS =          0x40;
-const uint8_t INTERNAL_ADDRESS_MONTH_COUNTER_POS =        0x50;
-const uint8_t INTERNAL_ADDRESS_YEAR_COUNTER_POS =         0x60;
+constexpr uint8_t INTERNAL_ADDRESS_SECOND_COUNTER_POS =       0x00;
+constexpr uint8_t INTERNAL_ADDRESS_MINUTE_COUNTER_POS =       0x10;
+constexpr uint8_t INTERNAL_ADDRESS_HOUR_COUNTER_POS =         0x20;
+constexpr uint8_t INTERNAL_ADDRESS_DAYOFWEEK_COUNTER_POS =    0x30;
+constexpr uint8_t INTERNAL_ADDRESS_DAY_COUNTER_POS =          0x40;
+constexpr uint8_t INTERNAL_ADDRESS_MONTH_COUNTER_POS =        0x50;
+constexpr uint8_t INTERNAL_ADDRESS_YEAR_COUNTER_POS =         0x60;
 
-const uint8_t INTERNAL_ADDRESS_MINUTE_ALARM_POS =         0x80;
-const uint8_t INTERNAL_ADDRESS_HOUR_ALARM_POS =           0x90;
-const uint8_t INTERNAL_ADDRESS_DAYOFWEEK_ALARM_POS =      0xA0;
+constexpr uint8_t INTERNAL_ADDRESS_MINUTE_ALARM_POS =         0x80;
+constexpr uint8_t INTERNAL_ADDRESS_HOUR_ALARM_POS =           0x90;
+constexpr uint8_t INTERNAL_ADDRESS_DAYOFWEEK_ALARM_POS =      0xA0;
 
 // 曜日レジスタのAW0からAW6は、曜日カウンタ (W4, W2, W1) = (0, 0, 0) ~ (1, 1, 0) に対応します。
 // DATA_DAYOFWEEK_COUNTER: (SUN, MON, TUE, WED, THU, FRI, SAT) = (0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7)
 // DATA_DAYOFWEEK_ALARM: (SUN, MON, TUE, WED, THU, FRI, SAT) = (1<<0, 1<<1, 1<<2, 1<<3, 1<<4, 1<<5, 1<<6)
 //
-//const uint8_t DATA_SECOND_COUNTER                         (—   S40 S20 S10  S8  S4  S2  S1)
-//const uint8_t DATA_MINUTE_COUNTER                         (—   M40 M20 M10  M8  M4  M2  M1)
-//const uint8_t DATA_HOUR_COUNTER                           (—   —   H20 H10  H8  H4  H2  H1)
-//const uint8_t DATA_DAYOFWEEK_COUNTER                      (—   —   —   —    —   W4  W2  W1)
-//const uint8_t DATA_DAY_COUNTER                            (—   —   D20 D10  D8  D4  D2  D1)
-//const uint8_t DATA_MONTH_COUNTER                          (—   —   —   MO10 MO8 MO4 MO2 MO1)
-//const uint8_t DATA_YEAR_COUNTER                           (Y80 Y40 Y20 Y10  Y8  Y4  Y2  Y1)
+//constexpr uint8_t DATA_SECOND_COUNTER                         (—   S40 S20 S10  S8  S4  S2  S1)
+//constexpr uint8_t DATA_MINUTE_COUNTER                         (—   M40 M20 M10  M8  M4  M2  M1)
+//constexpr uint8_t DATA_HOUR_COUNTER                           (—   —   H20 H10  H8  H4  H2  H1)
+//constexpr uint8_t DATA_DAYOFWEEK_COUNTER                      (—   —   —   —    —   W4  W2  W1)
+//constexpr uint8_t DATA_DAY_COUNTER                            (—   —   D20 D10  D8  D4  D2  D1)
+//constexpr uint8_t DATA_MONTH_COUNTER                          (—   —   —   MO10 MO8 MO4 MO2 MO1)
+//constexpr uint8_t DATA_YEAR_COUNTER                           (Y80 Y40 Y20 Y10  Y8  Y4  Y2  Y1)
 //
-//const uint8_t DATA_MINUTE_ALARM                           (— AM40 AM20 AM10 AM8 AM4 AM2 AM1)
-//const uint8_t DATA_HOUR_ALARM                             (— -    AH20 AH10 AH8 AH4 AH2 AH1)
-//const uint8_t DATA_DAYOFWEEK_ALARM                        (— AW6  AW5  AW4  AW3 AW2 AW1 AW0)
+//constexpr uint8_t DATA_MINUTE_ALARM                           (— AM40 AM20 AM10 AM8 AM4 AM2 AM1)
+//constexpr uint8_t DATA_HOUR_ALARM                             (— -    AH20 AH10 AH8 AH4 AH2 AH1)
+//constexpr uint8_t DATA_DAYOFWEEK_ALARM                        (— AW6  AW5  AW4  AW3 AW2 AW1 AW0)
 
-const uint8_t INTERNAL_ADDRESS_CONTROL_REGISTER1_POS =    0xE0;
+constexpr uint8_t INTERNAL_ADDRESS_CONTROL_REGISTER1_POS =    0xE0;
 // アラームを発生させたい時間を設定した後に、イネーブルをオンにします。
 // Set the constant interrupt: in every one SECOND/MINUTE/HOUR/MONTH
-const uint8_t DATA_REGISTER1_MASK =                       0xFF;
-const uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_SECOND =  0b00000100;
-const uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_MINUTE =  0b00000101;
-const uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_HOUR =    0b00000110;
-const uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_MONTH =   0b00000111;
-const uint8_t DATA_REGISTER1_ENABLE_ALARM =               0b10000000;
-const uint8_t DATA_REGISTER1_DISABLE_ALARM_MASK =         0b10000000;
+constexpr uint8_t DATA_REGISTER1_MASK =                       0xFF;
+constexpr uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_SECOND =  0b00000100;
+constexpr uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_MINUTE =  0b00000101;
+constexpr uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_HOUR =    0b00000110;
+constexpr uint8_t DATA_REGISTER1_CONSTANT_INTERRUPT_MONTH =   0b00000111;
+constexpr uint8_t DATA_REGISTER1_ENABLE_ALARM =               0b10000000;
+constexpr uint8_t DATA_REGISTER1_DISABLE_ALARM_MASK =         0b10000000;
 
-const uint8_t INTERNAL_ADDRESS_CONTROL_REGISTER2_POS =    0xF0;
-const uint8_t DATA_REGISTER2_24HOUR_CLOCK =               0b00100000;
+constexpr uint8_t INTERNAL_ADDRESS_CONTROL_REGISTER2_POS =    0xF0;
+constexpr uint8_t DATA_REGISTER2_24HOUR_CLOCK =               0b00100000;
+
+TwoWire RtcWire(NRF_TWIM0, NRF_TWIS0, SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn, RTC_I2C_SDA, RTC_I2C_SCL);
 
 
-NectisRtc::NectisRtc() : _RtcWire(NRF_TWIM0, NRF_TWIS0, SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn, RTC_I2C_SDA, RTC_I2C_SCL){
-
+NectisRTC::NectisRTC() {
+  _RtcWire = &RtcWire;
 }
 
 /*
  * Helper functions
  */
-uint16_t NectisRtc::ConvertBcdToDecimal(uint16_t bcd) {
+uint16_t NectisRTC::ConvertBcdToDecimal(uint16_t bcd) {
   // 0 <= bcd <= 99
   // このRTCは、2019年を表したい場合、19をINTERNAL_ADDRESS_YEAR_COUNTER_POSにセットする。
   // Input : 0001 1001
@@ -88,7 +92,7 @@ uint16_t NectisRtc::ConvertBcdToDecimal(uint16_t bcd) {
   return decimal;
 }
 
-uint16_t NectisRtc::ConvertDecimalToBcd(uint16_t decimal) {
+uint16_t NectisRTC::ConvertDecimalToBcd(uint16_t decimal) {
   // 0 <= decimal <= 99
   // このRTCは、2019年を表したい場合、19をINTERNAL_ADDRESS_YEAR_COUNTER_POSにセットする。
   // Input :    1    9
@@ -105,37 +109,37 @@ uint16_t NectisRtc::ConvertDecimalToBcd(uint16_t decimal) {
 }
 
 
-void NectisRtc::Write(uint8_t slaveAddress, const uint8_t* data, int dataSize) {
-  _RtcWire.beginTransmission(slaveAddress);
+void NectisRTC::Write(uint8_t slaveAddress, const uint8_t* data, int dataSize) {
+  _RtcWire->beginTransmission(slaveAddress);
   while (dataSize > 0) {
-    _RtcWire.write(*data++);
+    _RtcWire->write(*data++);
     dataSize--;
   }
-  _RtcWire.endTransmission(true);
+  _RtcWire->endTransmission(true);
 }
 
-int NectisRtc::Read(uint8_t slaveAddress, const uint8_t* slaveRegister, uint8_t* data, int dataSize) {
+int NectisRTC::Read(uint8_t slaveAddress, const uint8_t* slaveRegister, uint8_t* data, int dataSize) {
   int tmpReadSize = dataSize;
 
-  _RtcWire.beginTransmission(slaveAddress);
+  _RtcWire->beginTransmission(slaveAddress);
   while (dataSize > 0) {
-    _RtcWire.write(*slaveRegister);
+    _RtcWire->write(*slaveRegister);
     dataSize--;
   }
-  _RtcWire.endTransmission(false);
+  _RtcWire->endTransmission(false);
 
-  auto readSize = _RtcWire.requestFrom(slaveAddress, tmpReadSize);
+  auto readSize = _RtcWire->requestFrom(slaveAddress, tmpReadSize);
 
   while (readSize > 0) {
-    *data++ = _RtcWire.read();
+    *data++ = _RtcWire->read();
     readSize--;
   }
-  _RtcWire.endTransmission(true);
+  _RtcWire->endTransmission(true);
 
   return readSize;
 }
 
-void NectisRtc::WriteReg8(uint8_t slaveAddress, uint8_t reg, uint8_t data) {
+void NectisRTC::WriteReg8(uint8_t slaveAddress, uint8_t reg, uint8_t data) {
   uint8_t writeData[2];
   writeData[0] = reg;
   writeData[1] = data;
@@ -143,7 +147,7 @@ void NectisRtc::WriteReg8(uint8_t slaveAddress, uint8_t reg, uint8_t data) {
   Write(slaveAddress, writeData, sizeof(writeData));
 }
 
-int NectisRtc::ReadReg8(uint8_t slaveAddress, uint8_t reg, uint8_t* data) {
+int NectisRTC::ReadReg8(uint8_t slaveAddress, uint8_t reg, uint8_t* data) {
   uint8_t writeData[1];
   writeData[0] = reg;
 
@@ -151,18 +155,18 @@ int NectisRtc::ReadReg8(uint8_t slaveAddress, uint8_t reg, uint8_t* data) {
 }
 
 
-void NectisRtc::Begin() {
-  _RtcWire.begin();
+void NectisRTC::RtcBegin() {
+  _RtcWire->begin();
 }
 
-void NectisRtc::End() {
-  _RtcWire.end();
+void NectisRTC::RtcEnd() {
+  _RtcWire->end();
 }
 
 /*
  * Initialize RTC
  */
-void NectisRtc::Init() {
+void NectisRTC::RtcInit() {
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
   const uint8_t resetBits = 0x00;
   WriteReg8(slaveAddress, INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT, resetBits);
@@ -171,13 +175,13 @@ void NectisRtc::Init() {
 
 
 // RTCを24時間モードで動作させるか、12時間モードで動作させるかを選択する。
-void NectisRtc::ConfigRtc24HourDisplay() {
+void NectisRTC::Rtc24HourDisplay() {
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
   WriteReg8(slaveAddress, INTERNAL_ADDRESS_CONTROL_REGISTER2_POS | TRANSFER_FORMAT, DATA_REGISTER2_24HOUR_CLOCK);
 }
 
 // このメソッドを呼ぶ前後で、現在時刻をBG96から取得するために、 BG96の電源のOn/Off と UARTの有効化/無効化 が必要である。
-void NectisRtc::SetCurrentTimeToRtc(struct tm *currentTime) {
+void NectisRTC::RtcSetCurrentTime(struct tm *currentTime) {
   Serial.println("### Get the current time from BG96.");
 
 
@@ -222,7 +226,7 @@ void NectisRtc::SetCurrentTimeToRtc(struct tm *currentTime) {
   Serial.println("### Set the current time to RTC.");
 }
 
-void NectisRtc::PrintCalender() {
+void NectisRTC::RtcPrintCalender() {
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
 
   // calender = [year, month, day, hour, minute, second, dayofweek]
@@ -242,7 +246,7 @@ void NectisRtc::PrintCalender() {
   );
 }
 
-void NectisRtc::ReadCalender(uint8_t calenderDecimal[7]) {
+void NectisRTC::RtcReadCalender(uint8_t calenderDecimal[7]) {
   uint8_t calender[7];
 
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
@@ -261,7 +265,7 @@ void NectisRtc::ReadCalender(uint8_t calenderDecimal[7]) {
   }
 }
 
-void NectisRtc::SetAlarm(const char* tableTime[], uint16_t tableTimeSize, const uint8_t tableDayofweek) {
+void NectisRTC::RtcSetAlarm(const char* tableTime[], uint16_t tableTimeSize, const uint8_t tableDayofweek) {
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
 
   for (int i = 0; i < tableTimeSize; i++) {
@@ -272,7 +276,7 @@ void NectisRtc::SetAlarm(const char* tableTime[], uint16_t tableTimeSize, const 
     WriteReg8(slaveAddress, INTERNAL_ADDRESS_MINUTE_ALARM_POS | TRANSFER_FORMAT, ConvertDecimalToBcd(alarmMinute));
     WriteReg8(slaveAddress, INTERNAL_ADDRESS_DAYOFWEEK_ALARM_POS | TRANSFER_FORMAT, tableDayofweek);
   }
-  EnableRtcAlarm(slaveAddress);
+  RtcEnableAlarm(slaveAddress);
 
   delay(10);
   uint8_t setAlarm[3];
@@ -282,7 +286,14 @@ void NectisRtc::SetAlarm(const char* tableTime[], uint16_t tableTimeSize, const 
   Serial.printf("### Alarm set: %02u:%02u %01x\n", ConvertBcdToDecimal(setAlarm[0]), ConvertBcdToDecimal(setAlarm[1]), ConvertBcdToDecimal(setAlarm[2]));
 }
 
-void NectisRtc::SetConstantInterruptByEveryMinute() {
+void NectisRTC::RtcEnableAlarm(uint8_t slaveAddress) {
+  uint8_t slaveRegister = INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT;
+  uint8_t data = DATA_REGISTER1_ENABLE_ALARM;
+
+  WriteReg8(slaveAddress, slaveRegister, data);
+}
+
+void NectisRTC::RtcSetConstantInterruptByEveryMinute() {
   Serial.println("### Set the constant interrupt by every one minute.");
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
 
@@ -294,7 +305,7 @@ void NectisRtc::SetConstantInterruptByEveryMinute() {
   WriteReg8(slaveAddress, INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT, constantInterruptByEveryMinute);
 }
 
-void NectisRtc::SetConstantInterruptByEveryHour() {
+void NectisRTC::RtcSetConstantInterruptByEveryHour() {
   Serial.println("### Set the constant interrupt by every one hour.");
   uint8_t slaveAddress = SLAVE_ADDRESS | DATA_TRANSFER_BIT_LOW;
 
@@ -305,11 +316,4 @@ void NectisRtc::SetConstantInterruptByEveryHour() {
   uint8_t constantInterruptByEveryMinute = DATA_REGISTER1_CONSTANT_INTERRUPT_HOUR | controlRegister1DisableAlarm;
 
   WriteReg8(slaveAddress, INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT, constantInterruptByEveryMinute);
-}
-
-void NectisRtc::EnableRtcAlarm(uint8_t slaveAddress) {
-  uint8_t slaveRegister = INTERNAL_ADDRESS_CONTROL_REGISTER1_POS | TRANSFER_FORMAT;
-  uint8_t data = DATA_REGISTER1_ENABLE_ALARM;
-
-  WriteReg8(slaveAddress, slaveRegister, data);
 }
