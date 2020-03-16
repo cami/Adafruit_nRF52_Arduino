@@ -1,4 +1,5 @@
 #include "NectisDebug.h"
+#include "Uart.h"
 
 #ifdef NECTIS_DEBUG
 
