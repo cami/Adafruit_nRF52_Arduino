@@ -38,6 +38,14 @@ extern "C"
 {
 #endif // __cplusplus
 
+
+// Number of pins defined in PinDescription array
+#define PINS_COUNT                  (48)
+#define NUM_DIGITAL_PINS            (48)
+#define NUM_ANALOG_INPUTS           (6)
+#define NUM_ANALOG_OUTPUTS          (0)
+
+
 /*
  * Analog pins
  */
@@ -61,53 +69,6 @@ extern "C"
 #define PIN_NFC1                    (9)     // NFC電源側
 #define PIN_NFC2                    (10)    // NFCグラウンド側
 
-/*
- * Serial interfaces
- */
-#define PIN_SERIAL_RX               (GROVE_UART_RX)
-#define PIN_SERIAL_TX               (GROVE_UART_TX)
-
-#define PIN_SERIAL1_RX              (MODULE_UART_RX_PIN)
-#define PIN_SERIAL1_TX              (MODULE_UART_TX_PIN)
-
-/*
- * SPI Interfaces
- */
-#define SPI_INTERFACES_COUNT        (1)
-
-#define PIN_SPI_MISO                (21)
-#define PIN_SPI_MOSI                (20)
-#define PIN_SPI_SCK                 (19)
-#define PIN_SPI_CS                  (24)
-
-/*
- * Wire Interfaces
- */
-#define WIRE_INTERFACES_COUNT       (1)
-
-#define PIN_WIRE_SDA                (GROVE_I2C_SDA)
-#define PIN_WIRE_SCL                (GROVE_I2C_SCL)
-
-/*
- * QSPI interface for external flash
- */
-#define PIN_QSPI_SCK                (19)    // Quad SPIクロック, equals to PIN_QSPI_SCLK
-#define PIN_QSPI_CS                 (24)    // Quad SPIチップセレクト
-#define PIN_QSPI_IO0                (20)    // Quad SPIデータ入出力
-#define PIN_QSPI_IO1                (21)    // Quad SPIデータ入出力
-#define PIN_QSPI_IO2                (22)    // Quad SPIデータ入出力
-#define PIN_QSPI_IO3                (23)    // Quad SPIデータ入出力
-
-#define PIN_QSPI_DATA0              PIN_QSPI_IO0
-#define PIN_QSPI_DATA1              PIN_QSPI_IO1
-#define PIN_QSPI_DATA2              PIN_QSPI_IO2
-#define PIN_QSPI_DATA3              PIN_QSPI_IO3
-
-// Number of pins defined in PinDescription array
-#define PINS_COUNT                  (48)
-#define NUM_DIGITAL_PINS            (48)
-#define NUM_ANALOG_INPUTS           (6)
-#define NUM_ANALOG_OUTPUTS          (0)
 
 /*
  * LEDs
@@ -127,8 +88,8 @@ extern "C"
 /*
  * USB/Battery voltage
  */
-#define PIN_BATTERY_VOLTAGE         (A0)
-#define PIN_USB_VOLTAGE             (A1)
+#define PIN_BATTERY_VOLTAGE         (PIN_A0)
+#define PIN_USB_VOLTAGE             (PIN_A1)
 #define PIN_BATTERY_LEVEL_ENABLE    (45)
 
 #define BATTERY_VOLTAGE_PIN         PIN_BATTERY_VOLTAGE
@@ -158,6 +119,13 @@ extern "C"
  * | black | red |     white      |     yellow     |
  * |  GND  | VCC | GROVE_GPIO_6_2 | GROVE_GPIO_6_1 |
  */
+
+/* Grove sensors
+ * | black | red |      white       |      yellow      |
+ * |  GND  | VCC | GROVE_ANALOG_1_2 | GROVE_ANALOG_1_1 |
+ * |  GND  | VCC |        NC        |        SIG       |
+ */
+
 /*
  * Warning
  * Analog1, Analog2, Analog3 はハードウェア的に、外部抵抗でプルダウンされている
@@ -178,6 +146,39 @@ extern "C"
 #define GROVE_GPIO_6_1              (15)    // GPIO, GROVE_GPIO_6_1
 #define GROVE_GPIO_6_2              (16)    // GPIO, GROVE_GPIO_6_2
 
+
+//#define DEBUG_UART_CORE           (2)   // USART3
+//#define DEBUG_UART_TX_PIN         MODULE_UART_TX_PIN
+//#define DEBUG_UART_RX_PIN         MODULE_UART_RX_PIN
+
+
+/*
+ * Serial interfaces
+ */
+#define PIN_SERIAL_RX               (GROVE_UART_RX)
+#define PIN_SERIAL_TX               (GROVE_UART_TX)
+
+#define PIN_SERIAL1_RX              (MODULE_UART_RX_PIN)
+#define PIN_SERIAL1_TX              (MODULE_UART_TX_PIN)
+
+/*
+ * SPI Interfaces
+ */
+#define SPI_INTERFACES_COUNT        (1)
+
+#define PIN_SPI_MISO                (21)
+#define PIN_SPI_MOSI                (20)
+#define PIN_SPI_SCK                 (19)
+#define PIN_SPI_CS                  (24)
+
+/*
+ * Wire Interfaces
+ */
+#define WIRE_INTERFACES_COUNT       (1)
+
+#define PIN_WIRE_SDA                (GROVE_I2C_SDA)
+#define PIN_WIRE_SCL                (GROVE_I2C_SCL)
+
 /*
  * External RTC
  */
@@ -187,9 +188,21 @@ extern "C"
 #define RTC_INTRB                   (9)      // IF this pin is set to LOW,
 
 
-//#define DEBUG_UART_CORE           (2)   // USART3
-//#define DEBUG_UART_TX_PIN         MODULE_UART_TX_PIN
-//#define DEBUG_UART_RX_PIN         MODULE_UART_RX_PIN
+/*
+ * QSPI interface for external flash
+ */
+#define PIN_QSPI_SCK                (19)    // Quad SPIクロック, equals to PIN_QSPI_SCLK
+#define PIN_QSPI_CS                 (24)    // Quad SPIチップセレクト
+#define PIN_QSPI_IO0                (20)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO1                (21)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO2                (22)    // Quad SPIデータ入出力
+#define PIN_QSPI_IO3                (23)    // Quad SPIデータ入出力
+
+#define PIN_QSPI_DATA0              PIN_QSPI_IO0
+#define PIN_QSPI_DATA1              PIN_QSPI_IO1
+#define PIN_QSPI_DATA2              PIN_QSPI_IO2
+#define PIN_QSPI_DATA3              PIN_QSPI_IO3
+
 
 
 static const uint8_t A0 = PIN_A0;
