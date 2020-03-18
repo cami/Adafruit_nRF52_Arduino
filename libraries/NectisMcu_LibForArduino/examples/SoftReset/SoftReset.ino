@@ -1,7 +1,7 @@
-#include "NectisCellular.h"
+#include "NectisCellularBG96.h"
 #include "NectisMcu.h"
 
-NectisCellular Nectis;
+NectisCellularBG96 BG96;
 
 #define PIN_SOFT_RESET_ENABLE       GROVE_ANALOG_1_1
 
@@ -14,8 +14,8 @@ void setup() {
 
   mcu::InitMcu();
   
-  Nectis.Begin();
-  Nectis.InitLteM();
+  BG96.Begin();
+  BG96.InitLteM();
   
   pinMode(PIN_SOFT_RESET_ENABLE, INPUT);
   

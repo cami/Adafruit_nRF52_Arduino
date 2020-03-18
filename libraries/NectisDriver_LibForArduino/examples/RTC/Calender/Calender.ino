@@ -1,9 +1,9 @@
-#include "NectisCellular.h"
+#include "NectisCellularBG96.h"
 #include "NectisMcu.h"
 #include "NectisPeripherals.h"
 #include "NectisRtc.h"
 
-NectisCellular Nectis;
+NectisCellularBG96 BG96;
 NectisRtc Rtc;
 
 
@@ -16,23 +16,23 @@ void setup() {
   mcu::InitMcu();
   peripherals::WakeUpFlashRomFromDeepSleep();
 
-  Nectis.Begin();
-  Nectis.InitLteM();
+  BG96.Begin();
+  BG96.InitLteM();
 
   delay(10);
 
   struct tm currentTime;
   char currentTimeStr[64];
 
-  Nectis.GetCurrentTime(&currentTime, true);
+  BG96.GetCurrentTime(&currentTime, true);
   strftime(currentTimeStr, sizeof(currentTimeStr), "%y/%m/%d %H:%M:%S %w", &currentTime);
 
   Serial.printf("\nNow=%s\n", currentTimeStr);
   delay(10);
 
   delay(100);
-  Nectis.TurnOff();
-  Nectis.End();
+  BG96.TurnOff();
+  BG96.End();
   delay(100);
 
   Rtc.Begin();

@@ -1,10 +1,10 @@
-#include "NectisCellular.h"
+#include "NectisCellularBG96.h"
 #include "NectisMcu.h"
 #include "NectisUtils.h"
 #include "NectisPeripherals.h"
 #include "NectisRTC.h"
 
-NectisCellular Nectis;
+NectisCellularBG96 BG96;
 NectisRtc Rtc;
 
 const char* RtcAlarmTable[] = {
