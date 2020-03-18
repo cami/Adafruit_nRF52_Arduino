@@ -2,6 +2,14 @@
 #include "NectisConfig.h"
 #include "NectisDebug.h"
 #include <Arduino.h>
+#include "nrf_power.h"
+
+
+#define DFU_MAGIC_RESET                 0UL
+#define DFU_MAGIC_SERIAL_ONLY_RESET     0x4e
+#define DFU_MAGIC_UF2_RESET             0x57
+#define DFU_MAGIC_OTA_RESET             0xA8
+#define DFU_MAGIC_LTEM_RESET            0x64
 
 
 namespace mcu {
@@ -55,6 +63,8 @@ void PowerSupplyGrove(bool on) {
 }
 
 void InitMcu(void) {
+  ResetGpregretRegister();
+
   Serial.println("### I/O Initialize.");
   InitPins();
   delay(100);
@@ -163,6 +173,14 @@ float mvToPercent(float mvolts) {
   return battery_level;
 }
 
+uint8_t GetBatteryLevel() {
+  // Battery Level
+  float LipoVoltageLevelMv = ReadVbat();
+  float LipoVoltageLevelPercentageFloat = mvToPercent(LipoVoltageLevelMv);
+  uint8_t LipoVoltageLevelPercentageUint = (uint8_t)(LipoVoltageLevelPercentageFloat + 0.5F);
+  return LipoVoltageLevelPercentageUint;
+}
+
 
 /*
  * PWM
@@ -207,7 +225,14 @@ void PwmWritePin(int pin) {
 
 
 /*
- * Software register
+ * Clear the register
+ */
+void ResetGpregretRegister(void) {
+  nrf_power_gpregret_set(DFU_MAGIC_RESET);
+}
+
+/*
+ * Software reset
  */
 void SoftReset(void) {
   NVIC_SystemReset();

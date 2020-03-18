@@ -14,12 +14,14 @@ namespace mcu {
   float ReadVusb(void);
   float ReadVbat(void);
   float mvToPercent(float);
+  uint8_t GetBatteryLevel();
 
   void PwmSetup(int, uint8_t);
   void PwmBegin(void);
   void PwmStop(void);
   void PwmWritePin(int);
 
+  void ResetGpregretRegister(void);
   void SoftReset(void);
 
   void DisableAllPeripherals(void);
