@@ -20,9 +20,9 @@
 menu.softdevice=Bootloader
 menu.debug=Debug
 
-#**********************************************
+# ************************************************************
 # CAMI qibanca nectis series on nRF52840
-#**********************************************
+# ************************************************************
 nectis.name=CAMI qibanca nectis series on nRF52840
 
 # Upload
@@ -78,6 +78,65 @@ nectis.pid.1=0x0029
 # Arduino Application with CDC + MSC
 nectis.vid.2=0x239A
 nectis.pid.2=0x8029
+
+# ************************************************************
+# CAMI general purpose nectis on nRF52840
+# ************************************************************
+nectis_gp.name=CAMI general purpose nectis on nRF52840
+
+# Upload
+nectis_gp.bootloader.tool=bootburn
+nectis_gp.upload.tool=nrfutil
+nectis_gp.upload.protocol=nrfutil
+nectis_gp.upload.use_1200bps_touch=true
+nectis_gp.upload.wait_for_upload_port=true
+
+# Build
+nectis_gp.build.mcu=cortex-m4
+nectis_gp.build.f_cpu=64000000
+nectis_gp.build.board=NRF52840_NECTIS
+nectis_gp.build.core=nRF5
+nectis_gp.build.variant=nectis_nRF52840_gp
+nectis_gp.build.usb_manufacturer="CAMI and Co."
+nectis_gp.build.usb_product="CAMI general purpose nectis"
+nectis_gp.build.extra_flags=-DARDUINO_NECTIS -DARDUINO_ARCH_NRF52 -DNRF52_SERIES -DNRF52840_XXAA {build.flags.usb}
+nectis_gp.build.ldscript=nrf52840_s140_v6.ld
+nectis_gp.build.vid=0x239A
+nectis_gp.build.pid=0x8029
+
+# SofDevice Menu
+# Ram & ROM size varies depending on SoftDevice (check linker script)
+nectis_gp.menu.softdevice.s140v6=0.4.0 (s140 6.1.1)
+nectis_gp.menu.softdevice.s140v6.build.sd_flags=-DS140
+nectis_gp.menu.softdevice.s140v6.build.sd_name=s140
+nectis_gp.menu.softdevice.s140v6.build.sd_version=6.1.1
+nectis_gp.menu.softdevice.s140v6.build.sd_fwid=0x00B6
+nectis_gp.menu.softdevice.s140v6.build.ldscript=nrf52840_s140_v6.ld
+nectis_gp.menu.softdevice.s140v6.upload.maximum_size=815104
+nectis_gp.menu.softdevice.s140v6.upload.maximum_data_size=248832
+
+# Debug Menu
+nectis_gp.menu.debug.l0=Level 0 (Release)
+nectis_gp.menu.debug.l0.build.debug_flags=-DCFG_DEBUG=0 -Os
+nectis_gp.menu.debug.l1=Level 1 (Error Message)
+nectis_gp.menu.debug.l1.build.debug_flags=-DCFG_DEBUG=1 -Os
+nectis_gp.menu.debug.l2=Level 2 (Full Debug)
+nectis_gp.menu.debug.l2.build.debug_flags=-DCFG_DEBUG=2 -Os
+nectis_gp.menu.debug.l3=Level 3 (Segger SystemView)
+nectis_gp.menu.debug.l3.build.debug_flags=-DCFG_DEBUG=3 -Os
+
+# DFU Mode with CDC only
+nectis_gp.vid.0=0x239A
+nectis_gp.pid.0=0x002A
+# VID/PID for bootloader with/without UF2, Arduino + Circuitpython App
+nectis_gp.vid.0=0x239A
+nectis_gp.pid.0=0x8029
+# DFU Mode with CDC + MSC (UF2)
+nectis_gp.vid.1=0x239A
+nectis_gp.pid.1=0x0029
+# Arduino Application with CDC + MSC
+nectis_gp.vid.2=0x239A
+nectis_gp.pid.2=0x8029
 
 
 # ----------------------------------
