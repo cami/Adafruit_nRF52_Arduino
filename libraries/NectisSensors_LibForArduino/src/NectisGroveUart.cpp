@@ -52,10 +52,15 @@ void NectisGroveUart::End() {
 /*
  * Grove GPS
  */
-gps_data_t* NectisGroveUart::GpsSetup(gps_data_t* gps_data) {
+gps_data_t* NectisGroveUart::GpsNewData(gps_data_t* gps_data) {
 	gps_data = new gps_data_t;
 	_gps_data = gps_data;
 	return _gps_data;
+}
+
+void NectisGroveUart::GpsDeleteData() {
+	delete _gps_data;
+	_gps_data = nullptr;
 }
 
 bool NectisGroveUart::IsGpsLocationUpdate() {
@@ -106,13 +111,18 @@ void NectisGroveUart::PrintGpsData() {
 /*
  * Grove CO2
  */
-co2_data_t* NectisGroveUart::Co2Setup(co2_data_t* co2_data) {
+co2_data_t* NectisGroveUart::Co2NewData(co2_data_t* co2_data) {
 	co2_data = new co2_data_t;
 	_co2_data = co2_data;
 	return _co2_data;
 }
 
-void NectisGroveUart::Co2Calibration() {
+void NectisGroveUart::Co2DeleteData() {
+	delete _co2_data;
+	_co2_data = nullptr;
+}
+
+void NectisGroveUart::Co2Calibrate() {
 	const unsigned char cmd_calibrate[] = {
 		0xff, 0x87, 0x87, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf2
 	};
@@ -133,7 +143,8 @@ bool NectisGroveUart::GetCo2Data() {
 
 	unsigned int i = 0;
 	byte data[CO2_DATA_SIZE];
-	uint32_t CO2PPM;
+	int temperature;
+	int CO2PPM;
 
 	memset(&data[0], 0x00, CO2_DATA_SIZE);
 	
@@ -152,34 +163,46 @@ bool NectisGroveUart::GetCo2Data() {
 		}
 	}
 
+
+
+	for (uint8_t i = 0; i < CO2_DATA_SIZE; i++) {
+		Serial.printf("0x%02x ", data[i]);
+	}
+	Serial.println("\n");
+
+
+
 	if((i != CO2_DATA_SIZE) || (1 + (0xFF ^ (byte)(data[1] + data[2] + data[3] + data[4] + data[5] + data[6] + data[7]))) != data[8]) {
 		return false;
 	} else {
-		for(i = 0; i < CO2_DATA_SIZE; i++) {
-			Serial.printf("0x%x ", data[i]);
-		}
-		Serial.println("");
-	
-		CO2PPM = (uint32_t)data[2] * 256 + (uint32_t)data[3];
-		// temperature = (int)data[4] - 40;
+		CO2PPM = (int)data[2] * 256 + (int)data[3];
+		temperature = (int)data[4] - 40;
 
-		_co2_data->co2 = CO2PPM;
+		_co2_data->temperature = temperature;
+		_co2_data->co2ppm = CO2PPM;
+
 		return true;
 	}
 }
 
 void NectisGroveUart::PrintCo2Data() {
-	Serial.printf("CO2=%u\n", _co2_data->co2);
+    Serial.printf("temperature=%d\n", _co2_data->temperature);
+    Serial.printf("co2[ppm]=%d\n", _co2_data->co2ppm);
 }
 
 
 /*
  * Grove RFID
  */
-rfid_data_t* NectisGroveUart::RfidSetup(rfid_data_t* rfid_data) {
+rfid_data_t* NectisGroveUart::RfidNewData(rfid_data_t* rfid_data) {
 	rfid_data = new rfid_data_t;
 	_rfid_data = rfid_data;
 	return _rfid_data;
+}
+
+void NectisGroveUart::RfidDeleteData() {
+	delete _rfid_data;
+	_rfid_data = nullptr;
 }
 
 bool NectisGroveUart::GetRfidData() {

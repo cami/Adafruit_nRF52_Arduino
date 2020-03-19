@@ -11,7 +11,8 @@ typedef struct {
 } gps_data_t;
 
 typedef struct {
-  uint32_t co2;
+  int temperature;
+  int co2ppm;
 } co2_data_t;
 
 typedef struct {
@@ -44,7 +45,8 @@ class NectisGroveUart {
     /*
      * Grove GPS
      */
-    gps_data_t* GpsSetup(gps_data_t* gps_data);
+    gps_data_t* GpsNewData(gps_data_t* gps_data);
+    void GpsDeleteData();
     bool IsGpsLocationUpdate();
     bool GetGpsData();
     void PrintGpsData();
@@ -52,15 +54,17 @@ class NectisGroveUart {
     /*
      * Grove CO2
      */
-    co2_data_t* Co2Setup(co2_data_t* co2_data);
-    void Co2Calibration();
+    co2_data_t* Co2NewData(co2_data_t* co2_data);
+    void Co2DeleteData();
+    void Co2Calibrate();
     bool GetCo2Data();
     void PrintCo2Data();
 
     /*
      * Grove RFID
      */
-    rfid_data_t* RfidSetup(rfid_data_t* rfid_data);
+    rfid_data_t* RfidNewData(rfid_data_t* rfid_data);
+    void RfidDeleteData();
     bool GetRfidData();
     void PrintRfidData();
 };
