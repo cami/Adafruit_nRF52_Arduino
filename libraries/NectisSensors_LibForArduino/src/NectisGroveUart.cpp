@@ -9,10 +9,6 @@
 constexpr uint32_t GROVE_HARDWARE_SERIAL_RX = GROVE_UART_RX;
 constexpr uint32_t GROVE_HARDWARE_SERIAL_TX = GROVE_UART_TX;
 
-constexpr uint16_t GPS_DATA_SIZE = 64;
-constexpr uint16_t CO2_DATA_SIZE = 9;
-constexpr uint16_t RFID_DATA_SIZE = 32;
-
 
 NectisGroveUart::NectisGroveUart() : _GroveUart() {
 	_GroveUart = &Serial1;
@@ -63,14 +59,11 @@ void NectisGroveUart::GpsDeleteData() {
 	_gps_data = nullptr;
 }
 
-bool NectisGroveUart::IsGpsLocationUpdate() {
+bool NectisGroveUart::IsGpsUpdate() {
 	return _gps->location.isUpdated();
 }
 
-bool NectisGroveUart::GetGpsData() {
-	char gpsDataArray[GPS_DATA_SIZE];
-	uint16_t gpsDataLength = 0;
-
+const char* NectisGroveUart::ReadGps() {
 	memset(gpsDataArray, 0x00, GPS_DATA_SIZE);
 
 	while (_GroveUart->available()) {
@@ -80,21 +73,31 @@ bool NectisGroveUart::GetGpsData() {
 		if (data == '\r')	continue;
 		if (data == '\n') {
 			gpsDataArray[gpsDataLength] = '\0';
+
+			Serial.printf("gpsDataLength=%u\n", gpsDataLength);
+			Serial.printf("gps=%c\n", gpsDataArray[0]);
+			Serial.printf("gps=%s\n", gpsDataArray);
+
 			gpsDataLength = 0;
-			break;
+			return gpsDataArray;
 		}
 		
-		gpsDataArray[gpsDataLength++] = data;
-
 		if (gpsDataLength - 1 > GPS_DATA_SIZE) { // Overflow
-			memset(gpsDataArray, 0x00, GPS_DATA_SIZE);
+			gpsDataLength = 0;
 			Serial.println("### OVERFLOW");
-			return false;
+			return "OVERFLOW";
 		}
+
+		gpsDataArray[gpsDataLength++] = data;
 	}
 
-  if (gpsDataArray != NULL && strncmp(gpsDataArray, "$GPGGA,", 7) == 0) {
-    Serial.printf("GPS=%s\n", gpsDataArray);
+	return NULL;
+}
+
+bool NectisGroveUart::GetGpsData() {
+	const char* gpsData = ReadGps();
+
+  if (gpsData != NULL && strncmp(gpsData, "$GPGGA,", 7) == 0) {
 		_gps_data->lat = _gps->location.lat();
 		_gps_data->lng = _gps->location.lng();
 		return true;
@@ -104,7 +107,7 @@ bool NectisGroveUart::GetGpsData() {
 }
 
 void NectisGroveUart::PrintGpsData() {
-	Serial.printf("LAT=%.6f, LNG=%.6f\n", _gps_data->lat, _gps_data->lng);
+	Serial.printf("lat=%.6f, lng=%.6f\n", _gps_data->lat, _gps_data->lng);
 }
 
 

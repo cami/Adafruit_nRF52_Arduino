@@ -47,7 +47,6 @@ class NectisGroveUart {
      */
     gps_data_t* GpsNewData(gps_data_t* gps_data);
     void GpsDeleteData();
-    bool IsGpsLocationUpdate();
     bool GetGpsData();
     void PrintGpsData();
 
@@ -67,4 +66,15 @@ class NectisGroveUart {
     void RfidDeleteData();
     bool GetRfidData();
     void PrintRfidData();
+
+  private:
+  	uint16_t gpsDataLength = 0;
+
+    static const uint16_t GPS_DATA_SIZE = 128;
+    static const uint16_t CO2_DATA_SIZE = 9;
+    static const uint16_t RFID_DATA_SIZE = 32;
+  	char gpsDataArray[GPS_DATA_SIZE];
+
+    bool IsGpsUpdate();
+    const char* ReadGps();
 };
