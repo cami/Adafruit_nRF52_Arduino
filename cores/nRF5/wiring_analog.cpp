@@ -48,10 +48,12 @@ extern "C"
 /**
  * This will apply to all PWM Hardware
  */
-void analogWriteResolution(uint8_t res) {
-    HwPWM0.setResolution(res);
-    HwPWM1.setResolution(res);
-    HwPWM2.setResolution(res);
+void analogWriteResolution( uint8_t res )
+{
+  for (int i = 0; i<HWPWM_MODULE_NUM; i++)
+  {
+    HwPWMx[i]->setResolution(res);
+  }
 }
 
 /**

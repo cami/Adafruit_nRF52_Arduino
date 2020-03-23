@@ -25,3 +25,6 @@
 CustomerMngt_LibForArduino-master/
 HardwareInspection_LibForArduino-master/
 OtaDfu_LibForArduino-master/
+# Ignore local overrides of platform.txt and boards.txt,
+/boards.local.txt
+/platform.local.txt

@@ -95,7 +95,7 @@ void BLEAdafruitQuaternion::setCalibration(Adafruit_Sensor_Calibration* calib)
   _calib = calib;
 }
 
-void BLEAdafruitQuaternion::_notify_cb(uint16_t conn_hdl, uint16_t value)
+void BLEAdafruitQuaternion::_notify_handler(uint16_t conn_hdl, uint16_t value)
 {
   // Start/Stop filter timer
   if (value & BLE_GATT_HVX_NOTIFICATION)
@@ -107,7 +107,7 @@ void BLEAdafruitQuaternion::_notify_cb(uint16_t conn_hdl, uint16_t value)
   }
 
   // Call SuperClass function
-  BLEAdafruitSensor::_notify_cb(conn_hdl, value);
+  BLEAdafruitSensor::_notify_handler(conn_hdl, value);
 }
 
 void BLEAdafruitQuaternion::_update_timer(int32_t ms)
@@ -134,7 +134,9 @@ void BLEAdafruitQuaternion::_update_timer(int32_t ms)
 #if CFG_DEBUG
 static void print_quaternion(float quater[4])
 {
-  Serial.printf("Quaternion: %.04f, %.04f, %.04f, %.04f\n", quater[0], quater[1], quater[2], quater[3]);
+  // prepare for ability to change output, based on compile-time flags
+  Print& logger = Serial;
+  logger.printf("Quaternion: %.04f, %.04f, %.04f, %.04f\n", quater[0], quater[1], quater[2], quater[3]);
 }
 #endif
 
