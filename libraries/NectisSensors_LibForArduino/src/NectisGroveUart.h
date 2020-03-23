@@ -2,12 +2,26 @@
 #include <stdint.h>
 
 class Uart;
-class TinyGPSPlus;
 
 
+/*
+ * Grove GPS から送られてくる生データ
+ * data=$GPRMC,000001.799,V,,,,,0.00,0.00,060180,,,N*44
+ * data=$GPGGA,000002.799,,,,,0,0,,,M,,M,,*4D
+ * data=$GPGSA,A,1,,,,,,,,,,,,,,,*1E
+ * data=$GPGSV,1,1,00*79
+ */
 typedef struct {
-  float lat;
-  float lng;
+  uint8_t numSatellites;
+  double lat;
+  double lng;
+  uint16_t year;
+  uint8_t month;
+  uint8_t day;
+  uint8_t hour;
+  uint8_t minute;
+  uint8_t second;
+  uint8_t centisecond;
 } gps_data_t;
 
 typedef struct {
@@ -23,7 +37,6 @@ typedef struct {
 class NectisGroveUart {
   private:
     Uart* _GroveUart;
-    TinyGPSPlus* _gps;
 
   private:
     gps_data_t* _gps_data;
@@ -67,14 +80,26 @@ class NectisGroveUart {
     bool GetRfidData();
     void PrintRfidData();
 
-  private:
-  	uint16_t gpsDataLength = 0;
+private:
+    const char* ReadGps();
 
+  private:
     static const uint16_t GPS_DATA_SIZE = 128;
     static const uint16_t CO2_DATA_SIZE = 9;
     static const uint16_t RFID_DATA_SIZE = 32;
-  	char gpsDataArray[GPS_DATA_SIZE];
 
-    bool IsGpsUpdate();
-    const char* ReadGps();
+		uint8_t numSatellites;
+    bool isLocationUpdated = false;
+		double lat;
+		double lng;
+		uint16_t year;
+		uint8_t month;
+		uint8_t day;
+		uint8_t hour;
+		uint8_t minute;
+		uint8_t second;
+		uint8_t centisecond;
+
+  	uint16_t gpsDataLength = 0;
+  	char gpsDataArray[GPS_DATA_SIZE];
 };

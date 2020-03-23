@@ -1,6 +1,7 @@
 #include "NectisGroveUart.h"
 #include "Uart.h"
 #include "TinyGPS++.h"
+#include "NectisDebug.h"
 
 #include <Arduino.h>
 #include <variant.h>
@@ -9,10 +10,11 @@
 constexpr uint32_t GROVE_HARDWARE_SERIAL_RX = GROVE_UART_RX;
 constexpr uint32_t GROVE_HARDWARE_SERIAL_TX = GROVE_UART_TX;
 
+TinyGPSPlus gps;
+
 
 NectisGroveUart::NectisGroveUart() : _GroveUart() {
 	_GroveUart = &Serial1;
-	_gps = nullptr;
 
 	_gps_data = nullptr;
 	_co2_data = nullptr;
@@ -59,32 +61,35 @@ void NectisGroveUart::GpsDeleteData() {
 	_gps_data = nullptr;
 }
 
-bool NectisGroveUart::IsGpsUpdate() {
-	return _gps->location.isUpdated();
-}
-
 const char* NectisGroveUart::ReadGps() {
-	memset(gpsDataArray, 0x00, GPS_DATA_SIZE);
+	/*
+	 * ReadGps()メソッドの呼び出し元では、delay()を入れないので、常にmemset()が実行されることになり、
+	 * Serial.printf("gps=%s\n", gpsDataArray);
+	 * というように、if (data == '\n') {} の中で、gpsDataArrayを操作しようとすると、
+	 * memset()が実行された配列が対象となる。
+	 * これを避けるために、memset()を実行するのではなく、配列の終端に'\0'を挿入することで対処する。
+	 */
+	// memset(gpsDataArray, '\0', GPS_DATA_SIZE);
 
 	while (_GroveUart->available()) {
 		char data = _GroveUart->read();
-		_gps->encode(data);
+		gps.encode(data);
 		
+		// GPS のデータが表示できない
 		if (data == '\r')	continue;
 		if (data == '\n') {
 			gpsDataArray[gpsDataLength] = '\0';
 
-			Serial.printf("gpsDataLength=%u\n", gpsDataLength);
-			Serial.printf("gps=%c\n", gpsDataArray[0]);
-			Serial.printf("gps=%s\n", gpsDataArray);
+			delay(10);
 
 			gpsDataLength = 0;
 			return gpsDataArray;
 		}
 		
 		if (gpsDataLength - 1 > GPS_DATA_SIZE) { // Overflow
-			gpsDataLength = 0;
 			Serial.println("### OVERFLOW");
+
+			gpsDataLength = 0;
 			return "OVERFLOW";
 		}
 
@@ -95,19 +100,64 @@ const char* NectisGroveUart::ReadGps() {
 }
 
 bool NectisGroveUart::GetGpsData() {
+	// gpsDataArray をprivate変数として所有しているため、戻り値はない
 	const char* gpsData = ReadGps();
 
+	/* 
+	 * 衛星捕捉前
+	 * $GPGGA,030838.183,,,,,0,2,,,M,,M,,*40
+	 * lat=-2689.000002 lng=-1823.000002 month=18 day=0 year=2073
+	 * 衛星捕捉後
+	 * 
+	 * 
+	 */
+	// $GPGGA,025129.000,3537.6636,N,13943.5273,E,1,5,1.31,23.6,M,39.4,M,,*66
   if (gpsData != NULL && strncmp(gpsData, "$GPGGA,", 7) == 0) {
-		_gps_data->lat = _gps->location.lat();
-		_gps_data->lng = _gps->location.lng();
-		return true;
-  } else {
-		return false;
+		NECTIS_DEBUG_PRINTLN(gpsData);
+
+		numSatellites = gps.satellites.value();
+		isLocationUpdated = gps.location.isUpdated();
+		if (numSatellites >= 1) {
+			if (gps.location.isValid() && isLocationUpdated) {
+				lat = gps.location.lat();
+				lng = gps.location.lng();
+				_gps_data->lat = lat;
+				_gps_data->lng = lng;
+			}
+
+			if (gps.date.isValid() && gps.date.isUpdated()) {
+				year = gps.date.year();
+				month = gps.date.month();
+				day = gps.date.day();
+				_gps_data->year = year;
+				_gps_data->month = month;
+				_gps_data->day = day;
+			}
+
+			if (gps.time.isValid() && gps.time.isUpdated()) {
+				hour = gps.time.hour();
+				minute = gps.time.minute();
+				second = gps.time.second();
+				centisecond = gps.time.centisecond();
+				_gps_data->hour = hour;
+				_gps_data->minute = minute;
+				_gps_data->second = second;
+				_gps_data->centisecond = centisecond;
+			}
+
+			if ((numSatellites >= 4) && isLocationUpdated) {
+				_gps_data->numSatellites = numSatellites;
+				return true;
+			}
+		}
 	}
+	return false;
 }
 
 void NectisGroveUart::PrintGpsData() {
-	Serial.printf("lat=%.6f, lng=%.6f\n", _gps_data->lat, _gps_data->lng);
+	Serial.printf("lat=%.6f lng=%.6f, ", _gps_data->lat, _gps_data->lng);
+	Serial.printf("%u/%u/%u(MM/DD/YY), ", _gps_data->month, _gps_data->day, _gps_data->year);
+	Serial.printf("%02u:%u:%u:%03u(HH:MM:SS:centiSS) (UST)\n", _gps_data->hour, _gps_data->minute, _gps_data->second, _gps_data->centisecond);
 }
 
 
@@ -165,15 +215,6 @@ bool NectisGroveUart::GetCo2Data() {
 			}
 		}
 	}
-
-
-
-	for (uint8_t i = 0; i < CO2_DATA_SIZE; i++) {
-		Serial.printf("0x%02x ", data[i]);
-	}
-	Serial.println("\n");
-
-
 
 	if((i != CO2_DATA_SIZE) || (1 + (0xFF ^ (byte)(data[1] + data[2] + data[3] + data[4] + data[5] + data[6] + data[7]))) != data[8]) {
 		return false;
