@@ -3,7 +3,6 @@
 
 class Uart;
 
-
 /*
  * Grove GPS から送られてくる生データ
  * data=$GPRMC,000001.799,V,,,,,0.00,0.00,060180,,,N*44
@@ -58,7 +57,7 @@ class NectisGroveUart {
     /*
      * Grove GPS
      */
-    gps_data_t* GpsNewData(gps_data_t* gps_data);
+    gps_data_t* GpsNewData();
     void GpsDeleteData();
     bool GetGpsData();
     void PrintGpsData();
@@ -66,7 +65,7 @@ class NectisGroveUart {
     /*
      * Grove CO2
      */
-    co2_data_t* Co2NewData(co2_data_t* co2_data);
+    co2_data_t* Co2NewData();
     void Co2DeleteData();
     void Co2Calibrate();
     bool GetCo2Data();
@@ -75,7 +74,7 @@ class NectisGroveUart {
     /*
      * Grove RFID
      */
-    rfid_data_t* RfidNewData(rfid_data_t* rfid_data);
+    rfid_data_t* RfidNewData();
     void RfidDeleteData();
     bool GetRfidData();
     void PrintRfidData();

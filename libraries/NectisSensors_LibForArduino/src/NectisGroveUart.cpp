@@ -50,9 +50,8 @@ void NectisGroveUart::End() {
 /*
  * Grove GPS
  */
-gps_data_t* NectisGroveUart::GpsNewData(gps_data_t* gps_data) {
-	gps_data = new gps_data_t;
-	_gps_data = gps_data;
+gps_data_t* NectisGroveUart::GpsNewData() {
+	_gps_data = new gps_data_t;
 	return _gps_data;
 }
 
@@ -164,9 +163,8 @@ void NectisGroveUart::PrintGpsData() {
 /*
  * Grove CO2
  */
-co2_data_t* NectisGroveUart::Co2NewData(co2_data_t* co2_data) {
-	co2_data = new co2_data_t;
-	_co2_data = co2_data;
+co2_data_t* NectisGroveUart::Co2NewData() {
+	_co2_data = new co2_data_t;
 	return _co2_data;
 }
 
@@ -238,9 +236,8 @@ void NectisGroveUart::PrintCo2Data() {
 /*
  * Grove RFID
  */
-rfid_data_t* NectisGroveUart::RfidNewData(rfid_data_t* rfid_data) {
-	rfid_data = new rfid_data_t;
-	_rfid_data = rfid_data;
+rfid_data_t* NectisGroveUart::RfidNewData() {
+	_rfid_data = new rfid_data_t;
 	return _rfid_data;
 }
 
