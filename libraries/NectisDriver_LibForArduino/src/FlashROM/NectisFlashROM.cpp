@@ -61,9 +61,24 @@ void NectisFlashROM::FlashRomEraseChip() {
 }
 
 void NectisFlashROM::FlashRomWaitUntilReady() {
-  if (!_flash.eraseChip()) {
-    Serial.println("### Failed to erase chip!");
-  }
+  _flash.waitUntilReady();
+}
+
+
+void NectisFlashROM::FlashRomPrintJedecId() {
+  Serial.print("JEDEC ID=");
+  Serial.println(_flash.getJEDECID(), HEX);
+}
+
+uint32_t NectisFlashROM::FlashRomGetSize() {
+  return _flash.size();
+}
+
+
+void NectisFlashROM::FlashRomReadSector(uint16_t sector_no, uint8_t *buf, uint8_t contents_size) {
+  _flash.readBuffer(sector_no*SECTOR_SIZE, buf, contents_size);
+
+  _flash.waitUntilReady();
 }
 
 void NectisFlashROM::FlashRomWriteSector(uint16_t sector_no, const char* contents, uint16_t contents_size) {
@@ -76,4 +91,27 @@ void NectisFlashROM::FlashRomWriteSector(uint16_t sector_no, const char* content
   _flash.writeBuffer(sector_no*SECTOR_SIZE, buf, contents_size);
 
   _flash.waitUntilReady();
+}
+
+void NectisFlashROM::FlashRomDumpSector(uint16_t sector_no) {
+  uint8_t buf[SECTOR_SIZE];
+  _flash.readBuffer(sector_no*SECTOR_SIZE, buf, SECTOR_SIZE);
+
+  for(uint32_t row=0; row<32; row++) {
+    if ( row == 0 ) Serial.print("0");
+    if ( row < 16 ) Serial.print("0");
+    Serial.print(row*16, HEX);
+    Serial.print(" : ");
+
+    for(uint32_t col=0; col<16; col++) {
+      uint8_t val = buf[row*16 + col];
+
+      if ( val < 16 ) Serial.print("0");
+      Serial.print(val, HEX);
+
+      Serial.print(" ");
+    }
+
+    Serial.println();
+  }
 }
